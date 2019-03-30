@@ -13,12 +13,16 @@ export default class Map{
             [1,1,1,1,1,1,1,1,1],
         ];
         this.bSize = width/this.grid[0].length;
-        this.object = canvas.getContext('2d');;
+        this.object = canvas.getContext('2d');
     }
-    
-    drawMap() {
+    renderObject() {
+        return {
+            object: this.object,
+            bSize: this.bSize
+        }
+    }
+    async drawMap() {
         for (let row=0; row < this.grid.length; row++) {
-            console.log(this.grid[row]);
             for(let i=0; i<this.grid[row].length; i++) {
                 /* */
                 this.object.fillStyle = (this.grid[row][i] == "1") ? 
@@ -26,13 +30,17 @@ export default class Map{
                                         GameEngine.getColor().block;
 
                 this.object.fillRect(this.bSize*i,this.bSize*row,this.bSize,this.bSize);
+                this.object.strokeStyle= GameEngine.getColor().border;
                 this.object.strokeRect(this.bSize*i,this.bSize*row,this.bSize,this.bSize);
             }
         }
     }
 
-    get gridDetails() {
-        return this.grid;
+    get details() {
+        return {
+            grid: this.grid,
+            bSize: this.bSize
+        }
     }
 
 }
