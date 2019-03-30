@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "babel": "babel --presets es2015 src/js/main.js -o build/main.bundle.js",
-    "start": "node build.js && http-server"
+    "start": "node build.js && http-server",
+    "compile": "node build.js"
   },
   "author": "",
   "license": "ISC",

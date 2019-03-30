@@ -17,17 +17,37 @@ export class GameEngine {
         this.object = canvas.getContext('2d');
     }
 
+    static getColorPath() {
+        return {
+            path: "#77B6EA",
+            block: "#37393A"
+        }
+    }
+
     setResolution(canvas,width,height) {
         canvas.width = width;
         canvas.height = height;
     }
 
-    render() {
-        this.object.fillRect(30,30,100,100);
-        this.object.fillStyle="green";
+    drawMap() {
+        for (let row=0; row<this.grid.length; row++) {
+            console.log(this.grid[row]);
+            for(let i=0; i<this.grid[row].length; i++) {
+                /* Define block width and height*/
+                let bWidth = this.width/9;
+                let bHeight = this.height/9;
+                /* */
+                this.object.fillStyle = (this.grid[row][i] == "1") ? 
+                                        GameEngine.getColorPath().path : 
+                                        GameEngine.getColorPath().block;
+
+                this.object.fillRect(bWidth*i,bHeight*row,bWidth,bHeight);
+                this.object.strokeRect(bWidth*i,bHeight*row,bWidth,bHeight);
+            }
+        }
     }
 
-    drawMap() {
-
+    render() {
+        this.drawMap();
     }
 }

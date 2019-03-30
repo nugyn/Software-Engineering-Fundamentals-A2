@@ -27,14 +27,35 @@ var GameEngine = exports.GameEngine = function () {
             canvas.height = height;
         }
     }, {
-        key: "render",
-        value: function render() {
-            this.object.fillRect(30, 30, 100, 100);
-            this.object.fillStyle = "green";
+        key: "drawMap",
+        value: function drawMap() {
+            for (var row = 0; row < this.grid.length; row++) {
+                console.log(this.grid[row]);
+                for (var i = 0; i < this.grid[row].length; i++) {
+                    /* Define block width and height*/
+                    var bWidth = this.width / 9;
+                    var bHeight = this.height / 9;
+                    /* */
+                    this.object.fillStyle = this.grid[row][i] == "1" ? GameEngine.getColorPath().path : GameEngine.getColorPath().block;
+
+                    this.object.fillRect(bWidth * i, bHeight * row, bWidth, bHeight);
+                    this.object.strokeRect(bWidth * i, bHeight * row, bWidth, bHeight);
+                }
+            }
         }
     }, {
-        key: "drawMap",
-        value: function drawMap() {}
+        key: "render",
+        value: function render() {
+            this.drawMap();
+        }
+    }], [{
+        key: "getColorPath",
+        value: function getColorPath() {
+            return {
+                path: "#77B6EA",
+                block: "#37393A"
+            };
+        }
     }]);
 
     return GameEngine;
