@@ -1,23 +1,14 @@
-export class GameEngine { 
+import Map from './Components/Map';
+export default class GameEngine { 
     constructor(canvas, width, height) {
-        this.grid = [
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-        ];
-        this.width = width;
+        this.player = [];
+        this.width = width; 
         this.height = height;
+        this.map = new Map(canvas,width,height);
         this.setResolution(canvas, width,height);
-        this.object = canvas.getContext('2d');
     }
 
-    static getColorPath() {
+    static getColor() {
         return {
             path: "#77B6EA",
             block: "#37393A"
@@ -28,26 +19,17 @@ export class GameEngine {
         canvas.width = width;
         canvas.height = height;
     }
-
-    drawMap() {
-        for (let row=0; row<this.grid.length; row++) {
-            console.log(this.grid[row]);
-            for(let i=0; i<this.grid[row].length; i++) {
-                /* Define block width and height*/
-                let bWidth = this.width/9;
-                let bHeight = this.height/9;
-                /* */
-                this.object.fillStyle = (this.grid[row][i] == "1") ? 
-                                        GameEngine.getColorPath().path : 
-                                        GameEngine.getColorPath().block;
-
-                this.object.fillRect(bWidth*i,bHeight*row,bWidth,bHeight);
-                this.object.strokeRect(bWidth*i,bHeight*row,bWidth,bHeight);
-            }
+    
+    get details() {
+        return {
+            mWdith: this.width,
+            mHeight: this.height,
+            bSize: this.bSize,
+            // grid: Map.gridDetails()
         }
     }
 
     render() {
-        this.drawMap();
+        this.map.drawMap();
     }
 }
