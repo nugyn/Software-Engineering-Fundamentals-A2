@@ -1,0 +1,8 @@
+* {
+    margin: 0;
+}
+canvas{
+    background: lightskyblue;
+    /* width: 500px;
+    height: 500px; */
+}
