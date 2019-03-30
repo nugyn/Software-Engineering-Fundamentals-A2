@@ -47,7 +47,6 @@ export default class GameEngine {
     async animate(players) {
         requestAnimationFrame(this.animate.bind(this, players));
         this.canvas.getContext("2d").clearRect(0,0,this.width, this.height);
-        // await this.setup();
         this.setup();
         for(let i = 0; i < players.length; i++) { 
             players[i].render();
