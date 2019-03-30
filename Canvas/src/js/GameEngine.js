@@ -1,6 +1,6 @@
 import Map from './Components/Map';
-import { Player } from './Components/Player';
-import { Component } from './Components/Component';
+import { Driver } from './Components/Driver';
+
 export default class GameEngine { 
     constructor(canvas, width, height) {
         this.player = [];
@@ -39,9 +39,18 @@ export default class GameEngine {
     }
 
     async render() {
-        const renderObject = this.map.renderObject();
-        let player1 = new Player(0,0,renderObject,"Thang");
-        player1.render();
-        console.log(player1.status);
+        let gameplay = new Driver(this.map.renderObject());
+        let players = gameplay.init();
+        this.animate(players);
+    }
+
+    async animate(players) {
+        requestAnimationFrame(this.animate.bind(this, players));
+        this.canvas.getContext("2d").clearRect(0,0,this.width, this.height);
+        // await this.setup();
+        this.setup();
+        for(let i = 0; i < players.length; i++) { 
+            players[i].render();
+        }
     }
 }

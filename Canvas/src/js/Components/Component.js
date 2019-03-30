@@ -8,20 +8,38 @@ export class Component {
         this.npc = npc;
         this.size = object.bSize;
         this.object = object.object;
+        this.controllable = false;
     }
 
-    get getPosition() {
+    getPosition() {
         return {
             x: this.x,
             y: this.y
         }
     }
 
-    moveLeft() {
-        this.x += this.size;
+    control(boolean) {
+        this.controllable = boolean;
     }
 
     moveRight() {
+        this.x += this.size;
+    }
+
+    moveLeft() {
         this.x -= this.size;
+    }
+
+    moveUp() {
+        this.y -= this.size;
+
+    }
+
+    moveDown() {
+        this.y += this.size;
+    }
+
+    render(){
+        this.object.fillRect(this.x,this.y,this.size,this.size);
     }
 }

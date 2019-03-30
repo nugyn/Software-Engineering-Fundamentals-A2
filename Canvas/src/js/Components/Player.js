@@ -4,6 +4,7 @@ export class Player extends Component{
     constructor(x,y,object, name) {
         super(x,y,object,name, false);
         this.alive = true;
+        super.control(true);
     }
 
     die() {
@@ -21,16 +22,13 @@ export class Player extends Component{
         }
     }
 
-    get getPosition() {
+    getPosition() {
         return super.getPosition();
     }
 
     render() {
-        this.object.globalCompositeOperation='destination-over';
         this.object.fillStyle=GameEngine.getColor().player;
-        this.object.fillRect(this.x,this.y,this.size,this.size);
-        // var ctx = document.querySelector("canvas").getContext("2d");
-        // ctx.fillRect(0,0,150,150);
+        super.render();
     }
 
 

@@ -26,32 +26,114 @@ var Component = exports.Component = function () {
         this.npc = npc;
         this.size = object.bSize;
         this.object = object.object;
+        this.controllable = false;
     }
 
     _createClass(Component, [{
-        key: 'moveLeft',
-        value: function moveLeft() {
-            this.x += this.size;
-        }
-    }, {
-        key: 'moveRight',
-        value: function moveRight() {
-            this.x -= this.size;
-        }
-    }, {
         key: 'getPosition',
-        get: function get() {
+        value: function getPosition() {
             return {
                 x: this.x,
                 y: this.y
             };
+        }
+    }, {
+        key: 'control',
+        value: function control(boolean) {
+            this.controllable = boolean;
+        }
+    }, {
+        key: 'moveRight',
+        value: function moveRight() {
+            this.x += this.size;
+        }
+    }, {
+        key: 'moveLeft',
+        value: function moveLeft() {
+            this.x -= this.size;
+        }
+    }, {
+        key: 'moveUp',
+        value: function moveUp() {
+            this.y -= this.size;
+        }
+    }, {
+        key: 'moveDown',
+        value: function moveDown() {
+            this.y += this.size;
+        }
+    }, {
+        key: 'render',
+        value: function render() {
+            this.object.fillRect(this.x, this.y, this.size, this.size);
         }
     }]);
 
     return Component;
 }();
 
-},{"../GameEngine":4}],2:[function(require,module,exports){
+},{"../GameEngine":5}],2:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.Driver = undefined;
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _Player = require("./Player");
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Driver = exports.Driver = function () {
+    function Driver(renderObject) {
+        _classCallCheck(this, Driver);
+
+        this.renderObject = renderObject;
+        this.component = [];
+    }
+
+    _createClass(Driver, [{
+        key: "keyListener",
+        value: function keyListener(component) {
+            window.onkeyup = function (e) {
+                var key = e.keyCode ? e.keyCode : e.which;
+                switch (key) {
+                    case 37:
+                        /* left arrow */
+                        component.moveLeft();
+                        break;
+                    case 39:
+                        /* right arrow */
+                        component.moveRight();
+                        break;
+                    case 38:
+                        /* up arrow */
+                        component.moveUp();
+                        break;
+                    case 40:
+                        /* down arrow */
+                        component.moveDown();
+                        break;
+                }
+            };
+        }
+    }, {
+        key: "init",
+        value: function init() {
+            var player1 = new _Player.Player(0, 0, this.renderObject, "Thang");
+            player1.render();
+            this.component.push(player1);
+            this.keyListener(player1);
+            return this.component;
+        }
+    }]);
+
+    return Driver;
+}();
+
+},{"./Player":4}],3:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -114,7 +196,7 @@ var Map = function () {
 
 exports.default = Map;
 
-},{"../GameEngine":4}],3:[function(require,module,exports){
+},{"../GameEngine":5}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -149,6 +231,7 @@ var Player = exports.Player = function (_Component) {
         var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, x, y, object, name, false));
 
         _this.alive = true;
+        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
         return _this;
     }
 
@@ -158,13 +241,15 @@ var Player = exports.Player = function (_Component) {
             this.alive = false;
         }
     }, {
+        key: 'getPosition',
+        value: function getPosition() {
+            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
+        }
+    }, {
         key: 'render',
         value: function render() {
-            this.object.globalCompositeOperation = 'destination-over';
             this.object.fillStyle = _GameEngine2.default.getColor().player;
-            this.object.fillRect(this.x, this.y, this.size, this.size);
-            // var ctx = document.querySelector("canvas").getContext("2d");
-            // ctx.fillRect(0,0,150,150);
+            _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'render', this).call(this);
         }
     }, {
         key: 'status',
@@ -178,17 +263,12 @@ var Player = exports.Player = function (_Component) {
                 alive: this.alive
             };
         }
-    }, {
-        key: 'getPosition',
-        get: function get() {
-            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
-        }
     }]);
 
     return Player;
 }(_Component2.Component);
 
-},{"../GameEngine":4,"./Component":1}],4:[function(require,module,exports){
+},{"../GameEngine":5,"./Component":1}],5:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -201,9 +281,7 @@ var _Map = require('./Components/Map');
 
 var _Map2 = _interopRequireDefault(_Map);
 
-var _Player = require('./Components/Player');
-
-var _Component = require('./Components/Component');
+var _Driver = require('./Components/Driver');
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -235,10 +313,20 @@ var GameEngine = function () {
     }, {
         key: 'render',
         value: async function render() {
-            var renderObject = this.map.renderObject();
-            var player1 = new _Player.Player(0, 0, renderObject, "Thang");
-            player1.render();
-            console.log(player1.status);
+            var gameplay = new _Driver.Driver(this.map.renderObject());
+            var players = gameplay.init();
+            this.animate(players);
+        }
+    }, {
+        key: 'animate',
+        value: async function animate(players) {
+            requestAnimationFrame(this.animate.bind(this, players));
+            this.canvas.getContext("2d").clearRect(0, 0, this.width, this.height);
+            // await this.setup();
+            this.setup();
+            for (var i = 0; i < players.length; i++) {
+                players[i].render();
+            }
         }
     }, {
         key: 'details',
@@ -267,7 +355,7 @@ var GameEngine = function () {
 
 exports.default = GameEngine;
 
-},{"./Components/Component":1,"./Components/Map":2,"./Components/Player":3}],5:[function(require,module,exports){
+},{"./Components/Driver":2,"./Components/Map":3}],6:[function(require,module,exports){
 "use strict";
 
 var _GameEngine = require("./GameEngine");
@@ -277,6 +365,6 @@ var _GameEngine2 = _interopRequireDefault(_GameEngine);
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 var main = new _GameEngine2.default(document.querySelector("canvas"), 450, 450);
-main.render().then(main.setup());
+main.render();
 
-},{"./GameEngine":4}]},{},[5]);
+},{"./GameEngine":5}]},{},[6]);
