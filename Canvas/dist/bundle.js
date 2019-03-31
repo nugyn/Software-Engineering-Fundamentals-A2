@@ -12,6 +12,8 @@ var _GameEngine = require('../GameEngine');
 
 var _GameEngine2 = _interopRequireDefault(_GameEngine);
 
+var _InvalidMoveException = require('../Exceptions/InvalidMoveException');
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -27,6 +29,7 @@ var Component = exports.Component = function () {
         this.size = object.bSize;
         this.object = object.object;
         this.controllable = false;
+        this.grid = object.grid;
     }
 
     _createClass(Component, [{
@@ -43,28 +46,92 @@ var Component = exports.Component = function () {
             this.controllable = boolean;
         }
     }, {
+        key: 'getPotentialMove',
+        value: function getPotentialMove(direction) {
+            var potentialMove = void 0;
+            switch (direction) {
+                case 'up':
+                    potentialMove = this.y - this.size;
+                    break;
+                case 'down':
+                    potentialMove = this.y + this.size;
+                    break;
+                case 'left':
+                    potentialMove = this.x - this.size;
+                    break;
+                case 'right':
+                    potentialMove = this.x + this.size;
+                    break;
+            }
+            var indX = direction == 'left' || direction == 'right' ? potentialMove / this.size : this.x / this.size;
+            var indY = direction == 'up' || direction == 'down' ? potentialMove / this.size : this.y / this.size;
+            return this.grid[indY][indX];
+        }
+    }, {
+        key: 'logError',
+        value: function logError(e) {
+            if (e instanceof TypeError) {
+                console.warn("Can't move beyond the grid");
+            } else {
+                console.warn(e.getMessage());
+            }
+        }
+    }, {
         key: 'moveRight',
         value: function moveRight() {
-            this.x += this.size;
+            try {
+                if (this.getPotentialMove('right') == 1) {
+                    this.x += this.size;
+                } else {
+                    throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('right'));
+                }
+            } catch (e) {
+                this.logError(e);
+            }
         }
     }, {
         key: 'moveLeft',
         value: function moveLeft() {
-            this.x -= this.size;
+            try {
+                if (this.getPotentialMove('left') == 1) {
+                    this.x -= this.size;
+                } else {
+                    throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('left'));
+                }
+            } catch (e) {
+                this.logError(e);
+            }
         }
     }, {
         key: 'moveUp',
         value: function moveUp() {
-            this.y -= this.size;
+            try {
+                if (this.getPotentialMove('up') == 1) {
+                    this.y -= this.size;
+                } else {
+                    throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('up'));
+                }
+            } catch (e) {
+                this.logError(e);
+            }
         }
     }, {
         key: 'moveDown',
         value: function moveDown() {
-            this.y += this.size;
+            try {
+                if (this.getPotentialMove('down') == 1) {
+                    this.y += this.size;
+                } else {
+                    throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('down'));
+                }
+            } catch (e) {
+                this.logError(e);
+            }
         }
     }, {
         key: 'render',
         value: function render() {
+            document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
             this.object.fillRect(this.x, this.y, this.size, this.size);
         }
     }]);
@@ -72,7 +139,7 @@ var Component = exports.Component = function () {
     return Component;
 }();
 
-},{"../GameEngine":5}],2:[function(require,module,exports){
+},{"../Exceptions/InvalidMoveException":6,"../GameEngine":7}],2:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -164,7 +231,8 @@ var Map = function () {
         value: function renderObject() {
             return {
                 object: this.object,
-                bSize: this.bSize
+                bSize: this.bSize,
+                grid: this.grid
             };
         }
     }, {
@@ -181,14 +249,6 @@ var Map = function () {
                 }
             }
         }
-    }, {
-        key: 'details',
-        get: function get() {
-            return {
-                grid: this.grid,
-                bSize: this.bSize
-            };
-        }
     }]);
 
     return Map;
@@ -196,7 +256,7 @@ var Map = function () {
 
 exports.default = Map;
 
-},{"../GameEngine":5}],4:[function(require,module,exports){
+},{"../GameEngine":7}],4:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -268,7 +328,70 @@ var Player = exports.Player = function (_Component) {
     return Player;
 }(_Component2.Component);
 
-},{"../GameEngine":5,"./Component":1}],5:[function(require,module,exports){
+},{"../GameEngine":7,"./Component":1}],5:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var Exception = function () {
+    function Exception(message) {
+        _classCallCheck(this, Exception);
+
+        this.message = message;
+    }
+
+    _createClass(Exception, [{
+        key: "getMessage",
+        value: function getMessage() {
+            return this.message;
+        }
+    }]);
+
+    return Exception;
+}();
+
+exports.default = Exception;
+
+},{}],6:[function(require,module,exports){
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+exports.InvalidMoveException = undefined;
+
+var _Exception2 = require("./Exception");
+
+var _Exception3 = _interopRequireDefault(_Exception2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var InvalidMoveException = exports.InvalidMoveException = function (_Exception) {
+    _inherits(InvalidMoveException, _Exception);
+
+    function InvalidMoveException(e) {
+        _classCallCheck(this, InvalidMoveException);
+
+        var message = "Invalid move, grid value has to be 1. Moving to " + e;
+        return _possibleConstructorReturn(this, (InvalidMoveException.__proto__ || Object.getPrototypeOf(InvalidMoveException)).call(this, message));
+    }
+
+    return InvalidMoveException;
+}(_Exception3.default);
+
+},{"./Exception":5}],7:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -322,7 +445,6 @@ var GameEngine = function () {
         value: async function animate(players) {
             requestAnimationFrame(this.animate.bind(this, players));
             this.canvas.getContext("2d").clearRect(0, 0, this.width, this.height);
-            // await this.setup();
             this.setup();
             for (var i = 0; i < players.length; i++) {
                 players[i].render();
@@ -355,7 +477,7 @@ var GameEngine = function () {
 
 exports.default = GameEngine;
 
-},{"./Components/Driver":2,"./Components/Map":3}],6:[function(require,module,exports){
+},{"./Components/Driver":2,"./Components/Map":3}],8:[function(require,module,exports){
 "use strict";
 
 var _GameEngine = require("./GameEngine");
@@ -367,4 +489,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var main = new _GameEngine2.default(document.querySelector("canvas"), 450, 450);
 main.render();
 
-},{"./GameEngine":5}]},{},[6]);
+},{"./GameEngine":7}]},{},[8]);

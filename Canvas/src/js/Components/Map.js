@@ -18,7 +18,8 @@ export default class Map{
     renderObject() {
         return {
             object: this.object,
-            bSize: this.bSize
+            bSize: this.bSize,
+            grid: this.grid
         }
     }
     async drawMap() {
@@ -33,13 +34,6 @@ export default class Map{
                 this.object.strokeStyle= GameEngine.getColor().border;
                 this.object.strokeRect(this.bSize*i,this.bSize*row,this.bSize,this.bSize);
             }
-        }
-    }
-
-    get details() {
-        return {
-            grid: this.grid,
-            bSize: this.bSize
         }
     }
 
