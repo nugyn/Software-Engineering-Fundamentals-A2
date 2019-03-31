@@ -40,16 +40,16 @@ export default class GameEngine {
 
     async render() {
         let gameplay = new Driver(this.map.renderObject());
-        let players = gameplay.init();
-        this.animate(players);
+        let components = gameplay.init();
+        this.animate(components);
     }
 
-    async animate(players) {
-        requestAnimationFrame(this.animate.bind(this, players));
+    async animate(components) {
+        requestAnimationFrame(this.animate.bind(this, components));
         this.canvas.getContext("2d").clearRect(0,0,this.width, this.height);
         this.setup();
-        for(let i = 0; i < players.length; i++) { 
-            players[i].render();
+        for(let i = 0; i < components.length; i++) { 
+            components[i].render();
         }
     }
 }

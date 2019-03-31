@@ -437,17 +437,17 @@ var GameEngine = function () {
         key: 'render',
         value: async function render() {
             var gameplay = new _Driver.Driver(this.map.renderObject());
-            var players = gameplay.init();
-            this.animate(players);
+            var components = gameplay.init();
+            this.animate(components);
         }
     }, {
         key: 'animate',
-        value: async function animate(players) {
-            requestAnimationFrame(this.animate.bind(this, players));
+        value: async function animate(components) {
+            requestAnimationFrame(this.animate.bind(this, components));
             this.canvas.getContext("2d").clearRect(0, 0, this.width, this.height);
             this.setup();
-            for (var i = 0; i < players.length; i++) {
-                players[i].render();
+            for (var i = 0; i < components.length; i++) {
+                components[i].render();
             }
         }
     }, {
