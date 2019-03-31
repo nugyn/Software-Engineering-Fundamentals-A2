@@ -133,6 +133,11 @@ var Component = exports.Component = function () {
         value: function render() {
             document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
             this.object.fillRect(this.x, this.y, this.size, this.size);
+            this.object.fillStyle = _GameEngine2.default.getColor().border;
+            this.object.font = "13px Arial";
+            this.object.textAlign = "center";
+            this.object.textBaseline = "middle";
+            this.object.fillText(this.name, this.x + this.size / 2, this.y + this.size / 2);
         }
     }]);
 

@@ -102,5 +102,10 @@ export class Component {
     render(){
         document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
         this.object.fillRect(this.x,this.y,this.size,this.size);
+        this.object.fillStyle = GameEngine.getColor().border;
+        this.object.font="13px Arial";
+        this.object.textAlign = "center";
+        this.object.textBaseline="middle";
+        this.object.fillText(this.name,this.x + this.size/2,this.y + this.size/2);
     }
 }
