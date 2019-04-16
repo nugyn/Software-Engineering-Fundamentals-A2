@@ -1,0 +1,486 @@
+<?xml version='1.0'?>
+<ns2:test-suite xmlns:ns2='urn:model.allure.qatools.yandex.ru' start='1555388746587' stop='1555388765984'>
+    <name>PlayerMovement:</name>
+    <title>PlayerMovement:</title>
+    <test-cases>
+        <test-case start='1555388746588' status='passed' stop='1555388765927'>
+            <name>test player movement</name>
+            <title>test player movement</title>
+            <labels>
+                <label name='tag' value='null'/>
+            </labels>
+            <parameters/>
+            <steps>
+                <step start='1555388747625' status='passed' stop='1555388748007'>
+                    <name>I am on page "https://monstermash-d9577.firebaseapp.com/"</name>
+                    <title>I am on page "https://monstermash-d9577.firebaseapp.com/"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388748007' status='passed' stop='1555388748111'>
+                    <name>I see "Player", ".debug"</name>
+                    <title>I see "Player", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388748217' status='passed' stop='1555388748428'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388748428' status='passed' stop='1555388748457'>
+                    <name>I see "Player: x{50} y{0}", ".debug"</name>
+                    <title>I see "Player: x{50} y{0}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388748560' status='passed' stop='1555388748772'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388748773' status='passed' stop='1555388748804'>
+                    <name>I see "Player: x{100} y{0}", ".debug"</name>
+                    <title>I see "Player: x{100} y{0}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388748908' status='passed' stop='1555388749119'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388749119' status='passed' stop='1555388749153'>
+                    <name>I see "Player: x{150} y{0}", ".debug"</name>
+                    <title>I see "Player: x{150} y{0}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388749253' status='passed' stop='1555388749465'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388749465' status='passed' stop='1555388749489'>
+                    <name>I see "Player: x{200} y{0}", ".debug"</name>
+                    <title>I see "Player: x{200} y{0}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388749593' status='passed' stop='1555388749804'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388749804' status='passed' stop='1555388749825'>
+                    <name>I see "Player: x{200} y{50}", ".debug"</name>
+                    <title>I see "Player: x{200} y{50}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388749927' status='passed' stop='1555388750138'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388750138' status='passed' stop='1555388750159'>
+                    <name>I see "Player: x{200} y{50}", ".debug"</name>
+                    <title>I see "Player: x{200} y{50}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388750263' status='passed' stop='1555388750477'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388750477' status='passed' stop='1555388750510'>
+                    <name>I see "Player: x{200} y{50}", ".debug"</name>
+                    <title>I see "Player: x{200} y{50}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388750613' status='passed' stop='1555388750827'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388750827' status='passed' stop='1555388750853'>
+                    <name>I see "Player: x{200} y{100}", ".debug"</name>
+                    <title>I see "Player: x{200} y{100}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388750953' status='passed' stop='1555388751162'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388751162' status='passed' stop='1555388751187'>
+                    <name>I see "Player: x{200} y{150}", ".debug"</name>
+                    <title>I see "Player: x{200} y{150}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388751287' status='passed' stop='1555388751494'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388751494' status='passed' stop='1555388751518'>
+                    <name>I see "Player: x{200} y{200}", ".debug"</name>
+                    <title>I see "Player: x{200} y{200}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388751619' status='passed' stop='1555388751828'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388751828' status='passed' stop='1555388751851'>
+                    <name>I see "Player: x{250} y{200}", ".debug"</name>
+                    <title>I see "Player: x{250} y{200}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388751952' status='passed' stop='1555388752162'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388752266' status='passed' stop='1555388752477'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388752477' status='passed' stop='1555388752503'>
+                    <name>I see "Player: x{150} y{200}", ".debug"</name>
+                    <title>I see "Player: x{150} y{200}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388752603' status='passed' stop='1555388752814'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388752916' status='passed' stop='1555388753122'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388753227' status='passed' stop='1555388753437'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388753437' status='passed' stop='1555388753456'>
+                    <name>I see "Player: x{50} y{200}", ".debug"</name>
+                    <title>I see "Player: x{50} y{200}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388753559' status='passed' stop='1555388753769'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388753870' status='passed' stop='1555388754078'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388754078' status='passed' stop='1555388754103'>
+                    <name>I see "Player: x{0} y{200}", ".debug"</name>
+                    <title>I see "Player: x{0} y{200}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388754206' status='passed' stop='1555388754416'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388754520' status='passed' stop='1555388754727'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388754828' status='passed' stop='1555388755041'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388755144' status='passed' stop='1555388755357'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388755462' status='passed' stop='1555388755678'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388755678' status='passed' stop='1555388755702'>
+                    <name>I see "Player: x{0} y{400}", ".debug"</name>
+                    <title>I see "Player: x{0} y{400}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388755803' status='passed' stop='1555388756012'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388756116' status='passed' stop='1555388756328'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388756431' status='passed' stop='1555388756644'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388756747' status='passed' stop='1555388756957'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388757062' status='passed' stop='1555388757275'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388757275' status='passed' stop='1555388757303'>
+                    <name>I see "Player: x{200} y{400}", ".debug"</name>
+                    <title>I see "Player: x{200} y{400}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388757407' status='passed' stop='1555388757619'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388757620' status='passed' stop='1555388757640'>
+                    <name>I see "Player: x{200} y{350}", ".debug"</name>
+                    <title>I see "Player: x{200} y{350}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388757746' status='passed' stop='1555388757962'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388757962' status='passed' stop='1555388757987'>
+                    <name>I see "Player: x{200} y{300}", ".debug"</name>
+                    <title>I see "Player: x{200} y{300}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388758087' status='passed' stop='1555388758296'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388758397' status='passed' stop='1555388758612'>
+                    <name>I press key "ArrowDown"</name>
+                    <title>I press key "ArrowDown"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388758716' status='passed' stop='1555388758928'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388759029' status='passed' stop='1555388759240'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388759345' status='passed' stop='1555388759557'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388759662' status='passed' stop='1555388759877'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388759978' status='passed' stop='1555388760189'>
+                    <name>I press key "ArrowRight"</name>
+                    <title>I press key "ArrowRight"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388760189' status='passed' stop='1555388760209'>
+                    <name>I see "Player: x{400} y{400}", ".debug"</name>
+                    <title>I see "Player: x{400} y{400}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388760313' status='passed' stop='1555388760523'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388760627' status='passed' stop='1555388760839'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388760945' status='passed' stop='1555388761155'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388761255' status='passed' stop='1555388761466'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388761570' status='passed' stop='1555388761780'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388761882' status='passed' stop='1555388762091'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388762195' status='passed' stop='1555388762408'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388762509' status='passed' stop='1555388762716'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388762820' status='passed' stop='1555388763030'>
+                    <name>I press key "ArrowUp"</name>
+                    <title>I press key "ArrowUp"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388763030' status='passed' stop='1555388763057'>
+                    <name>I see "Player: x{400} y{0}", ".debug"</name>
+                    <title>I see "Player: x{400} y{0}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388763162' status='passed' stop='1555388763374'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388763479' status='passed' stop='1555388763693'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388763796' status='passed' stop='1555388764013'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388764117' status='passed' stop='1555388764330'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388764430' status='passed' stop='1555388764640'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388764745' status='passed' stop='1555388764957'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388765061' status='passed' stop='1555388765272'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388765374' status='passed' stop='1555388765583'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388765687' status='passed' stop='1555388765897'>
+                    <name>I press key "ArrowLeft"</name>
+                    <title>I press key "ArrowLeft"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+                <step start='1555388765897' status='passed' stop='1555388765927'>
+                    <name>I see "Player: x{0} y{0}", ".debug"</name>
+                    <title>I see "Player: x{0} y{0}", ".debug"</title>
+                    <attachments/>
+                    <steps/>
+                </step>
+            </steps>
+            <attachments/>
+        </test-case>
+    </test-cases>
+</ns2:test-suite>
