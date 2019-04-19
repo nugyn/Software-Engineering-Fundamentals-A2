@@ -1,9 +1,12 @@
 import { Player } from './Player';
 
 export class Driver{
-    constructor(renderObject) {
+    constructor(renderObject, thisPlayer, component,socket) {
         this.renderObject = renderObject;
-        this.component = [];
+        this.component = component;
+        this.data = thisPlayer;
+        this.socket = socket;
+
     }
 
     keyListener(component) {
@@ -27,14 +30,16 @@ export class Driver{
                     component.moveDown();
                     break;
             }
+            this.socket.emit("playerMove", component.getPosition());
         }
     }
 
     init() {
-        let player1 = new Player(0,0,this.renderObject,"Thang");
-        player1.render();
-        this.component.push(player1);
-        this.keyListener(player1);
-        return this.component;
+        let thisPlayer = new Player(this.data.id,0,0,this.renderObject,this.data.name);
+        thisPlayer.render();
+        // this.component.push(thisPlayer);
+        this.keyListener(thisPlayer);
+        return thisPlayer;
+            // return this.component;
     }
 }

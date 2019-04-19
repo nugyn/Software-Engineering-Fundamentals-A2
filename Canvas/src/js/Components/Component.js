@@ -1,7 +1,8 @@
 import GameEngine from '../GameEngine';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
 export class Component {
-    constructor(x,y, object, name, npc) {
+    constructor(id, x, y, object, name, npc) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.name = name;
@@ -14,6 +15,7 @@ export class Component {
 
     getPosition() {
         return {
+            id: this.id,
             x: this.x,
             y: this.y
         }
@@ -55,6 +57,7 @@ export class Component {
         try{
             if(this.getPotentialMove('right') == 1) {
                 this.x += this.size;
+                return true;
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('right'));
             }
@@ -67,6 +70,7 @@ export class Component {
         try{
             if(this.getPotentialMove('left') == 1) {
                 this.x -= this.size;
+                return true;
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('left'));
             }
@@ -79,6 +83,7 @@ export class Component {
         try{
             if(this.getPotentialMove('up') == 1) {
                 this.y -= this.size;
+                return true;
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('up'));
             }
@@ -91,6 +96,7 @@ export class Component {
         try{
             if(this.getPotentialMove('down') == 1) {
                 this.y += this.size;
+                return true;
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('down'));
             }
@@ -107,5 +113,6 @@ export class Component {
         this.object.textAlign = "center";
         this.object.textBaseline="middle";
         this.object.fillText(this.name,this.x + this.size/2,this.y + this.size/2);
+        return this.getPosition();
     }
 }

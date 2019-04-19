@@ -1,8 +1,8 @@
 import {Component} from './Component';
 import GameEngine from '../GameEngine';
 export class Player extends Component{
-    constructor(x,y,object, name) {
-        super(x,y,object,name, false);
+    constructor(id,x,y,object, name) {
+        super(id,x,y,object,name, false);
         this.alive = true;
         super.control(true);
     }

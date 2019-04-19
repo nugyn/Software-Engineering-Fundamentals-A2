@@ -8462,9 +8462,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = exports.Component = function () {
-    function Component(x, y, object, name, npc) {
+    function Component(id, x, y, object, name, npc) {
         _classCallCheck(this, Component);
 
+        this.id = id;
         this.x = x;
         this.y = y;
         this.name = name;
@@ -8479,6 +8480,7 @@ var Component = exports.Component = function () {
         key: 'getPosition',
         value: function getPosition() {
             return {
+                id: this.id,
                 x: this.x,
                 y: this.y
             };
@@ -8525,6 +8527,7 @@ var Component = exports.Component = function () {
             try {
                 if (this.getPotentialMove('right') == 1) {
                     this.x += this.size;
+                    return true;
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('right'));
                 }
@@ -8538,6 +8541,7 @@ var Component = exports.Component = function () {
             try {
                 if (this.getPotentialMove('left') == 1) {
                     this.x -= this.size;
+                    return true;
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('left'));
                 }
@@ -8551,6 +8555,7 @@ var Component = exports.Component = function () {
             try {
                 if (this.getPotentialMove('up') == 1) {
                     this.y -= this.size;
+                    return true;
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('up'));
                 }
@@ -8564,6 +8569,7 @@ var Component = exports.Component = function () {
             try {
                 if (this.getPotentialMove('down') == 1) {
                     this.y += this.size;
+                    return true;
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('down'));
                 }
@@ -8581,6 +8587,7 @@ var Component = exports.Component = function () {
             this.object.textAlign = "center";
             this.object.textBaseline = "middle";
             this.object.fillText(this.name, this.x + this.size / 2, this.y + this.size / 2);
+            return this.getPosition();
         }
     }]);
 
@@ -8602,11 +8609,13 @@ var _Player = require("./Player");
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Driver = exports.Driver = function () {
-    function Driver(renderObject) {
+    function Driver(renderObject, thisPlayer, component, socket) {
         _classCallCheck(this, Driver);
 
         this.renderObject = renderObject;
-        this.component = [];
+        this.component = component;
+        this.data = thisPlayer;
+        this.socket = socket;
     }
 
     _createClass(Driver, [{
@@ -8632,16 +8641,18 @@ var Driver = exports.Driver = function () {
                         component.moveDown();
                         break;
                 }
+                this.socket.emit("playerMove", component.getPosition());
             };
         }
     }, {
         key: "init",
         value: function init() {
-            var player1 = new _Player.Player(0, 0, this.renderObject, "Thang");
-            player1.render();
-            this.component.push(player1);
-            this.keyListener(player1);
-            return this.component;
+            var thisPlayer = new _Player.Player(this.data.id, 0, 0, this.renderObject, this.data.name);
+            thisPlayer.render();
+            // this.component.push(thisPlayer);
+            this.keyListener(thisPlayer);
+            return thisPlayer;
+            // return this.component;
         }
     }]);
 
@@ -8733,10 +8744,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = exports.Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(x, y, object, name) {
+    function Player(id, x, y, object, name) {
         _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, x, y, object, name, false));
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, object, name, false));
 
         _this.alive = true;
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
@@ -8854,9 +8865,15 @@ var _Map2 = _interopRequireDefault(_Map);
 
 var _Driver = require('./Components/Driver');
 
+var _socket = require('socket.io-client');
+
+var _socket2 = _interopRequireDefault(_socket);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var socket = (0, _socket2.default)('http://localhost:8080');
 
 var GameEngine = function () {
     function GameEngine(canvas, width, height) {
@@ -8884,20 +8901,40 @@ var GameEngine = function () {
     }, {
         key: 'render',
         value: async function render() {
-            var gameplay = new _Driver.Driver(this.map.renderObject());
-            var components = gameplay.init();
-            this.animate(components);
-        }
-    }, {
-        key: 'animate',
-        value: async function animate(components) {
-            requestAnimationFrame(this.animate.bind(this, components));
-            this.canvas.getContext("2d").clearRect(0, 0, this.width, this.height);
+            var _this = this;
+
+            // let components = gameplay.init();
+
+            socket.on("getPlayers", function (components) {
+                socket.on("myPlayer", function (data) {
+                    console.log("hi");
+                    var gameplay = new _Driver.Driver(_this.map.renderObject(), data, components, socket);
+                    thisPlayer = gameplay.init();
+                    socket.emit("addPlayer", thisPlayer);
+                });
+            });
             this.setup();
-            for (var i = 0; i < components.length; i++) {
-                components[i].render();
-            }
+
+            socket.on("updateAll", function (components) {
+                _this.canvas.getContext("2d").clearRect(0, 0, _this.width, _this.height);
+                _this.setup();
+                console.log(components);
+                for (var i = 0; i < components.length; i++) {
+                    components[i].render();
+                }
+            });
+            // this.animate();
         }
+
+        // async animate() {
+        //     requestAnimationFrame(this.animate.bind(this));
+        //     this.canvas.getContext("2d").clearRect(0,0,this.width, this.height);
+        //     this.setup();
+        //     // for(let i = 0; i < components.length; i++) { 
+        //     //     components[i].render();
+        //     // }
+        // }
+
     }, {
         key: 'details',
         get: function get() {
@@ -8925,25 +8962,16 @@ var GameEngine = function () {
 
 exports.default = GameEngine;
 
-},{"./Components/Driver":51,"./Components/Map":52}],57:[function(require,module,exports){
-'use strict';
+},{"./Components/Driver":51,"./Components/Map":52,"socket.io-client":35}],57:[function(require,module,exports){
+"use strict";
 
-var _socket = require('socket.io-client');
-
-var _socket2 = _interopRequireDefault(_socket);
-
-var _GameEngine = require('./GameEngine');
+var _GameEngine = require("./GameEngine");
 
 var _GameEngine2 = _interopRequireDefault(_GameEngine);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var socket = (0, _socket2.default)('http://localhost:8080');
-
 var main = new _GameEngine2.default(document.querySelector("canvas"), 450, 450);
 main.render();
-socket.emit("msg", {
-    msg: "hello mom"
-});
 
-},{"./GameEngine":56,"socket.io-client":35}]},{},[57]);
+},{"./GameEngine":56}]},{},[57]);
