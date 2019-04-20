@@ -15,6 +15,11 @@ let SOCKET_LIST = {};
 app.get('/',(req,res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
+
+app.get('/join',(req,res) => {
+    res.sendFile(__dirname + '/public/controller.html');
+});
+
 app.use('/dist', express.static(__dirname + '/public/dist'));
 
 /* Cors setting */
