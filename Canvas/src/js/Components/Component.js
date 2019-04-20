@@ -1,27 +1,15 @@
-// import GameEngine from '../GameEngine';
+import Global from '../Global';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
 export default class Component {
-    constructor(id, x, y, name, npc, size,drawTool) {
+    constructor(id, x, y, name, npc, mapComponent,drawTool) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.name = name;
         this.npc = npc;
-        // this.size = object.bSize;
-        // this.object = object.object;
         this.controllable = false;
-        this.grid = [
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-        ];
-        this.size = size;
+        this.grid = mapComponent.grid;
+        this.size = mapComponent.bSize;
         this.drawTool = drawTool;
     }
 
@@ -121,9 +109,9 @@ export default class Component {
 
     render(){
         // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-        this.drawTool.fillStyle = "#A6B1E1";
+        this.drawTool.fillStyle = Global.getColor().player
         this.drawTool.fillRect(this.x,this.y,this.size,this.size);
-        this.drawTool.fillStyle = "#000";
+        this.drawTool.fillStyle = Global.getColor().name;
         this.drawTool.font="13px Arial";
         this.drawTool.textAlign = "center";
         this.drawTool.textBaseline="middle";

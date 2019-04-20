@@ -34,12 +34,8 @@ export class Driver{
     }
 
     init() {
-        // let thisPlayer = new Player(this.data.id,0,0,this.renderObject,this.data.name);
-        // thisPlayer.render();
-        // this.component.push(thisPlayer);
         this.keyListener(this.player);
         console.log(this.player.getPosition());
         return this.player.getPosition();
-            // return this.component;
     }
 }

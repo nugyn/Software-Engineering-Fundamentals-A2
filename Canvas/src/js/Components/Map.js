@@ -1,4 +1,5 @@
 import GameEngine from '../GameEngine';
+import Global from '../Global';
 export default class Map{
     constructor(canvas, width,height) {
         this.grid = [
@@ -15,9 +16,8 @@ export default class Map{
         this.bSize = width/this.grid[0].length;
         this.object = canvas.getContext('2d');
     }
-    renderObject() {
+    getInfo() {
         return {
-            object: this.object,
             bSize: this.bSize,
             grid: this.grid
         }
@@ -27,11 +27,11 @@ export default class Map{
             for(let i=0; i<this.grid[row].length; i++) {
                 /* */
                 this.object.fillStyle = (this.grid[row][i] == "1") ? 
-                                        GameEngine.getColor().path : 
-                                        GameEngine.getColor().block;
+                Global.getColor().path : 
+                Global.getColor().block;
 
                 this.object.fillRect(this.bSize*i,this.bSize*row,this.bSize,this.bSize);
-                this.object.strokeStyle= GameEngine.getColor().border;
+                this.object.strokeStyle= Global.getColor().border;
                 this.object.strokeRect(this.bSize*i,this.bSize*row,this.bSize,this.bSize);
             }
         }
