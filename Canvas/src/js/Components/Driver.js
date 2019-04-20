@@ -1,16 +1,14 @@
-import { Player } from './Player';
-
 export class Driver{
-    constructor(renderObject, thisPlayer, component,socket) {
-        this.renderObject = renderObject;
-        this.component = component;
-        this.data = thisPlayer;
+    constructor(thisPlayer, socket) {
+        // this.renderObject = renderObject;
+        this.player = thisPlayer;
         this.socket = socket;
-
     }
 
     keyListener(component) {
+        var self = this;
         window.onkeyup = function(e) {
+            console.log(self.socket);
             var key = e.keyCode ? e.keyCode : e.which;
             switch(key) {
                 case 37:
@@ -30,16 +28,18 @@ export class Driver{
                     component.moveDown();
                     break;
             }
-            this.socket.emit("playerMove", component.getPosition());
+            self.socket.emit("move", component.getPosition());
+
         }
     }
 
     init() {
-        let thisPlayer = new Player(this.data.id,0,0,this.renderObject,this.data.name);
-        thisPlayer.render();
+        // let thisPlayer = new Player(this.data.id,0,0,this.renderObject,this.data.name);
+        // thisPlayer.render();
         // this.component.push(thisPlayer);
-        this.keyListener(thisPlayer);
-        return thisPlayer;
+        this.keyListener(this.player);
+        console.log(this.player.getPosition());
+        return this.player.getPosition();
             // return this.component;
     }
 }

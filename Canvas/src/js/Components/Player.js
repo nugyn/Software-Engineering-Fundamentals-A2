@@ -1,8 +1,8 @@
-import {Component} from './Component';
-import GameEngine from '../GameEngine';
-export class Player extends Component{
-    constructor(id,x,y,object, name) {
-        super(id,x,y,object,name, false);
+import Component from './Component';
+// import GameEngine from '../GameEngine'; // cause socket duplication
+export default class Player extends Component{
+    constructor(id, x, y, name, size) {
+        super(id,x,y,name, false, size);
         this.alive = true;
         super.control(true);
     }
@@ -11,26 +11,12 @@ export class Player extends Component{
         this.alive = false;
     }
 
-    get status() {
-        return {
-            name: this.name,
-            renderObject: this.object,
-            x: this.x,
-            y: this.y,
-            size: this.size,
-            alive: this.alive
-        }
-    }
-
     getPosition() {
         return super.getPosition();
     }
 
-    render() {
-        this.object.fillStyle=GameEngine.getColor().player;
-        super.render();
-    }
-
-
-
+    // render() {
+    //     this.object.fillStyle=GameEngine.getColor().player;
+    //     super.render();
+    // }
 }

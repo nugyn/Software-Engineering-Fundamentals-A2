@@ -22,7 +22,7 @@ export default class Map{
             grid: this.grid
         }
     }
-    async drawMap() {
+    drawMap() {
         for (let row=0; row < this.grid.length; row++) {
             for(let i=0; i<this.grid[row].length; i++) {
                 /* */
