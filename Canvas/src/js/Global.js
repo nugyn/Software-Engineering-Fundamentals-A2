@@ -29,7 +29,7 @@ export default class Global {
         return this.resolution()/this.getGrid()[0].length;
     }
     static resolution() {
-        return 450;
+        return 720;
     }
 
     static getHost() {

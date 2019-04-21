@@ -9043,7 +9043,7 @@ var Global = function () {
     }, {
         key: "resolution",
         value: function resolution() {
-            return 450;
+            return 720;
         }
     }, {
         key: "getHost",
