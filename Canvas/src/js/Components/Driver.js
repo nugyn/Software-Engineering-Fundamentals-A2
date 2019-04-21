@@ -1,8 +1,9 @@
 export class Driver{
-    constructor(thisPlayer, socket) {
+    constructor(thisPlayer, socket, touchInput) {
         // this.renderObject = renderObject;
         this.player = thisPlayer;
         this.socket = socket;
+        this.touchInput = touchInput;
     }
 
     keyListener(component) {
@@ -33,8 +34,31 @@ export class Driver{
         }
     }
 
+    controller(component) {
+        let keyList = this.touchInput;
+        let self = this;
+        /* Same order as key Listener */
+        keyList[0].onclick = function() {
+            component.moveLeft();
+            self.socket.emit("move", component.getPosition());
+        }
+        keyList[1].onclick = function() {
+            component.moveRight();
+            self.socket.emit("move", component.getPosition());
+        }
+        keyList[2].onclick = function() {
+            component.moveUp();
+            self.socket.emit("move", component.getPosition());
+        }
+        keyList[3].onclick = function() {
+            component.moveDown();
+            self.socket.emit("move", component.getPosition());
+        }
+    }
+
     init() {
         this.keyListener(this.player);
+        this.controller(this.player);
         console.log(this.player.getPosition());
         return this.player.getPosition();
     }

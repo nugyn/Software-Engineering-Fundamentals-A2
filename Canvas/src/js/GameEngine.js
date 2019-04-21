@@ -2,15 +2,16 @@ import Map from './Components/Map';
 import { Driver } from './Components/Driver';
 import io from 'socket.io-client';
 import Player from './Components/Player';
+import Global from './Global';
 import Component from './Components/Component';
-const socket = io('http://localhost:8080');
+const socket = io(Global.getHost());
 
 export default class GameEngine { 
     constructor(canvas, width, height) {
         this.width = width; 
         this.height = height;
         this.canvas = canvas;
-        this.map = new Map(this.canvas,this.width,this.height, socket);
+        this.map = new Map(this.canvas, socket);
         this.setResolution(canvas, width,height);
     }
 
@@ -41,7 +42,7 @@ export default class GameEngine {
             for(var i in playerList) {
                 let player = playerList[i];
                 let component = new Component(player.id, player.x, player.y, player.name, player.npc,
-                    self.map.getInfo(), drawTool);
+                    self.map.getInfo(), drawTool, player.color);
                 console.log(component);
                 players.push(component);
                 component.render();

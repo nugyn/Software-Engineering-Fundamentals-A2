@@ -8461,7 +8461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
-    function Component(id, x, y, name, npc, mapComponent, drawTool) {
+    function Component(id, x, y, name, npc, mapComponent, drawTool, color) {
         _classCallCheck(this, Component);
 
         this.id = id;
@@ -8473,6 +8473,7 @@ var Component = function () {
         this.grid = mapComponent.grid;
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
+        this.color = color;
     }
 
     _createClass(Component, [{
@@ -8582,7 +8583,7 @@ var Component = function () {
         key: 'render',
         value: function render() {
             // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-            this.drawTool.fillStyle = _Global2.default.getColor().player;
+            this.drawTool.fillStyle = this.color;
             this.drawTool.fillRect(this.x, this.y, this.size, this.size);
             this.drawTool.fillStyle = _Global2.default.getColor().name;
             this.drawTool.font = "13px Arial";
@@ -8609,12 +8610,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Driver = exports.Driver = function () {
-    function Driver(thisPlayer, socket) {
+    function Driver(thisPlayer, socket, touchInput) {
         _classCallCheck(this, Driver);
 
         // this.renderObject = renderObject;
         this.player = thisPlayer;
         this.socket = socket;
+        this.touchInput = touchInput;
     }
 
     _createClass(Driver, [{
@@ -8646,9 +8648,33 @@ var Driver = exports.Driver = function () {
             };
         }
     }, {
+        key: "controller",
+        value: function controller(component) {
+            var keyList = this.touchInput;
+            var self = this;
+            /* Same order as key Listener */
+            keyList[0].onclick = function () {
+                component.moveLeft();
+                self.socket.emit("move", component.getPosition());
+            };
+            keyList[1].onclick = function () {
+                component.moveRight();
+                self.socket.emit("move", component.getPosition());
+            };
+            keyList[2].onclick = function () {
+                component.moveUp();
+                self.socket.emit("move", component.getPosition());
+            };
+            keyList[3].onclick = function () {
+                component.moveDown();
+                self.socket.emit("move", component.getPosition());
+            };
+        }
+    }, {
         key: "init",
         value: function init() {
             this.keyListener(this.player);
+            this.controller(this.player);
             console.log(this.player.getPosition());
             return this.player.getPosition();
         }
@@ -8724,18 +8750,26 @@ var _Player2 = _interopRequireDefault(_Player);
 
 var _Driver = require('./Components/Driver');
 
+var _Global = require('./Global');
+
+var _Global2 = _interopRequireDefault(_Global);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
 
-var socket = (0, _socket2.default)('http://localhost:8080');
+var socket = (0, _socket2.default)(_Global2.default.getHost());
 var register = document.querySelector("section.register");
 var setup = document.querySelector("section.setup");
 var waiting = document.querySelector("section.waiting");
 var loading = document.querySelector(".loading");
+var controller = document.querySelector(".controller");
 var pname = document.querySelectorAll(".playerName");
 var mapInfo = {};
 var firstPlayer = false;
+window.onload = function () {
+    hide(controller);
+};
 /* Support functions */
 function fadeOut(element) {
     var op = 1; // initial opacity
@@ -8839,7 +8873,7 @@ joinBtn.addEventListener("click", function () {
                     console.log(pos.options.namedItem(i));
                     pos.options.namedItem(i).disabled = true;
                 } else {
-                    pos.options.namedItem(i).selected = true;
+                    pos.options.namedItem(i).selected = "selected";
                 }
             }
         });
@@ -8859,14 +8893,51 @@ continueBtn.addEventListener("click", function () {
         socket.emit("setMaxPlayer", maxP.options[maxP.selectedIndex].value);
     }
     socket.emit("setPosition", pos.options[pos.selectedIndex].value);
+    hide(setup);
+    show(waiting);
+    socket.on("initPlayer", function (player) {
+        var thisPlayer = new _Player2.default(player.id, player.x, player.y, playerName.value, mapInfo);
+        var controller = new _Driver.Driver(thisPlayer, socket, btnController);
+        controller.init();
+        myColor.style.background = player.color;
+        [].concat(btnController).map(function (each) {
+            return each.style.background = player.color;
+        });
+    });
 });
-// socket.on("initPlayer", (player) => {
-//     var thisPlayer = new Player(player.id,player.x,player.y,playerName.value,mapInfo);
-//     let controller = new Driver(thisPlayer, socket);
-//     controller.init();
-// })
+/* Waiting */
+var myColor = document.querySelector('.myColor');
+var leftArrow = document.querySelector(".leftArrow");
+var rightArrow = document.querySelector(".rightArrow");
+var upArrow = document.querySelector(".upArrow");
+var downArrow = document.querySelector(".downArrow");
+var btnController = [leftArrow, rightArrow, upArrow, downArrow];
+var btnStart = document.querySelector("button[name='start']");
+socket.on("startAble", function () {
+    btnStart.classList.remove("is-loading");
+    if (firstPlayer == true) {
+        btnStart.disabled = false;
+        btnStart.innerHTML = "Start Game";
+    } else {
+        btnStart.innerHTML = "Waiting for first player to start game";
+    }
+});
 
-},{"./Components/Driver":51,"./Components/Player":52,"socket.io-client":35}],54:[function(require,module,exports){
+btnStart.addEventListener("click", function () {
+    socket.emit("start");
+});
+
+socket.on("showController", function () {
+    hide(waiting);
+    controller.style.display = 'grid';
+});
+controller.addEventListener("click", function () {
+    var el = document.documentElement,
+        rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
+    rfs.call(el);
+});
+
+},{"./Components/Driver":51,"./Components/Player":52,"./Global":56,"socket.io-client":35}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8955,13 +9026,34 @@ var Global = function () {
                 player: "#A6B1E1",
                 monster: "#A5243D",
                 border: "#000",
-                name: "#000"
+                name: "#fff",
+                playerColor: ["#E75A7C", "#DAA89B", "#9055A2", "#6D466B"]
             };
         }
     }, {
         key: "getGrid",
         value: function getGrid() {
             return [[1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1]];
+        }
+    }, {
+        key: "getBSize",
+        value: function getBSize() {
+            return this.resolution() / this.getGrid()[0].length;
+        }
+    }, {
+        key: "resolution",
+        value: function resolution() {
+            return 450;
+        }
+    }, {
+        key: "getHost",
+        value: function getHost() {
+            return "http://192.168.1.10:" + this.getPort();
+        }
+    }, {
+        key: "getPort",
+        value: function getPort() {
+            return 8080;
         }
     }]);
 

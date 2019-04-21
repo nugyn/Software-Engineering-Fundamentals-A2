@@ -1,15 +1,20 @@
 import io from 'socket.io-client';
 import Player from './Components/Player';
 import { Driver } from './Components/Driver';
+import Global from './Global';
 
-const socket = io('http://localhost:8080');
+const socket = io(Global.getHost());
 const register = document.querySelector("section.register");
 const setup = document.querySelector("section.setup");
 const waiting = document.querySelector("section.waiting");
 const loading = document.querySelector(".loading");
+const controller = document.querySelector(".controller");
 const pname = document.querySelectorAll(".playerName");
 let mapInfo = {}
 var firstPlayer = false;
+window.onload = function () {
+    hide(controller);
+}
 /* Support functions */
 function fadeOut(element) {
     var op = 1;  // initial opacity
@@ -110,7 +115,7 @@ joinBtn.addEventListener("click", function (){
                     console.log(pos.options.namedItem(i));  
                     pos.options.namedItem(i).disabled = true;
                 } else {
-                    pos.options.namedItem(i).selected = true;
+                    pos.options.namedItem(i).selected = "selected";
                 }
             }
         })
@@ -130,9 +135,49 @@ continueBtn.addEventListener("click", function () {
         socket.emit("setMaxPlayer", maxP.options[maxP.selectedIndex].value);
     }
     socket.emit("setPosition", pos.options[pos.selectedIndex].value);
+    hide(setup);
+    show(waiting);
+    socket.on("initPlayer", (player) => {
+        var thisPlayer = new Player(player.id,player.x,player.y,playerName.value,mapInfo);
+        let controller = new Driver(thisPlayer, socket, btnController);
+        controller.init();
+        myColor.style.background = player.color;
+        [...btnController].map(each => each.style.background = player.color);
+    })
 })
-// socket.on("initPlayer", (player) => {
-//     var thisPlayer = new Player(player.id,player.x,player.y,playerName.value,mapInfo);
-//     let controller = new Driver(thisPlayer, socket);
-//     controller.init();
-// })
+/* Waiting */
+let myColor = document.querySelector('.myColor');
+let leftArrow = document.querySelector(".leftArrow");
+let rightArrow = document.querySelector(".rightArrow");
+let upArrow = document.querySelector(".upArrow");
+let downArrow = document.querySelector(".downArrow");
+let btnController = [leftArrow, rightArrow, upArrow, downArrow];
+let btnStart = document.querySelector("button[name='start']");
+socket.on("startAble", () => {
+    btnStart.classList.remove("is-loading");
+    if(firstPlayer == true) {
+        btnStart.disabled = false;
+        btnStart.innerHTML = "Start Game";
+    } else {
+        btnStart.innerHTML = "Waiting for first player to start game";
+    }
+})
+
+btnStart.addEventListener("click", function() {
+    socket.emit("start");
+})
+
+socket.on("showController", () => {
+    hide(waiting);
+    controller.style.display = 'grid';
+})
+controller.addEventListener("click", function() {
+    var
+          el = document.documentElement
+        , rfs =
+               el.requestFullScreen
+            || el.webkitRequestFullScreen
+            || el.mozRequestFullScreen
+    ;
+    rfs.call(el);
+});

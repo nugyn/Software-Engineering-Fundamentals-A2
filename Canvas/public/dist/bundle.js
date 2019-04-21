@@ -8461,7 +8461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
-    function Component(id, x, y, name, npc, mapComponent, drawTool) {
+    function Component(id, x, y, name, npc, mapComponent, drawTool, color) {
         _classCallCheck(this, Component);
 
         this.id = id;
@@ -8473,6 +8473,7 @@ var Component = function () {
         this.grid = mapComponent.grid;
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
+        this.color = color;
     }
 
     _createClass(Component, [{
@@ -8582,7 +8583,7 @@ var Component = function () {
         key: 'render',
         value: function render() {
             // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-            this.drawTool.fillStyle = _Global2.default.getColor().player;
+            this.drawTool.fillStyle = this.color;
             this.drawTool.fillRect(this.x, this.y, this.size, this.size);
             this.drawTool.fillStyle = _Global2.default.getColor().name;
             this.drawTool.font = "13px Arial";
@@ -8609,12 +8610,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Driver = exports.Driver = function () {
-    function Driver(thisPlayer, socket) {
+    function Driver(thisPlayer, socket, touchInput) {
         _classCallCheck(this, Driver);
 
         // this.renderObject = renderObject;
         this.player = thisPlayer;
         this.socket = socket;
+        this.touchInput = touchInput;
     }
 
     _createClass(Driver, [{
@@ -8646,9 +8648,33 @@ var Driver = exports.Driver = function () {
             };
         }
     }, {
+        key: "controller",
+        value: function controller(component) {
+            var keyList = this.touchInput;
+            var self = this;
+            /* Same order as key Listener */
+            keyList[0].onclick = function () {
+                component.moveLeft();
+                self.socket.emit("move", component.getPosition());
+            };
+            keyList[1].onclick = function () {
+                component.moveRight();
+                self.socket.emit("move", component.getPosition());
+            };
+            keyList[2].onclick = function () {
+                component.moveUp();
+                self.socket.emit("move", component.getPosition());
+            };
+            keyList[3].onclick = function () {
+                component.moveDown();
+                self.socket.emit("move", component.getPosition());
+            };
+        }
+    }, {
         key: "init",
         value: function init() {
             this.keyListener(this.player);
+            this.controller(this.player);
             console.log(this.player.getPosition());
             return this.player.getPosition();
         }
@@ -8679,11 +8705,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Map = function () {
-    function Map(canvas, width, height, socket) {
+    function Map(canvas, socket) {
         _classCallCheck(this, Map);
 
         this.grid = _Global2.default.getGrid();
-        this.bSize = width / this.grid[0].length;
+        this.bSize = _Global2.default.getBSize();
         this.object = canvas.getContext('2d');
         this.socket = socket;
     }
@@ -8860,6 +8886,10 @@ var _Player = require('./Components/Player');
 
 var _Player2 = _interopRequireDefault(_Player);
 
+var _Global = require('./Global');
+
+var _Global2 = _interopRequireDefault(_Global);
+
 var _Component = require('./Components/Component');
 
 var _Component2 = _interopRequireDefault(_Component);
@@ -8868,7 +8898,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-var socket = (0, _socket2.default)('http://localhost:8080');
+var socket = (0, _socket2.default)(_Global2.default.getHost());
 
 var GameEngine = function () {
     function GameEngine(canvas, width, height) {
@@ -8877,7 +8907,7 @@ var GameEngine = function () {
         this.width = width;
         this.height = height;
         this.canvas = canvas;
-        this.map = new _Map2.default(this.canvas, this.width, this.height, socket);
+        this.map = new _Map2.default(this.canvas, socket);
         this.setResolution(canvas, width, height);
     }
 
@@ -8913,7 +8943,7 @@ var GameEngine = function () {
                 var players = [];
                 for (var i in playerList) {
                     var player = playerList[i];
-                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), drawTool);
+                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), drawTool, player.color);
                     console.log(component);
                     players.push(component);
                     component.render();
@@ -8928,7 +8958,7 @@ var GameEngine = function () {
 
 exports.default = GameEngine;
 
-},{"./Components/Component":50,"./Components/Driver":51,"./Components/Map":52,"./Components/Player":53,"socket.io-client":35}],57:[function(require,module,exports){
+},{"./Components/Component":50,"./Components/Driver":51,"./Components/Map":52,"./Components/Player":53,"./Global":57,"socket.io-client":35}],57:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8954,13 +8984,34 @@ var Global = function () {
                 player: "#A6B1E1",
                 monster: "#A5243D",
                 border: "#000",
-                name: "#000"
+                name: "#fff",
+                playerColor: ["#E75A7C", "#DAA89B", "#9055A2", "#6D466B"]
             };
         }
     }, {
         key: "getGrid",
         value: function getGrid() {
             return [[1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1]];
+        }
+    }, {
+        key: "getBSize",
+        value: function getBSize() {
+            return this.resolution() / this.getGrid()[0].length;
+        }
+    }, {
+        key: "resolution",
+        value: function resolution() {
+            return 450;
+        }
+    }, {
+        key: "getHost",
+        value: function getHost() {
+            return "http://192.168.1.10:" + this.getPort();
+        }
+    }, {
+        key: "getPort",
+        value: function getPort() {
+            return 8080;
         }
     }]);
 
@@ -8970,15 +9021,19 @@ var Global = function () {
 exports.default = Global;
 
 },{}],58:[function(require,module,exports){
-"use strict";
+'use strict';
 
-var _GameEngine = require("./GameEngine");
+var _GameEngine = require('./GameEngine');
 
 var _GameEngine2 = _interopRequireDefault(_GameEngine);
 
+var _Global = require('./Global');
+
+var _Global2 = _interopRequireDefault(_Global);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var main = new _GameEngine2.default(document.querySelector("canvas"), 450, 450);
+var main = new _GameEngine2.default(document.querySelector("canvas"), _Global2.default.resolution(), _Global2.default.resolution());
 main.render();
 
-},{"./GameEngine":56}]},{},[58]);
+},{"./GameEngine":56,"./Global":57}]},{},[58]);

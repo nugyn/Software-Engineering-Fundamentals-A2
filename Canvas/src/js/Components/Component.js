@@ -1,7 +1,7 @@
 import Global from '../Global';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
 export default class Component {
-    constructor(id, x, y, name, npc, mapComponent,drawTool) {
+    constructor(id, x, y, name, npc, mapComponent,drawTool, color) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -11,6 +11,7 @@ export default class Component {
         this.grid = mapComponent.grid;
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
+        this.color = color;
     }
 
     getPosition() {
@@ -109,7 +110,7 @@ export default class Component {
 
     render(){
         // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-        this.drawTool.fillStyle = Global.getColor().player
+        this.drawTool.fillStyle = this.color;
         this.drawTool.fillRect(this.x,this.y,this.size,this.size);
         this.drawTool.fillStyle = Global.getColor().name;
         this.drawTool.font="13px Arial";

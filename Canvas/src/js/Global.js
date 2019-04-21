@@ -7,7 +7,8 @@ export default class Global {
             player: "#A6B1E1",
             monster: "#A5243D",
             border: "#000",
-            name: "#000"
+            name: "#fff",
+            playerColor: ["#E75A7C", "#DAA89B", "#9055A2", "#6D466B"]
         }
     }
 
@@ -23,5 +24,19 @@ export default class Global {
             [1, 0, 0, 0, 1, 0, 0, 0, 1], 
             [1, 1, 1, 1, 1, 1, 1, 1, 1]
         ]);
+    }
+    static getBSize() {
+        return this.resolution()/this.getGrid()[0].length;
+    }
+    static resolution() {
+        return 450;
+    }
+
+    static getHost() {
+        return "http://192.168.1.10:" + this.getPort();
+    }
+
+    static getPort() {
+        return 8080;
     }
 }

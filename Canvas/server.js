@@ -2,23 +2,28 @@ import express from 'express';
 import http from 'http';
 import SocketIO from 'socket.io';
 import cors from 'cors';
-import Player from './src/js/Components/Player'; // this cause duplicated session
+import Global from './src/js/Global';
+/* TODO: When end game turn off controller */
 
 /* Global */
 const app = express();
 const serv = http.Server(app);
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || Global.getPort();
 let playerList = {};
 let SOCKET_LIST = {};
 let mapInfo = {};
 let maxPlayer = 2;
 let playerIndex = 0;
+let numberOfPlayer = 0;
 let positionTaken = {
     "top-left": false, 
     "top-right": false, 
     "bottom-left": false, 
     "bottom-right": false,
 };
+
+var showController = false;
+
 /* Hosting */
 
 app.get('/',(req,res) => {
@@ -60,22 +65,46 @@ io.on('connection', socket => {
             maxPlayer = maxP;
             console.log(`[+] Changed default maxPlayer to ${maxPlayer}`);
         })
-        var pos; 
-        socket.on("setPosition", position => {
-            positionTaken[position] = true;
-            pos = position;
-        })
         var thisPlayer = {
             id: socket.client.id,
             x: 0,
             y: 0,
             name: playerName,
-            npc: false
+            npc: false,
+            color: Global.getColor().player
         }
-        SOCKET_LIST[thisPlayer.id] = socket;
-        playerList[thisPlayer.id] = thisPlayer;
-        socket.emit('initPlayer', thisPlayer)
-        console.log(`Player: ${thisPlayer.id} joined the game as ${playerName}`);
+        var pos = null; 
+        socket.on("setPosition", position => {
+            numberOfPlayer += 1;
+            positionTaken[position] = true;
+            pos = position;
+            switch(pos) {
+                case "top-left":
+                    thisPlayer.x = 0;
+                    thisPlayer.y = 0;
+                    thisPlayer.color = Global.getColor().playerColor[0];
+                    break;
+                case "top-right": 
+                    thisPlayer.x = Global.getBSize() * (Global.getGrid()[0].length - 1);
+                    thisPlayer.y = 0;
+                    thisPlayer.color = Global.getColor().playerColor[1];
+                    break;
+                case "bottom-left":
+                    thisPlayer.x = 0;
+                    thisPlayer.y = Global.getBSize() * (Global.getGrid()[0].length - 1);
+                    thisPlayer.color = Global.getColor().playerColor[2];
+                    break;
+                case "bottom-right":
+                    thisPlayer.x = Global.getBSize() * (Global.getGrid()[0].length - 1);
+                    thisPlayer.y = Global.getBSize() * (Global.getGrid()[0].length - 1);
+                    thisPlayer.color = Global.getColor().playerColor[3];
+                    break;
+            }
+            SOCKET_LIST[thisPlayer.id] = socket;
+            playerList[thisPlayer.id] = thisPlayer;
+            socket.emit('initPlayer', thisPlayer)
+            console.log(`Player: ${thisPlayer.id} joined the game as ${playerName}`);
+        })
          /* Player moves */
         socket.on("move", usr => {
             /* socketID must match, just send back socketID for dataID*/
@@ -83,13 +112,20 @@ io.on('connection', socket => {
             playerList[usr.id].x = usr.x;
             playerList[usr.id].y = usr.y;
         })
+        socket.on("start", () => {
+            showController = true;
+        }) 
          /* Player leaves the game*/
         socket.on("disconnect", () => {
             playerIndex -= 1;
+            numberOfPlayer -= 1;
             positionTaken[pos] = false;
             delete SOCKET_LIST[thisPlayer.id];
             delete playerList[thisPlayer.id];
         })
+        if(numberOfPlayer < maxPlayer) {
+            showController = false;
+        }
     });
 })
 
@@ -102,6 +138,12 @@ serv.listen(PORT, () => {
 setInterval(function(){
     for(var i in SOCKET_LIST){
         var socket = SOCKET_LIST[i];
+        if(numberOfPlayer == maxPlayer) {
+            socket.emit("startAble");
+        }
+        if(showController) {
+            socket.emit("showController");
+        }
         socket.emit("update",playerList);
         socket.emit("loadMap", mapInfo);
     }

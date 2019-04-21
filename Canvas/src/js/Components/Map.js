@@ -1,9 +1,9 @@
 import GameEngine from '../GameEngine';
 import Global from '../Global';
 export default class Map{
-    constructor(canvas, width,height, socket) {
+    constructor(canvas, socket) {
         this.grid = Global.getGrid();
-        this.bSize = width/this.grid[0].length;
+        this.bSize = Global.getBSize();
         this.object = canvas.getContext('2d');
         this.socket = socket;
     }
