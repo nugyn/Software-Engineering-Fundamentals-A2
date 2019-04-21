@@ -10,6 +10,15 @@ const serv = http.Server(app);
 const PORT = process.env.PORT || 8080;
 let playerList = {};
 let SOCKET_LIST = {};
+let mapInfo = {};
+let maxPlayer = 2;
+let playerIndex = 0;
+let positionTaken = {
+    "top-left": false, 
+    "top-right": false, 
+    "bottom-left": false, 
+    "bottom-right": false,
+};
 /* Hosting */
 
 app.get('/',(req,res) => {
@@ -37,32 +46,51 @@ var io = new SocketIO(serv, {
 })
 
 io.on('connection', socket => {
+    console.log(`${socket.client.id} joined`);
+    socket.on("mapInfo", data => {
+        Object.assign(mapInfo, data);
+    });
+    SOCKET_LIST[socket.client.id] = socket;
     /* Init player to activate driver.js*/
-    var thisPlayer = {
-        id: socket.client.id,
-        x: 0,
-        y: 0,
-        name: "Test",
-        npc: false
-    }
-    SOCKET_LIST[thisPlayer.id] = socket;
-    playerList[thisPlayer.id] = thisPlayer;
-    socket.emit('initPlayer', thisPlayer)
-    console.log(`Player: ${thisPlayer.id} joined the game`);
-
-    /* Player moves */
-    socket.on("move", usr => {
-        /* socketID must match, just send back socketID for dataID*/
-        console.log(usr);
-        playerList[usr.id].x = usr.x;
-        playerList[usr.id].y = usr.y;
-    })
-
-    /* Player leaves the game*/
-    socket.on("disconnect", () => {
-        delete SOCKET_LIST[thisPlayer.id];
-        delete playerList[thisPlayer.id];
-    })
+    socket.on("isPlayer", playerName => {
+        playerIndex += 1;
+        socket.emit("matchInfo", {maxPlayer: maxPlayer, playerIndex: playerIndex});
+        socket.emit("getPosition", positionTaken);
+        socket.on("setMaxPlayer", maxP => {
+            maxPlayer = maxP;
+            console.log(`[+] Changed default maxPlayer to ${maxPlayer}`);
+        })
+        var pos; 
+        socket.on("setPosition", position => {
+            positionTaken[position] = true;
+            pos = position;
+        })
+        var thisPlayer = {
+            id: socket.client.id,
+            x: 0,
+            y: 0,
+            name: playerName,
+            npc: false
+        }
+        SOCKET_LIST[thisPlayer.id] = socket;
+        playerList[thisPlayer.id] = thisPlayer;
+        socket.emit('initPlayer', thisPlayer)
+        console.log(`Player: ${thisPlayer.id} joined the game as ${playerName}`);
+         /* Player moves */
+        socket.on("move", usr => {
+            /* socketID must match, just send back socketID for dataID*/
+            console.log(usr);
+            playerList[usr.id].x = usr.x;
+            playerList[usr.id].y = usr.y;
+        })
+         /* Player leaves the game*/
+        socket.on("disconnect", () => {
+            playerIndex -= 1;
+            positionTaken[pos] = false;
+            delete SOCKET_LIST[thisPlayer.id];
+            delete playerList[thisPlayer.id];
+        })
+    });
 })
 
 /* Run server*/
@@ -74,6 +102,7 @@ serv.listen(PORT, () => {
 setInterval(function(){
     for(var i in SOCKET_LIST){
         var socket = SOCKET_LIST[i];
-        socket.emit('update',playerList);
+        socket.emit("update",playerList);
+        socket.emit("loadMap", mapInfo);
     }
 },1000/25);

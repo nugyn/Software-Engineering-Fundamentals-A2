@@ -10,7 +10,7 @@ export default class GameEngine {
         this.width = width; 
         this.height = height;
         this.canvas = canvas;
-        this.map = new Map(this.canvas,this.width,this.height);
+        this.map = new Map(this.canvas,this.width,this.height, socket);
         this.setResolution(canvas, width,height);
     }
 
@@ -24,15 +24,14 @@ export default class GameEngine {
     }
 
     render() {
-        console.log(this.canvas);
         this.setup();
         var self = this;
         
-        socket.on("initPlayer", (player) => {
-            var thisPlayer = new Player(player.id,player.x,player.y,player.name,self.map.getInfo());
-            let controller = new Driver(thisPlayer, socket);
-            controller.init();
-        })
+        // socket.on("initPlayer", (player) => {
+        //     var thisPlayer = new Player(player.id,player.x,player.y,player.name,self.map.getInfo());
+        //     let controller = new Driver(thisPlayer, socket);
+        //     controller.init();
+        // })
 
         socket.on("update", playerList => {
             const drawTool =  this.canvas.getContext("2d");
@@ -43,6 +42,7 @@ export default class GameEngine {
                 let player = playerList[i];
                 let component = new Component(player.id, player.x, player.y, player.name, player.npc,
                     self.map.getInfo(), drawTool);
+                console.log(component);
                 players.push(component);
                 component.render();
             }

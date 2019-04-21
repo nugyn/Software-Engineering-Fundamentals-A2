@@ -25,20 +25,88 @@
             <div class="field">
                 <label class="label">Name</label>
                 <div class="control">
-                <input class="input" type="text" placeholder="e.g ILoveBrownies19">
+                <input class="input" name="playerName" type="text" placeholder="e.g ILoveBrownies19" required>
                 </div>
             </div>
 
             <div class="field">
                 <p class="control">
-                <button class="button is-success">
+                <button name="join" class="button is-medium is-fullwidth is-primary is-rounded" disabled>
                     Join
                 </button>
                 </p>
             </div>
 
+            
         </div>
     </section>
+    <section class="section setup">
+
+        <div class="container">
+            <article class="message is-warning limit">
+                    <div class="message-body">
+                        Hey <strong class="playerName">ILoveBrownies19</strong>, <br />
+                        We are sorry that the session is reached limited number of player.<br />
+                        Please come back later :).
+                    </div>
+            </article>
+            <div class="playable">
+                <p class="subtitle">
+                        Hey <strong class="playerName">ILoveBrownies19</strong>!
+                </p>
+                <div class="isFirst">
+                    <p class="subtitle">
+                            Since you're the first player. We need to go through some intial setups!
+                    </p>
+                    <div style="display: flex; justify-content: space-between">
+                        <p class="subtitle">First, let me know the <strong>maximum player allowed</strong> in this room:</p>
+                        <div class="select is-rounded">
+                                <select name="maxPlayer">
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between">
+                    <p class="subtitle">Almost done, what is your <strong>drop off zone</strong>:</p>
+                    <div class="select is-rounded">
+                            <select name="position">
+                                <option id="top-left">top-left</option>
+                                <option id="top-right">top-right</option>
+                                <option id="bottom-left">bottom-left</option>
+                                <option id="bottom-right">bottom-right</option>
+                            </select>
+                    </div>
+                </div>
+    
+                <button name="continue" class="button is-medium is-fullwidth is-info is-rounded">Continue</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="section waiting">
+        <center>
+                <div class="container">
+                        <h1 class="title">
+                                Way to go!
+                        </h1>
+                        <p class="subtitle">Just waiting for other players to join :)</p>
+                        <p class="subtitle">Your color is:</p>
+                        <div class="myColor" style="background:lightblue"></div>
+                        <br />
+                        </div>
+                        <button class="button is-medium is-fullwidth is-primary is-rounded is-loading" disabled>Loading</button>
+                    </div>
+        </center>
+    </section>
+
+    <div class="loading">
+            <img src="./dist/assets/loading.svg">
+    </div>
+
     <section class="controller">
         <div class="leftArrow"><p class="description">right</p><i class="fas fa-caret-up"></i></div>
         <div class="up-down-control">
@@ -47,5 +115,7 @@
         </div>
         <div class="rightArrow"><p class="description">left</p><i class="fas fa-caret-down"></i></div>
     </section>
+
+    <script src="./dist/controller.js"></script>
 </body>
 </html>

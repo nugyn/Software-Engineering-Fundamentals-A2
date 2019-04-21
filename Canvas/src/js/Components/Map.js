@@ -1,20 +1,11 @@
 import GameEngine from '../GameEngine';
 import Global from '../Global';
 export default class Map{
-    constructor(canvas, width,height) {
-        this.grid = [
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-        ];
+    constructor(canvas, width,height, socket) {
+        this.grid = Global.getGrid();
         this.bSize = width/this.grid[0].length;
         this.object = canvas.getContext('2d');
+        this.socket = socket;
     }
     getInfo() {
         return {
@@ -23,6 +14,9 @@ export default class Map{
         }
     }
     drawMap() {
+        /* Send map info to controller */
+        this.socket.emit("mapInfo", this.getInfo());
+        /* Draw the map */
         for (let row=0; row < this.grid.length; row++) {
             for(let i=0; i<this.grid[row].length; i++) {
                 /* */
