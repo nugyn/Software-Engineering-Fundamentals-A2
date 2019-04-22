@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
     <link rel="stylesheet" href="./dist/css/game.css">
     <title>Game</title>
 </head>
@@ -11,9 +13,29 @@
     <div class="debug">
         
     </div>
+
     <canvas>
 
     </canvas>
+
+    <div class="session">
+      <div class="session-info">
+          <h1 class="title">Monster Mash</h1>
+          <p class="subtitle">Go to <a href="http://localhost:8080/join">/join</a> and type in</p>
+          <input class="input is-large" type="text" value="321902" readonly>
+          <img class="qr" src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=http://localhost:8080/join">
+          <p class="subtitle status">Wating for other players to join...</p>
+          <div class="players">
+            <div class="playerInfo"></div>
+            <div class="playerInfo"></div>
+            <div class="playerInfo"></div>
+            <div class="playerInfo"></div>
+
+          </div>
+
+      </div>
+    </div>
+
     <script src="./dist/bundle.js"></script>
     <script src="https://www.gstatic.com/firebasejs/5.9.4/firebase.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js">
