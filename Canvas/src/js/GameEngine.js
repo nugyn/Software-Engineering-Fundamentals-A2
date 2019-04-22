@@ -1,55 +1,54 @@
 import Map from './Components/Map';
 import { Driver } from './Components/Driver';
+import io from 'socket.io-client';
+import Player from './Components/Player';
+import Global from './Global';
+import Component from './Components/Component';
+const socket = io(Global.getHost());
 
 export default class GameEngine { 
     constructor(canvas, width, height) {
-        this.player = [];
         this.width = width; 
         this.height = height;
         this.canvas = canvas;
-        this.map = new Map(canvas,width,height);
+        this.map = new Map(this.canvas, socket);
         this.setResolution(canvas, width,height);
     }
 
-    static getColor() {
-        return {
-            path: "#77B6EA",
-            block: "#37393A",
-            player: "#A6B1E1",
-            monster: "#A5243D",
-            border: "#000"
-        }
-    }
-
-    async setup() {
-        await this.map.drawMap();
+    setup() {
+        this.map.drawMap();
     }
 
     setResolution(canvas,width,height) {
         canvas.width = width;
         canvas.height = height;
     }
-    
-    get details() {
-        return {
-            mWdith: this.width,
-            mHeight: this.height,
-            bSize: this.map.details().bSize,
-        }
-    }
 
-    async render() {
-        let gameplay = new Driver(this.map.renderObject());
-        let components = gameplay.init();
-        this.animate(components);
-    }
-
-    async animate(components) {
-        requestAnimationFrame(this.animate.bind(this, components));
-        this.canvas.getContext("2d").clearRect(0,0,this.width, this.height);
+    render() {
         this.setup();
-        for(let i = 0; i < components.length; i++) { 
-            components[i].render();
-        }
+        var self = this;
+        
+        // socket.on("initPlayer", (player) => {
+        //     var thisPlayer = new Player(player.id,player.x,player.y,player.name,self.map.getInfo());
+        //     let controller = new Driver(thisPlayer, socket);
+        //     controller.init();
+        // })
+
+        socket.on("update", playerList => {
+            const drawTool =  this.canvas.getContext("2d");
+            drawTool.clearRect(0,0,this.width, this.height);
+            this.setup();
+            var players = [];
+            for(var i in playerList) {
+                let player = playerList[i];
+                let component = new Component(player.id, player.x, player.y, player.name, player.npc,
+                    self.map.getInfo(), drawTool, player.color);
+                console.log(component);
+                players.push(component);
+                component.render();
+            }
+            console.log(players);
+        })
     }
+
 }

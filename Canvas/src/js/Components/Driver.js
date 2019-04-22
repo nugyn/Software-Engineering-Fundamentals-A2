@@ -1,13 +1,15 @@
-import { Player } from './Player';
-
 export class Driver{
-    constructor(renderObject) {
-        this.renderObject = renderObject;
-        this.component = [];
+    constructor(thisPlayer, socket, touchInput) {
+        // this.renderObject = renderObject;
+        this.player = thisPlayer;
+        this.socket = socket;
+        this.touchInput = touchInput;
     }
 
     keyListener(component) {
+        var self = this;
         window.onkeyup = function(e) {
+            console.log(self.socket);
             var key = e.keyCode ? e.keyCode : e.which;
             switch(key) {
                 case 37:
@@ -27,14 +29,37 @@ export class Driver{
                     component.moveDown();
                     break;
             }
+            self.socket.emit("move", component.getPosition());
+
+        }
+    }
+
+    controller(component) {
+        let keyList = this.touchInput;
+        let self = this;
+        /* Same order as key Listener */
+        keyList[0].onclick = function() {
+            component.moveLeft();
+            self.socket.emit("move", component.getPosition());
+        }
+        keyList[1].onclick = function() {
+            component.moveRight();
+            self.socket.emit("move", component.getPosition());
+        }
+        keyList[2].onclick = function() {
+            component.moveUp();
+            self.socket.emit("move", component.getPosition());
+        }
+        keyList[3].onclick = function() {
+            component.moveDown();
+            self.socket.emit("move", component.getPosition());
         }
     }
 
     init() {
-        let player1 = new Player(0,0,this.renderObject,"Thang");
-        player1.render();
-        this.component.push(player1);
-        this.keyListener(player1);
-        return this.component;
+        this.keyListener(this.player);
+        this.controller(this.player);
+        console.log(this.player.getPosition());
+        return this.player.getPosition();
     }
 }

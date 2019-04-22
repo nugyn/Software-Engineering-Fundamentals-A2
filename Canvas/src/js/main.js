@@ -1,3 +1,4 @@
 import GameEngine from './GameEngine';
-let main = new GameEngine(document.querySelector("canvas"), 450, 450);
+import Global from './Global';
+let main = new GameEngine(document.querySelector("canvas"), Global.resolution(), Global.resolution());
 main.render();
