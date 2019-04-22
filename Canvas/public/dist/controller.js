@@ -9080,7 +9080,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://localhost:" + this.getPort();
+            return "http://192.168.1.4:" + this.getPort();
         }
     }, {
         key: "getPort",
