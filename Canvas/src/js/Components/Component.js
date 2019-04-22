@@ -1,6 +1,7 @@
 import Global from '../Global';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
 export default class Component {
+
     constructor(id, x, y, name, npc, mapComponent,drawTool, color) {
         this.id = id;
         this.x = x;
@@ -12,6 +13,7 @@ export default class Component {
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
         this.color = color;
+        this.score = 0;
     }
 
     getPosition() {
@@ -106,6 +108,11 @@ export default class Component {
         } catch (e){
             this.logError(e);
         }
+    }
+    
+   setScore(){
+       this.score += 1;
+       return this.score;
     }
 
     render(){

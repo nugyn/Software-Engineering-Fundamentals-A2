@@ -9,7 +9,6 @@ export class Driver{
     keyListener(component) {
         var self = this;
         window.onkeyup = function(e) {
-            console.log(self.socket);
             var key = e.keyCode ? e.keyCode : e.which;
             switch(key) {
                 case 37:
@@ -30,6 +29,13 @@ export class Driver{
                     break;
             }
             self.socket.emit("move", component.getPosition());
+            var player = component.setScore();
+            if(player != null){
+            self.socket.emit("score", player);
+            }
+            else{
+                self.socket.emit("score", "No dice");
+            }
 
         }
     }

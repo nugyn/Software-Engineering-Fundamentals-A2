@@ -33,7 +33,12 @@ export default class GameEngine {
         //     let controller = new Driver(thisPlayer, socket);
         //     controller.init();
         // })
-
+        // let pScore = document.querySelector(".pScore");
+        // socket.on("playerScore", score => {
+        //     console.log(pScore);
+        //     console.log(score);
+        //     pScore.innerHTML = score;
+        // })
         socket.on("update", playerList => {
             const drawTool =  this.canvas.getContext("2d");
             drawTool.clearRect(0,0,this.width, this.height);
@@ -49,6 +54,8 @@ export default class GameEngine {
             }
             console.log(players);
         })
+
     }
+
 
 }

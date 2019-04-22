@@ -14,4 +14,18 @@ export default class Player extends Component{
     getPosition() {
         return super.getPosition();
     }
+    
+    setScore() {
+        return super.setScore();
+    }
+
+    // setScore(score){
+    //     this.score = score;
+    // }
+
+    // startScore(){
+    //     score++
+    //     this.score = score;
+    //     socket.emit("scored", score);
+    // }
 }

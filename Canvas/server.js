@@ -24,6 +24,8 @@ let positionTaken = {
 
 var showController = false;
 
+let score = 0;
+
 /* Hosting */
 
 app.get('/',(req,res) => {
@@ -71,7 +73,8 @@ io.on('connection', socket => {
             y: 0,
             name: playerName,
             npc: false,
-            color: Global.getColor().player
+            color: Global.getColor().player,
+            score: 0
         }
         var pos = null; 
         socket.on("setPosition", position => {
@@ -113,8 +116,10 @@ io.on('connection', socket => {
             playerList[usr.id].y = usr.y;
         })
         socket.on("start", () => {
-            showController = true;
+            showController = true
         }) 
+
+        
          /* Player leaves the game*/
         socket.on("disconnect", () => {
             playerIndex -= 1;
@@ -134,10 +139,18 @@ serv.listen(PORT, () => {
     console.log(`Server is running on port: ` + PORT);
 });
 
+
 /* Update game per 0.25 second */
 setInterval(function(){
     for(var i in SOCKET_LIST){
         var socket = SOCKET_LIST[i];
+        socket.on("score", (score) => {
+            console.log(score);
+            playerList[socket.client.id].score = score;
+         //   console.log(playerList[socket.client.id].score);
+            // socket.emit("playerScore", score);
+        })
+
         if(numberOfPlayer == maxPlayer) {
             socket.emit("startAble");
         }

@@ -8474,6 +8474,7 @@ var Component = function () {
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
         this.color = color;
+        this.score = 0;
     }
 
     _createClass(Component, [{
@@ -8580,6 +8581,12 @@ var Component = function () {
             }
         }
     }, {
+        key: 'setScore',
+        value: function setScore() {
+            this.score += 1;
+            return this.score;
+        }
+    }, {
         key: 'render',
         value: function render() {
             // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
@@ -8624,7 +8631,6 @@ var Driver = exports.Driver = function () {
         value: function keyListener(component) {
             var self = this;
             window.onkeyup = function (e) {
-                console.log(self.socket);
                 var key = e.keyCode ? e.keyCode : e.which;
                 switch (key) {
                     case 37:
@@ -8645,6 +8651,12 @@ var Driver = exports.Driver = function () {
                         break;
                 }
                 self.socket.emit("move", component.getPosition());
+                var player = component.setScore();
+                if (player != null) {
+                    self.socket.emit("score", player);
+                } else {
+                    self.socket.emit("score", "No dice");
+                }
             };
         }
     }, {
@@ -8730,6 +8742,22 @@ var Player = function (_Component) {
         value: function getPosition() {
             return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
         }
+    }, {
+        key: 'setScore',
+        value: function setScore() {
+            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'setScore', this).call(this);
+        }
+
+        // setScore(score){
+        //     this.score = score;
+        // }
+
+        // startScore(){
+        //     score++
+        //     this.score = score;
+        //     socket.emit("scored", score);
+        // }
+
     }]);
 
     return Player;
@@ -9048,7 +9076,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://192.168.1.10:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",
