@@ -8845,6 +8845,13 @@ btnConnect.addEventListener("click", function () {
     socket.emit("checkSession", sessionInput.value);
     socket.on("sessionValid", function () {
         hide(session);
+        socket.on("loadMap", function (data) {
+            console.log(data);
+            if (!isEmpty(data)) {
+                /* If there is someone opens the map */
+                Object.assign(mapInfo, data);
+            }
+        });
     });
     socket.on("nosession", function () {
         alert("Invalid session id, please try again");
@@ -8865,13 +8872,6 @@ playerName.addEventListener("keydown", function (e) {
     return inputCheck(e);
 }, false);
 
-socket.on("loadMap", function (data) {
-    console.log(data);
-    if (!isEmpty(data)) {
-        /* If there is someone opens the map */
-        Object.assign(mapInfo, data);
-    }
-});
 joinBtn.addEventListener("click", function () {
     fadeIn(loading);
     console.log(playerName.value);
@@ -8945,12 +8945,13 @@ var downArrow = document.querySelector(".downArrow");
 var btnController = [leftArrow, rightArrow, upArrow, downArrow];
 var btnStart = document.querySelector("button[name='start']");
 socket.on("startAble", function () {
+    console.log("starting");
     btnStart.classList.remove("is-loading");
     if (firstPlayer == true) {
         btnStart.disabled = false;
         btnStart.innerHTML = "Start Game";
     } else {
-        btnStart.innerHTML = "Waiting for first player to start game";
+        btnStart.innerHTML = "Waiting for the first player to start game";
     }
 });
 
@@ -9079,7 +9080,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://10.132.100.250:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",

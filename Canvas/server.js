@@ -15,12 +15,6 @@ let mapInfo = {};
 let maxPlayer = 2;
 let playerIndex = 0;
 let numberOfPlayer = 0;
-let positionTaken = {
-    "top-left": false, 
-    "top-right": false, 
-    "bottom-left": false, 
-    "bottom-right": false,
-};
 
 var showController = false;
 
@@ -51,6 +45,12 @@ var io = new SocketIO(serv, {
 })
 
 io.on('connection', socket => {
+    let positionTaken = {
+        "top-left": false, 
+        "top-right": false, 
+        "bottom-left": false, 
+        "bottom-right": false,
+    };
     console.log(`${socket.client.id} joined`);
     socket.on("isSession", () => {
         var sessionID = Math.floor(Math.random() * 800000) + 100000;
@@ -66,7 +66,11 @@ io.on('connection', socket => {
         SESSION_LIST[sessionID].positionTaken = positionTaken;
         SESSION_LIST[sessionID].numberOfPlayer = numberOfPlayer;
         SESSION_LIST[sessionID].playerList = {};
-
+        SESSION_LIST[sessionID].drivers = {};
+        SESSION_LIST[sessionID].showController = false;
+        socket.on("disconnect", () => {
+            delete SESSION_LIST[sessionID]
+        });
     }); /* is SESSION */
 
     socket.on("checkSession", sessionID => {
@@ -80,10 +84,11 @@ io.on('connection', socket => {
                 break;
             }
         }
-        socket.emit("loadMap", SESSION_LIST[sessionID].mapInfo);
-
         if(found) {
-            console.log(SESSION_LIST);
+            console.log(sessionID);
+            console.log(SESSION_LIST[sessionID])
+            SESSION_LIST[sessionID].drivers[socket.client.id] = socket;
+            socket.emit("loadMap", SESSION_LIST[sessionID].mapInfo);
             /* Init player to activate driver.js*/
             socket.on("isPlayer", (playerName) => {
                 SESSION_LIST[sessionID].playerIndex += 1;
@@ -129,9 +134,7 @@ io.on('connection', socket => {
                             thisPlayer.color = Global.getColor().playerColor[3];
                             break;
                     }
-                    console.log(SESSION_LIST);
                     SESSION_LIST[sessionID].playerList[thisPlayer.id] = thisPlayer;
-                    console.log(SESSION_LIST);
                     socket.emit('initPlayer', thisPlayer)
                     console.log(`Player: ${thisPlayer.id} from ${sessionID} joined the game as ${playerName}`);
                 })
@@ -164,20 +167,31 @@ io.on('connection', socket => {
 });
 /* Run server*/
 serv.listen(PORT, () => {
-    console.log(`Server is running on port: ` + PORT);
+    console.log(`Server is running on: ` + Global.getHost());
 });
 
 /* Update game per 0.25 second */
 setInterval(function(){
     for(var i in SESSION_LIST){
-        var socket = SESSION_LIST[i].socketio;
+        var showController = SESSION_LIST[i].showController;
+        var playerList = SESSION_LIST[i].playerList;
+        var socketSession = SESSION_LIST[i].socketio; /* Map view */
+        var socketDriver = SESSION_LIST[i].drivers; /* Mobile view */
         if(SESSION_LIST[i].numberOfPlayer == SESSION_LIST[i].maxPlayer) {
-            socket.emit("startAble");
+            for(var i in socketDriver) {
+                var socketioDriver = socketDriver[i]
+                socketioDriver.emit("startAble");
+                socketSession.emit("startAble");
+            }
         }
-        if(showController) {
-            socket.emit("showController");
+        if(showController == true) {
+            for(var i in socketDriver) {
+                var socketioDriver = socketDriver[i]
+                socketioDriver.emit("showController");
+                socketSession.emit("gameStart");
+            }
         }
-        socket.emit("update",SESSION_LIST[i].playerList);
+        socketSession.emit("update",playerList);
         // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);

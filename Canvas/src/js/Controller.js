@@ -88,6 +88,13 @@ btnConnect.addEventListener("click", () => {
     socket.emit("checkSession", sessionInput.value);
     socket.on("sessionValid", () => {
         hide(session);
+        socket.on("loadMap", data => {
+            console.log(data);
+            if(!isEmpty(data)) {
+                /* If there is someone opens the map */
+                Object.assign(mapInfo, data);
+            } 
+        })
     })
     socket.on("nosession", () => {
         alert("Invalid session id, please try again");
@@ -105,14 +112,6 @@ let limit = document.querySelector(".limit");
 playerName.addEventListener("keyup", e => inputCheck(e), false);
 playerName.addEventListener("keydown", e => inputCheck(e), false)
 
-
-socket.on("loadMap", data => {
-    console.log(data);
-    if(!isEmpty(data)) {
-        /* If there is someone opens the map */
-        Object.assign(mapInfo, data);
-    } 
-})
 joinBtn.addEventListener("click", function (){
     fadeIn(loading);
     console.log(playerName.value);
@@ -182,12 +181,13 @@ let downArrow = document.querySelector(".downArrow");
 let btnController = [leftArrow, rightArrow, upArrow, downArrow];
 let btnStart = document.querySelector("button[name='start']");
 socket.on("startAble", () => {
+    console.log("starting");
     btnStart.classList.remove("is-loading");
     if(firstPlayer == true) {
         btnStart.disabled = false;
         btnStart.innerHTML = "Start Game";
     } else {
-        btnStart.innerHTML = "Waiting for first player to start game";
+        btnStart.innerHTML = "Waiting for the first player to start game";
     }
 })
 

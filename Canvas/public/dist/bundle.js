@@ -8927,24 +8927,40 @@ var GameEngine = function () {
         value: function render() {
             var _this = this;
 
+            var sessionView = document.querySelector(".session");
             var session = document.querySelector(".sessionInput");
             var joinlink = document.querySelector(".joinlink");
             var qr = document.querySelector(".qr");
+            var status = document.querySelector(".status");
             this.setup();
             var self = this;
             socket.emit("isSession"); /* let server know that this is a view*/
             socket.on("getSession", function (sessionID) {
                 session.value = sessionID;
             });
-            joinlink.href = _Global2.default.getHost();
-            qr.src = qr.src + _Global2.default.getHost();
+            joinlink.href = _Global2.default.getHost() + "/join";
+            qr.src = qr.src + _Global2.default.getHost() + "/join";
+            socket.on("startAble", function () {
+                status.innerHTML = "Waiting for <strong>the first player</strong> to start the game";
+            });
+            socket.on("gameStart", function () {
+                sessionView.style.display = 'none';
+            });
             socket.on("update", function (playerList) {
+                var playerHTML = document.querySelector(".players");
                 var drawTool = _this.canvas.getContext("2d");
                 drawTool.clearRect(0, 0, _this.width, _this.height);
                 _this.setup();
+                playerHTML.innerHTML = '';
                 var players = [];
                 for (var i in playerList) {
                     var player = playerList[i];
+                    /* Create players in waiting area */
+                    var newPlayer = document.createElement('div');
+                    newPlayer.className = "playerInfo";
+                    newPlayer.style.background = player.color;
+                    playerHTML.appendChild(newPlayer);
+                    /* Render player */
                     var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), drawTool, player.color);
                     console.log(component);
                     players.push(component);
@@ -9008,7 +9024,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://10.132.100.250:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",
