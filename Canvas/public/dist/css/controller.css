@@ -87,6 +87,7 @@ p.description{
     height: 100%;
     position: fixed;
     top: 0;
+    z-index: 3;
     left: 0;
     background: rgba(0, 0, 0, .5);
 }
@@ -109,4 +110,5 @@ p.description{
 
 .session-info input {
     text-align: center;
+    margin-bottom: 1em;
 }
