@@ -8815,13 +8815,6 @@ function isEmpty(obj) {
 
     return true;
 }
-/* Register */
-var playerName = document.querySelector("input[name='playerName']");
-var joinBtn = document.querySelector("button[name='join']");
-var isFirst = document.querySelector(".isFirst");
-var playable = document.querySelector(".playable");
-var limit = document.querySelector(".limit");
-
 var inputCheck = function inputCheck(e) {
     if (e.target.value.length > 0) {
         joinBtn.disabled = false;
@@ -8829,6 +8822,42 @@ var inputCheck = function inputCheck(e) {
         joinBtn.disabled = true;
     }
 };
+
+var sessionCheck = function sessionCheck(e) {
+    if (e.target.value.length == 6) {
+        btnConnect.disabled = false;
+    } else {
+        btnConnect.disabled = true;
+    }
+};
+/* Join session */
+var session = document.querySelector(".session");
+var sessionInput = document.querySelector("input[name='sessionID']");
+var btnConnect = document.querySelector("button[name='connect']");
+sessionInput.addEventListener("keyup", function (e) {
+    return sessionCheck(e);
+}, false);
+sessionInput.addEventListener("keydown", function (e) {
+    return sessionCheck(e);
+}, false);
+btnConnect.addEventListener("click", function () {
+    console.log(sessionInput.value);
+    socket.emit("checkSession", sessionInput.value);
+    socket.on("sessionValid", function () {
+        hide(session);
+    });
+    socket.on("nosession", function () {
+        alert("Invalid session id, please try again");
+    });
+}, false);
+
+/* Register */
+var playerName = document.querySelector("input[name='playerName']");
+var joinBtn = document.querySelector("button[name='join']");
+var isFirst = document.querySelector(".isFirst");
+var playable = document.querySelector(".playable");
+var limit = document.querySelector(".limit");
+
 playerName.addEventListener("keyup", function (e) {
     return inputCheck(e);
 }, false);
@@ -8837,6 +8866,7 @@ playerName.addEventListener("keydown", function (e) {
 }, false);
 
 socket.on("loadMap", function (data) {
+    console.log(data);
     if (!isEmpty(data)) {
         /* If there is someone opens the map */
         Object.assign(mapInfo, data);
@@ -8853,6 +8883,7 @@ joinBtn.addEventListener("click", function () {
         show(setup);
         socket.emit("isPlayer", playerName.value);
         socket.on("matchInfo", function (data) {
+            console.log("match info");
             console.log(data);
             if (data.playerIndex == 1) {
                 /* If it's first player */

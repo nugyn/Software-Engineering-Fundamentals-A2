@@ -10,7 +10,7 @@ const app = express();
 const serv = http.Server(app);
 const PORT = process.env.PORT || Global.getPort();
 let playerList = {};
-let SOCKET_LIST = {};
+let SESSION_LIST = {};
 let mapInfo = {};
 let maxPlayer = 2;
 let playerIndex = 0;
@@ -52,83 +52,116 @@ var io = new SocketIO(serv, {
 
 io.on('connection', socket => {
     console.log(`${socket.client.id} joined`);
-    socket.on("mapInfo", data => {
-        Object.assign(mapInfo, data);
-    });
-    SOCKET_LIST[socket.client.id] = socket;
-    /* Init player to activate driver.js*/
-    socket.on("isPlayer", playerName => {
-        playerIndex += 1;
-        socket.emit("matchInfo", {maxPlayer: maxPlayer, playerIndex: playerIndex});
-        socket.emit("getPosition", positionTaken);
-        socket.on("setMaxPlayer", maxP => {
-            maxPlayer = maxP;
-            console.log(`[+] Changed default maxPlayer to ${maxPlayer}`);
-        })
-        var thisPlayer = {
-            id: socket.client.id,
-            x: 0,
-            y: 0,
-            name: playerName,
-            npc: false,
-            color: Global.getColor().player
-        }
-        var pos = null; 
-        socket.on("setPosition", position => {
-            numberOfPlayer += 1;
-            positionTaken[position] = true;
-            pos = position;
-            switch(pos) {
-                case "top-left":
-                    thisPlayer.x = 0;
-                    thisPlayer.y = 0;
-                    thisPlayer.color = Global.getColor().playerColor[0];
-                    break;
-                case "top-right": 
-                    thisPlayer.x = Global.getBSize() * (Global.getGrid()[0].length - 1);
-                    thisPlayer.y = 0;
-                    thisPlayer.color = Global.getColor().playerColor[1];
-                    break;
-                case "bottom-left":
-                    thisPlayer.x = 0;
-                    thisPlayer.y = Global.getBSize() * (Global.getGrid()[0].length - 1);
-                    thisPlayer.color = Global.getColor().playerColor[2];
-                    break;
-                case "bottom-right":
-                    thisPlayer.x = Global.getBSize() * (Global.getGrid()[0].length - 1);
-                    thisPlayer.y = Global.getBSize() * (Global.getGrid()[0].length - 1);
-                    thisPlayer.color = Global.getColor().playerColor[3];
-                    break;
-            }
-            SOCKET_LIST[thisPlayer.id] = socket;
-            playerList[thisPlayer.id] = thisPlayer;
-            socket.emit('initPlayer', thisPlayer)
-            console.log(`Player: ${thisPlayer.id} joined the game as ${playerName}`);
-        })
-         /* Player moves */
-        socket.on("move", usr => {
-            /* socketID must match, just send back socketID for dataID*/
-            console.log(usr);
-            playerList[usr.id].x = usr.x;
-            playerList[usr.id].y = usr.y;
-        })
-        socket.on("start", () => {
-            showController = true;
-        }) 
-         /* Player leaves the game*/
-        socket.on("disconnect", () => {
-            playerIndex -= 1;
-            numberOfPlayer -= 1;
-            positionTaken[pos] = false;
-            delete SOCKET_LIST[thisPlayer.id];
-            delete playerList[thisPlayer.id];
-        })
-        if(numberOfPlayer < maxPlayer) {
-            showController = false;
-        }
-    });
-})
+    socket.on("isSession", () => {
+        var sessionID = Math.floor(Math.random() * 800000) + 100000;
+        SESSION_LIST[sessionID] = {};
+        socket.emit("getSession", sessionID);
+        socket.on("mapInfo", data => {
+          SESSION_LIST[sessionID].mapInfo = data
+        });
+        SESSION_LIST[sessionID].socketio = socket;
+        // SESSION_LIST[sessionID].socket = socket;
+        SESSION_LIST[sessionID].maxPlayer = maxPlayer;
+        SESSION_LIST[sessionID].playerIndex = playerIndex;
+        SESSION_LIST[sessionID].positionTaken = positionTaken;
+        SESSION_LIST[sessionID].numberOfPlayer = numberOfPlayer;
+        SESSION_LIST[sessionID].playerList = {};
 
+    }); /* is SESSION */
+
+    socket.on("checkSession", sessionID => {
+        console.log("checking session")
+        var found = false;
+        for(var i in SESSION_LIST) {
+            if(i == sessionID) {
+                found = true;
+                console.log("session found!");
+                socket.emit("sessionValid");
+                break;
+            }
+        }
+        socket.emit("loadMap", SESSION_LIST[sessionID].mapInfo);
+
+        if(found) {
+            console.log(SESSION_LIST);
+            /* Init player to activate driver.js*/
+            socket.on("isPlayer", (playerName) => {
+                SESSION_LIST[sessionID].playerIndex += 1;
+                socket.emit("matchInfo", {maxPlayer: SESSION_LIST[sessionID].maxPlayer, 
+                    playerIndex: SESSION_LIST[sessionID].playerIndex});
+                socket.emit("getPosition", SESSION_LIST[sessionID].positionTaken);
+                socket.on("setMaxPlayer", maxP => {
+                    SESSION_LIST[sessionID].maxPlayer = maxP;
+                    console.log(`[+] Changed default maxPlayer for session ${sessionID} to ${maxPlayer}`);
+                })
+                var thisPlayer = {
+                    id: socket.client.id,
+                    x: 0,
+                    y: 0,
+                    name: playerName,
+                    npc: false,
+                    color: Global.getColor().player
+                }
+                var pos = null; 
+                socket.on("setPosition", position => {
+                    SESSION_LIST[sessionID].numberOfPlayer += 1;
+                    pos = position;
+                    SESSION_LIST[sessionID].positionTaken[pos] = true;
+                    switch(pos) {
+                        case "top-left":
+                            thisPlayer.x = 0;
+                            thisPlayer.y = 0;
+                            thisPlayer.color = Global.getColor().playerColor[0];
+                            break;
+                        case "top-right": 
+                            thisPlayer.x = Global.getBSize() * (Global.getGrid()[0].length - 1);
+                            thisPlayer.y = 0;
+                            thisPlayer.color = Global.getColor().playerColor[1];
+                            break;
+                        case "bottom-left":
+                            thisPlayer.x = 0;
+                            thisPlayer.y = Global.getBSize() * (Global.getGrid()[0].length - 1);
+                            thisPlayer.color = Global.getColor().playerColor[2];
+                            break;
+                        case "bottom-right":
+                            thisPlayer.x = Global.getBSize() * (Global.getGrid()[0].length - 1);
+                            thisPlayer.y = Global.getBSize() * (Global.getGrid()[0].length - 1);
+                            thisPlayer.color = Global.getColor().playerColor[3];
+                            break;
+                    }
+                    console.log(SESSION_LIST);
+                    SESSION_LIST[sessionID].playerList[thisPlayer.id] = thisPlayer;
+                    console.log(SESSION_LIST);
+                    socket.emit('initPlayer', thisPlayer)
+                    console.log(`Player: ${thisPlayer.id} from ${sessionID} joined the game as ${playerName}`);
+                })
+                /* Player moves */
+                socket.on("move", usr => {
+                    /* socketID must match, just send back socketID for dataID*/
+                    SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
+                    SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
+                })
+                socket.on("start", () => {
+                    SESSION_LIST[sessionID].showController = true;
+                }) 
+                /* Player leaves the game*/
+                socket.on("disconnect", () => {
+                    SESSION_LIST[sessionID].playerIndex -= 1;
+                    SESSION_LIST[sessionID].numberOfPlayer -= 1;
+                    SESSION_LIST[sessionID].positionTaken[pos] = false;
+                    delete  SESSION_LIST[sessionID].socket;
+                    delete  SESSION_LIST[sessionID].playerList[thisPlayer.id];
+                })
+                if(SESSION_LIST[sessionID].numberOfPlayer <  SESSION_LIST[sessionID].maxPlayer) {
+                    SESSION_LIST[sessionID].showController = false;
+                }
+            }); /* end isplayer */
+        } else {
+            socket.emit("nosession")
+        }
+    }); /* end checkSession*/
+
+});
 /* Run server*/
 serv.listen(PORT, () => {
     console.log(`Server is running on port: ` + PORT);
@@ -136,15 +169,15 @@ serv.listen(PORT, () => {
 
 /* Update game per 0.25 second */
 setInterval(function(){
-    for(var i in SOCKET_LIST){
-        var socket = SOCKET_LIST[i];
-        if(numberOfPlayer == maxPlayer) {
+    for(var i in SESSION_LIST){
+        var socket = SESSION_LIST[i].socketio;
+        if(SESSION_LIST[i].numberOfPlayer == SESSION_LIST[i].maxPlayer) {
             socket.emit("startAble");
         }
         if(showController) {
             socket.emit("showController");
         }
-        socket.emit("update",playerList);
-        socket.emit("loadMap", mapInfo);
+        socket.emit("update",SESSION_LIST[i].playerList);
+        // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);

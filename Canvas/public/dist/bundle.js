@@ -8927,15 +8927,17 @@ var GameEngine = function () {
         value: function render() {
             var _this = this;
 
+            var session = document.querySelector(".sessionInput");
+            var joinlink = document.querySelector(".joinlink");
+            var qr = document.querySelector(".qr");
             this.setup();
             var self = this;
-
-            // socket.on("initPlayer", (player) => {
-            //     var thisPlayer = new Player(player.id,player.x,player.y,player.name,self.map.getInfo());
-            //     let controller = new Driver(thisPlayer, socket);
-            //     controller.init();
-            // })
-
+            socket.emit("isSession"); /* let server know that this is a view*/
+            socket.on("getSession", function (sessionID) {
+                session.value = sessionID;
+            });
+            joinlink.href = _Global2.default.getHost();
+            qr.src = qr.src + _Global2.default.getHost();
             socket.on("update", function (playerList) {
                 var drawTool = _this.canvas.getContext("2d");
                 drawTool.clearRect(0, 0, _this.width, _this.height);

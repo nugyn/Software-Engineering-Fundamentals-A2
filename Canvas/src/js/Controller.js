@@ -62,13 +62,6 @@ function isEmpty(obj) {
 
     return true;
 }
-/* Register */
-let playerName = document.querySelector("input[name='playerName']");
-let joinBtn = document.querySelector("button[name='join']");
-let isFirst = document.querySelector(".isFirst");
-let playable = document.querySelector(".playable");
-let limit = document.querySelector(".limit");
-
 let inputCheck = (e) => {
     if(e.target.value.length > 0) {
         joinBtn.disabled = false;
@@ -76,11 +69,45 @@ let inputCheck = (e) => {
         joinBtn.disabled = true;
     }
 }
+
+let sessionCheck = (e) => {
+    if(e.target.value.length == 6) {
+        btnConnect.disabled = false;
+    } else {
+        btnConnect.disabled = true;
+    }
+}
+/* Join session */
+const session = document.querySelector(".session");
+let sessionInput = document.querySelector("input[name='sessionID']");
+let btnConnect = document.querySelector("button[name='connect']");
+sessionInput.addEventListener("keyup", e => sessionCheck(e), false);
+sessionInput.addEventListener("keydown", e => sessionCheck(e), false);
+btnConnect.addEventListener("click", () => {
+    console.log(sessionInput.value);
+    socket.emit("checkSession", sessionInput.value);
+    socket.on("sessionValid", () => {
+        hide(session);
+    })
+    socket.on("nosession", () => {
+        alert("Invalid session id, please try again");
+    });
+}, false);
+
+/* Register */
+let playerName = document.querySelector("input[name='playerName']");
+let joinBtn = document.querySelector("button[name='join']");
+let isFirst = document.querySelector(".isFirst");
+let playable = document.querySelector(".playable");
+let limit = document.querySelector(".limit");
+
+
 playerName.addEventListener("keyup", e => inputCheck(e), false);
 playerName.addEventListener("keydown", e => inputCheck(e), false)
 
 
 socket.on("loadMap", data => {
+    console.log(data);
     if(!isEmpty(data)) {
         /* If there is someone opens the map */
         Object.assign(mapInfo, data);
@@ -95,6 +122,7 @@ joinBtn.addEventListener("click", function (){
         show(setup);
         socket.emit("isPlayer", playerName.value);
         socket.on("matchInfo", data => {
+            console.log("match info");
             console.log(data);
             if(data.playerIndex == 1) {
                 /* If it's first player */

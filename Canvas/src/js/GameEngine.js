@@ -25,15 +25,17 @@ export default class GameEngine {
     }
 
     render() {
+        let session = document.querySelector(".sessionInput");
+        let joinlink = document.querySelector(".joinlink");
+        let qr = document.querySelector(".qr");
         this.setup();
         var self = this;
-        
-        // socket.on("initPlayer", (player) => {
-        //     var thisPlayer = new Player(player.id,player.x,player.y,player.name,self.map.getInfo());
-        //     let controller = new Driver(thisPlayer, socket);
-        //     controller.init();
-        // })
-
+        socket.emit("isSession"); /* let server know that this is a view*/
+        socket.on("getSession", sessionID => {
+            session.value = sessionID;
+        })
+        joinlink.href = Global.getHost();
+        qr.src = qr.src + Global.getHost();
         socket.on("update", playerList => {
             const drawTool =  this.canvas.getContext("2d");
             drawTool.clearRect(0,0,this.width, this.height);
