@@ -8943,6 +8943,9 @@ var GameEngine = function () {
             socket.on("startAble", function () {
                 status.innerHTML = "Waiting for <strong>the first player</strong> to start the game";
             });
+            socket.on("wait", function () {
+                status.innerHTML = "Wating for other players to join...";
+            });
             socket.on("gameStart", function () {
                 sessionView.style.display = 'none';
             });

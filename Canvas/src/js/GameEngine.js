@@ -41,6 +41,9 @@ export default class GameEngine {
         socket.on("startAble", () => {
             status.innerHTML = "Waiting for <strong>the first player</strong> to start the game"
         })
+        socket.on("wait", () => {
+            status.innerHTML = "Wating for other players to join..."
+        })
         socket.on("gameStart", () =>{
             sessionView.style.display = 'none';
         });

@@ -183,6 +183,12 @@ setInterval(function(){
                 socketioDriver.emit("startAble");
                 socketSession.emit("startAble");
             }
+        } else {
+            for(var i in socketDriver) {
+                var socketioDriver = socketDriver[i]
+                socketioDriver.emit("wait");
+                socketSession.emit("wait");
+            }
         }
         if(showController == true) {
             for(var i in socketDriver) {

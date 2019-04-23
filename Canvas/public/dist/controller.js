@@ -8955,6 +8955,12 @@ socket.on("startAble", function () {
     }
 });
 
+socket.on("wait", function () {
+    btnStart.classList.add("is-loading");
+    btnStart.disabled = true;
+    btnStart.innerHTML = "Loading";
+});
+
 btnStart.addEventListener("click", function () {
     socket.emit("start");
 });
