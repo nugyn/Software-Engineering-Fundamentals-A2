@@ -99,6 +99,14 @@ io.on('connection', socket => {
                     SESSION_LIST[sessionID].maxPlayer = maxP;
                     console.log(`[+] Changed default maxPlayer for session ${sessionID} to ${maxPlayer}`);
                 })
+                var monster = {
+                    id: socket.client.id, 
+                    x = 200,
+                    y = 200,
+                    name: "Monster",
+                    npc: true,
+                    color: Global.getColor().monster
+                }
                 var thisPlayer = {
                     id: socket.client.id,
                     x: 0,
