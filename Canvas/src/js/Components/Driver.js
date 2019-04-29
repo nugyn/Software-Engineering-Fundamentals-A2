@@ -4,6 +4,7 @@ export class Driver{
         this.player = thisPlayer;
         this.socket = socket;
         this.touchInput = touchInput;
+        this.moves = [];
     }
 
     keyListener(component) {
@@ -56,9 +57,50 @@ export class Driver{
         }
     }
 
+   
+        
+    AI(component){
+        if(player.npc = true){
+                let self = this;
+                let smallest = 0;
+            socket.on("update", playerList => 
+                setInterval(function(){
+                    for(var i in playerList){ 
+                        moves = calculateDistance(playerList[i]);
+                       }
+
+                       for(var i in moves) {
+                           if (moves[i] < smallest) 
+                           {
+                           smallest = move[i];
+                           }
+                       }
+       
+                       if(smallest.direction == 0){
+                           component.moveUp();
+                           self.socket.emit("move", component.getPosition());
+                       }
+                       else if(smallest.direction == 1){
+                           component.moveDown();
+                           self.socket.emit("move", component.getPosition());
+                       }
+                       else if(smallest.direction == 2){
+                           component.moveLeft();
+                           self.socket.emit("move", component.getPosition());
+                       }
+                       else if(smallest.direction == 3){
+                           component.moveRight();
+                           self.socket.emit("move", component.getPosition());
+                       }
+                    })     
+            ) 
+        }
+    }
+
     init() {
         this.keyListener(this.player);
         this.controller(this.player);
+        this.AI(this.player);
         console.log(this.player.getPosition());
         return this.player.getPosition();
     }

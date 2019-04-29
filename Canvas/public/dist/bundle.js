@@ -8513,6 +8513,46 @@ var Component = function () {
             return this.grid[indY][indX];
         }
     }, {
+        key: 'calculateDistance',
+        value: function calculateDistance(player) {
+            /* 
+                The distance calculated based on the positions of all players. 
+                First, grab the player from the playerList.
+                    Calculate the distance between the point, from each potential
+                Move to the move that has the shorted distance 
+            */
+
+            /*
+            0 - UP
+            1 - DOWN
+            2 - LEFT
+            3 - RIGHT
+            */
+
+            var potentialMove = void 0;
+            var moves = [];
+            var direction = 0;
+
+            for (var i = 0; i < size; i++) {
+                if (direction = 0) potentialMove = this.y - this.size;
+                if (direction = 1) potentialMove = this.y + this.size;
+                if (direction = 2) potentialMove = this.x - this.size;
+                if (direction = 3) potentialMove = this.x + this.size;
+
+                var indX = direction == 2 || direction == 3 ? potentialMove : this.x;
+                var indY = direction == 0 || direction == 1 ? potentialMove : this.y;
+
+                distance = Math.sqrt(math.pow(playerX - indX) - math.pow(playerY - indY));
+                moves.push({
+                    key: direction,
+                    distance: distance,
+                    x: indX,
+                    y: indY
+                });
+            }
+            return moves;
+        }
+    }, {
         key: 'logError',
         value: function logError(e) {
             if (e instanceof TypeError) {
@@ -8617,6 +8657,7 @@ var Driver = exports.Driver = function () {
         this.player = thisPlayer;
         this.socket = socket;
         this.touchInput = touchInput;
+        this.moves = [];
     }
 
     _createClass(Driver, [{
@@ -8671,10 +8712,46 @@ var Driver = exports.Driver = function () {
             };
         }
     }, {
+        key: "AI",
+        value: function AI(component) {
+            if (player.npc = true) {
+                var self = this;
+                var smallest = 0;
+                socket.on("update", function (playerList) {
+                    return setInterval(function () {
+                        for (var i in playerList) {
+                            moves = calculateDistance(playerList[i]);
+                        }
+
+                        for (var i in moves) {
+                            if (moves[i] < smallest) {
+                                smallest = move[i];
+                            }
+                        }
+
+                        if (smallest.direction == 0) {
+                            component.moveUp();
+                            self.socket.emit("move", component.getPosition());
+                        } else if (smallest.direction == 1) {
+                            component.moveDown();
+                            self.socket.emit("move", component.getPosition());
+                        } else if (smallest.direction == 2) {
+                            component.moveLeft();
+                            self.socket.emit("move", component.getPosition());
+                        } else if (smallest.direction == 3) {
+                            component.moveRight();
+                            self.socket.emit("move", component.getPosition());
+                        }
+                    });
+                });
+            }
+        }
+    }, {
         key: "init",
         value: function init() {
             this.keyListener(this.player);
             this.controller(this.player);
+            this.AI(this.player);
             console.log(this.player.getPosition());
             return this.player.getPosition();
         }
@@ -9027,7 +9104,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://192.168.1.4:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",

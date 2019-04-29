@@ -101,8 +101,8 @@ io.on('connection', socket => {
                 })
                 var monster = {
                     id: socket.client.id, 
-                    x = 200,
-                    y = 200,
+                    x : 200,
+                    y : 200,
                     name: "Monster",
                     npc: true,
                     color: Global.getColor().monster
@@ -143,7 +143,8 @@ io.on('connection', socket => {
                             break;
                     }
                     SESSION_LIST[sessionID].playerList[thisPlayer.id] = thisPlayer;
-                    socket.emit('initPlayer', thisPlayer)
+                    SESSION_LIST[sessionID].playerList[monster.id] = monster;
+                    socket.emit('initPlayer', thisPlayer);
                     console.log(`Player: ${thisPlayer.id} from ${sessionID} joined the game as ${playerName}`);
                 })
                 /* Player moves */
@@ -205,7 +206,8 @@ setInterval(function(){
                 socketSession.emit("gameStart");
             }
         }
-        socketSession.emit("update",playerList);
+        socketSession.emit("update", playerList);
+
         // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);
