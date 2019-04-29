@@ -9,7 +9,6 @@ import Global from './src/js/Global';
 const app = express();
 const serv = http.Server(app);
 const PORT = process.env.PORT || Global.getPort();
-let playerList = {};
 let SESSION_LIST = {};
 let mapInfo = {};
 let maxPlayer = 2;
