@@ -9027,7 +9027,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://10.132.98.130:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",

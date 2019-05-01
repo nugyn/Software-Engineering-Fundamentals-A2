@@ -76,7 +76,7 @@ io.on('connection', socket => {
         console.log("checking session")
         var found = false;
         for(var i in SESSION_LIST) {
-            if(i == sessionID) {
+            if(i == sessionID && SESSION_LIST[sessionID].showController == false) {
                 found = true;
                 console.log("session found!");
                 socket.emit("sessionValid");
