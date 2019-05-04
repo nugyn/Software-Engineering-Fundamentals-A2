@@ -64,7 +64,7 @@ export default class GameEngine {
                 playerHTML.appendChild(newPlayer);
                 /* Render player */
                 let component = new Component(player.id, player.x, player.y, player.name, player.npc,
-                    self.map.getInfo(), drawTool, player.color);
+                    self.map.getInfo(), socket, drawTool, player.color);
                 console.log(component);
                 players.push(component);
                 component.render();

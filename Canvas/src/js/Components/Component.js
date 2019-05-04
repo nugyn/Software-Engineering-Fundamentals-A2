@@ -1,7 +1,8 @@
 import Global from '../Global';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
+
 export default class Component {
-    constructor(id, x, y, name, npc, mapComponent,drawTool, color) {
+    constructor(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -12,6 +13,31 @@ export default class Component {
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
         this.color = color;
+        this.socket = socket;
+    }
+
+    mod(n,m) {
+        return ((n%m) + m)%m;
+    }
+
+    checkCrash(futurePosition) {
+        var self = this;
+        var crash = false;
+        
+        this.socket.on("update", playerList => {
+            self.playerList = playerList
+        })
+        for(var i in self.playerList) {
+            let player = self.playerList[i];
+            if(player.id != self.id) {
+                if(futurePosition.x == player.x && futurePosition.y == player.y) {
+                    crash = true;
+                    break;
+                }
+            }
+        }
+
+        return crash;
     }
 
     getPosition() {
@@ -22,75 +48,57 @@ export default class Component {
         }
     }
 
-    control(boolean) {
-        this.controllable = boolean;
+    control(value) {
+        this.controllable = value;
     }
 
     getPotentialMove(direction) {
-        let potentialMove;
+        let futurePosition = {
+            x: null,
+            y: null
+        };
+        let currentPosition = {
+            x: this.x/Global.getBSize(),
+            y: this.y/Global.getBSize()
+        }
         switch(direction) {
             case 'up':
-                potentialMove = this.y - this.size;
+                futurePosition.x = this.x;
+                futurePosition.y = this.y - this.size;;
                 break;
             case 'down':
-                potentialMove = this.y + this.size;
+                futurePosition.x = this.x;
+                futurePosition.y = this.y + this.size;
                 break;
             case 'left':
-                potentialMove = this.x - this.size;
+                futurePosition.x = this.x - this.size;
+                futurePosition.y = this.y;
                 break;
             case 'right':
-                potentialMove = this.x + this.size;
+                futurePosition.x = this.x + this.size;
+                futurePosition.y = this.y;
                 break;
         }
-        let indX = (direction == 'left' || direction =='right') ? potentialMove/this.size : this.x/this.size;
-        let indY = (direction == 'up' || direction =='down') ? potentialMove/this.size : this.y/this.size;
-        return this.grid[indY][indX];
-    }
-
-    calculateDistance(player) {
-        /* 
-            The distance calculated based on the positions of all players. 
-            First, grab the player from the playerList.
-                Calculate the distance between the point, from each potential
-            Move to the move that has the shorted distance 
-        */
-
-        /*
-        0 - UP
-        1 - DOWN
-        2 - LEFT
-        3 - RIGHT
-        */
-
-       let potentialMove;
-       var moves = [];
-       let direction = 0;
+ 
+        let indX = futurePosition.x/this.size;
+        let indY = futurePosition.y/this.size;
        
-       for(let i = 0; i < size; i++){
-           console.log(
-               "Calculating..."
-           )
-           if(direction = 0)
-            potentialMove = this.y - this.size;
-           if(direction = 1)
-            potentialMove = this.y + this.size;
-           if(direction = 2)
-            potentialMove = this.x - this.size;
-           if(direction = 3)
-            potentialMove = this.x + this.size;
-            
-            let indX = (direction == 2 || direction == 3) ? potentialMove : this.x; 
-            let indY = (direction == 0 || direction == 1) ? potentialMove : this.y;
+        if(this.grid[currentPosition.x][currentPosition.y] == 2) {
+            indX = this.mod(indX,Global.getGrid()[0].length);
+            indY = this.mod(indY,Global.getGrid().length);
+        }
+        let newPos = { 
+            x: indX*this.size,
+            y: indY*this.size
+        }
+        
+        if(this.checkCrash(newPos) == true) {
+            console.warn("cant move");
+            return 0;
+        }
 
-            distance = Math.sqrt(math.pow(player.x - indX) - math.pow(player.y - indY));
-            moves.push({
-                key: direction,
-                distance: distance,
-                x: indX,
-                y: indY
-            });            
-       }
-        return moves;   
+
+        return this.grid[indY][indX];
     }
 
     logError(e) {
@@ -98,6 +106,7 @@ export default class Component {
             console.warn(e);
             console.warn("Can't move beyond the grid");
         } else {
+            console.log(e);
             console.warn(e.getMessage());
         }
     }
@@ -107,7 +116,11 @@ export default class Component {
                 this.x += this.size;
                 console.warn(this.x);
                 return true;
-            } else {
+            } else if(this.getPotentialMove('right') == 2) {
+                this.x += this.size;
+                this.x = this.mod(this.x, Global.resolution());
+            }
+            else {
                 throw new InvalidMoveException(this.getPotentialMove('right'));
             }
         } catch (e){
@@ -120,6 +133,9 @@ export default class Component {
             if(this.getPotentialMove('left') == 1) {
                 this.x -= this.size;
                 return true;
+            } else if(this.getPotentialMove('left') == 2) {
+                this.x -= this.size;
+                this.x = this.mod(this.x, Global.resolution());
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('left'));
             }
@@ -133,6 +149,9 @@ export default class Component {
             if(this.getPotentialMove('up') == 1) {
                 this.y -= this.size;
                 return true;
+            } else if(this.getPotentialMove('up') == 2) {
+                this.y -= this.size;
+                this.y = this.mod(this.y, Global.resolution());
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('up'));
             }
@@ -146,6 +165,9 @@ export default class Component {
             if(this.getPotentialMove('down') == 1) {
                 this.y += this.size;
                 return true;
+            } else if(this.getPotentialMove('down') == 2) {
+                this.y += this.size;
+                this.y = this.mod(this.y, Global.resolution());
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('down'));
             }

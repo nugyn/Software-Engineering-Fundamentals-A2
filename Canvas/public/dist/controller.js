@@ -8461,7 +8461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
-    function Component(id, x, y, name, npc, mapComponent, drawTool, color) {
+    function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
         _classCallCheck(this, Component);
 
         this.id = id;
@@ -8474,9 +8474,36 @@ var Component = function () {
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
         this.color = color;
+        this.socket = socket;
     }
 
     _createClass(Component, [{
+        key: 'mod',
+        value: function mod(n, m) {
+            return (n % m + m) % m;
+        }
+    }, {
+        key: 'checkCrash',
+        value: function checkCrash(futurePosition) {
+            var self = this;
+            var crash = false;
+
+            this.socket.on("update", function (playerList) {
+                self.playerList = playerList;
+            });
+            for (var i in self.playerList) {
+                var player = self.playerList[i];
+                if (player.id != self.id) {
+                    if (futurePosition.x == player.x && futurePosition.y == player.y) {
+                        crash = true;
+                        break;
+                    }
+                }
+            }
+
+            return crash;
+        }
+    }, {
         key: 'getPosition',
         value: function getPosition() {
             return {
@@ -8487,71 +8514,57 @@ var Component = function () {
         }
     }, {
         key: 'control',
-        value: function control(boolean) {
-            this.controllable = boolean;
+        value: function control(value) {
+            this.controllable = value;
         }
     }, {
         key: 'getPotentialMove',
         value: function getPotentialMove(direction) {
-            var potentialMove = void 0;
+            var futurePosition = {
+                x: null,
+                y: null
+            };
+            var currentPosition = {
+                x: this.x / _Global2.default.getBSize(),
+                y: this.y / _Global2.default.getBSize()
+            };
             switch (direction) {
                 case 'up':
-                    potentialMove = this.y - this.size;
+                    futurePosition.x = this.x;
+                    futurePosition.y = this.y - this.size;;
                     break;
                 case 'down':
-                    potentialMove = this.y + this.size;
+                    futurePosition.x = this.x;
+                    futurePosition.y = this.y + this.size;
                     break;
                 case 'left':
-                    potentialMove = this.x - this.size;
+                    futurePosition.x = this.x - this.size;
+                    futurePosition.y = this.y;
                     break;
                 case 'right':
-                    potentialMove = this.x + this.size;
+                    futurePosition.x = this.x + this.size;
+                    futurePosition.y = this.y;
                     break;
             }
-            var indX = direction == 'left' || direction == 'right' ? potentialMove / this.size : this.x / this.size;
-            var indY = direction == 'up' || direction == 'down' ? potentialMove / this.size : this.y / this.size;
-            return this.grid[indY][indX];
-        }
-    }, {
-        key: 'calculateDistance',
-        value: function calculateDistance(player) {
-            /* 
-                The distance calculated based on the positions of all players. 
-                First, grab the player from the playerList.
-                    Calculate the distance between the point, from each potential
-                Move to the move that has the shorted distance 
-            */
 
-            /*
-            0 - UP
-            1 - DOWN
-            2 - LEFT
-            3 - RIGHT
-            */
+            var indX = futurePosition.x / this.size;
+            var indY = futurePosition.y / this.size;
 
-            var potentialMove = void 0;
-            var moves = [];
-            var direction = 0;
-
-            for (var i = 0; i < size; i++) {
-                console.log("Calculating...");
-                if (direction = 0) potentialMove = this.y - this.size;
-                if (direction = 1) potentialMove = this.y + this.size;
-                if (direction = 2) potentialMove = this.x - this.size;
-                if (direction = 3) potentialMove = this.x + this.size;
-
-                var indX = direction == 2 || direction == 3 ? potentialMove : this.x;
-                var indY = direction == 0 || direction == 1 ? potentialMove : this.y;
-
-                distance = Math.sqrt(math.pow(player.x - indX) - math.pow(player.y - indY));
-                moves.push({
-                    key: direction,
-                    distance: distance,
-                    x: indX,
-                    y: indY
-                });
+            if (this.grid[currentPosition.x][currentPosition.y] == 2) {
+                indX = this.mod(indX, _Global2.default.getGrid()[0].length);
+                indY = this.mod(indY, _Global2.default.getGrid().length);
             }
-            return moves;
+            var newPos = {
+                x: indX * this.size,
+                y: indY * this.size
+            };
+
+            if (this.checkCrash(newPos) == true) {
+                console.warn("cant move");
+                return 0;
+            }
+
+            return this.grid[indY][indX];
         }
     }, {
         key: 'logError',
@@ -8560,6 +8573,7 @@ var Component = function () {
                 console.warn(e);
                 console.warn("Can't move beyond the grid");
             } else {
+                console.log(e);
                 console.warn(e.getMessage());
             }
         }
@@ -8571,6 +8585,9 @@ var Component = function () {
                     this.x += this.size;
                     console.warn(this.x);
                     return true;
+                } else if (this.getPotentialMove('right') == 2) {
+                    this.x += this.size;
+                    this.x = this.mod(this.x, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('right'));
                 }
@@ -8585,6 +8602,9 @@ var Component = function () {
                 if (this.getPotentialMove('left') == 1) {
                     this.x -= this.size;
                     return true;
+                } else if (this.getPotentialMove('left') == 2) {
+                    this.x -= this.size;
+                    this.x = this.mod(this.x, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('left'));
                 }
@@ -8599,6 +8619,9 @@ var Component = function () {
                 if (this.getPotentialMove('up') == 1) {
                     this.y -= this.size;
                     return true;
+                } else if (this.getPotentialMove('up') == 2) {
+                    this.y -= this.size;
+                    this.y = this.mod(this.y, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('up'));
                 }
@@ -8613,6 +8636,9 @@ var Component = function () {
                 if (this.getPotentialMove('down') == 1) {
                     this.y += this.size;
                     return true;
+                } else if (this.getPotentialMove('down') == 2) {
+                    this.y += this.size;
+                    this.y = this.mod(this.y, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('down'));
                 }
@@ -8713,58 +8739,10 @@ var Driver = exports.Driver = function () {
             };
         }
     }, {
-        key: "AI",
-        value: function AI(component) {
-
-            socket.on("getPlayerList", function (playerList) {
-                for (var i in playerList) {
-                    console.log(component.name);
-                    console.log(playerList[i].name);
-                }
-            });
-            /*console.log("Initiating AI");
-            if(player.npc = true){
-                    let self = this;
-                    let smallest = 0;
-                 socket.on("update", playerList => 
-                    setInterval(function(){
-                        for(var i in playerList){ 
-                            if(playerList.npc == false){
-                                 moves = calculateDistance(playerList[i]);
-                             }
-                           }
-                            for(var i in moves) {
-                               if (moves[i] < smallest) 
-                               {
-                               smallest = move[i];
-                               }
-                           }
-                                   if(smallest.direction == 0){
-                               component.moveUp();
-                               self.socket.emit("move", component.getPosition());
-                           }
-                           else if(smallest.direction == 1){
-                               component.moveDown();
-                               self.socket.emit("move", component.getPosition());
-                           }
-                           else if(smallest.direction == 2){
-                               component.moveLeft();
-                               self.socket.emit("move", component.getPosition());
-                           }
-                           else if(smallest.direction == 3){
-                               component.moveRight();
-                               self.socket.emit("move", component.getPosition());
-                           }
-                        })     
-                ) 
-            } */
-        }
-    }, {
         key: "init",
         value: function init() {
             this.keyListener(this.player);
             this.controller(this.player);
-            this.AI(this.player);
             console.log(this.player.getPosition());
             return this.player.getPosition();
         }
@@ -8800,10 +8778,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent) {
+    function Player(id, x, y, name, mapComponent, socket) {
         _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket));
 
         _this.alive = true;
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
@@ -9016,20 +8994,16 @@ continueBtn.addEventListener("click", function () {
     socket.emit("setPosition", pos.options[pos.selectedIndex].value);
     hide(setup);
     show(waiting);
-    socket.on("initPlayer", function (player) {
-        var thisPlayer = new _Player2.default(player.id, player.x, player.y, playerName.value, mapInfo);
+    socket.on("initPlayer", function (pack) {
+        /* pack[0] = player; pack[1] = playerList*/
+        var thisPlayer = new _Player2.default(pack[0].id, pack[0].x, pack[0].y, playerName.value, mapInfo, socket);
+
         var controller = new _Driver.Driver(thisPlayer, socket, btnController);
         controller.init();
-        myColor.style.background = player.color;
+        myColor.style.background = pack[0].color;
         [].concat(btnController).map(function (each) {
-            return each.style.background = player.color;
+            return each.style.background = pack[0].color;
         });
-    });
-    socket.on("initMonster", function (monster) {
-        var monster = new monster(monster.id, monster.x, monster.y, name.value, mapInfo);
-        var controller = new _Driver.Driver(monster, socket, null);
-        controller.init();
-        myColor.style.background = monster.color;
     });
 });
 /* Waiting */
@@ -9041,7 +9015,6 @@ var downArrow = document.querySelector(".downArrow");
 var btnController = [leftArrow, rightArrow, upArrow, downArrow];
 var btnStart = document.querySelector("button[name='start']");
 socket.on("startAble", function () {
-    console.log("starting");
     btnStart.classList.remove("is-loading");
     if (firstPlayer == true) {
         btnStart.disabled = false;
@@ -9167,7 +9140,7 @@ var Global = function () {
     }, {
         key: "getGrid",
         value: function getGrid() {
-            return [[1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1]];
+            return [[1, 1, 1, 1, 2, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [2, 1, 1, 1, 1, 1, 1, 1, 2], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 2, 1, 1, 1, 1]];
         }
     }, {
         key: "getBSize",

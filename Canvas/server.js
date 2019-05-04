@@ -9,14 +9,10 @@ import Global from './src/js/Global';
 const app = express();
 const serv = http.Server(app);
 const PORT = process.env.PORT || Global.getPort();
-let playerList = {};
 let SESSION_LIST = {};
-let mapInfo = {};
 let maxPlayer = 2;
 let playerIndex = 0;
 let numberOfPlayer = 0;
-
-var showController = false;
 
 /* Hosting */
 
@@ -77,7 +73,7 @@ io.on('connection', socket => {
         console.log("checking session")
         var found = false;
         for(var i in SESSION_LIST) {
-            if(i == sessionID) {
+            if(i == sessionID && SESSION_LIST[sessionID].showController == false) {
                 found = true;
                 console.log("session found!");
                 socket.emit("sessionValid");
@@ -135,30 +131,21 @@ io.on('connection', socket => {
                             break;
                     }
                     SESSION_LIST[sessionID].playerList[thisPlayer.id] = thisPlayer;
-                    socket.emit('initPlayer', thisPlayer);
+                    let pack = [thisPlayer, SESSION_LIST[sessionID].playerList];
+                    socket.emit('initPlayer', pack);
                     console.log(`Player: ${thisPlayer.id} from ${sessionID} joined the game as ${playerName}`);
                 })
+                /* checkCrash get playerList */
                 /* Player moves */
                 socket.on("move", usr => {
-                    /* socketID must match, just send back socketID for dataID*/ 
-                    socket.emit('getPlayerList', playerList);
+                    socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
+                    /* socketID must match, just send back socketID for dataID*/
+
                     SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
                     SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
                 })
                 socket.on("start", () => {
                     SESSION_LIST[sessionID].showController = true;
-                    var monster = {
-                        id: "monster_npc", 
-                        x : 320,
-                        y : 320,
-                        name: "Monster",
-                        npc: true,
-                        color: Global.getColor().monster
-                    }
-                    SESSION_LIST[sessionID].playerList[monster.id] = monster;
-                    socket.emit('initMonster', monster);
-                    console.log(`Monster: ${monster.id} from ${sessionID} joined the game as ${monster.name}`);
-
                 }) 
                 /* Player leaves the game*/
                 socket.on("disconnect", () => {
@@ -210,8 +197,13 @@ setInterval(function(){
                 socketSession.emit("gameStart");
             }
         }
-        socketSession.emit("update", playerList);
+        socketSession.emit("update",playerList);
+        for(var i in socketDriver) {
+            var socketioDriver = socketDriver[i]
+            socketioDriver.emit("update", playerList);
+        }
 
+        
         // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);
