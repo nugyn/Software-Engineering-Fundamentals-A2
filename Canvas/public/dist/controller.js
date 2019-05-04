@@ -8513,28 +8513,37 @@ var Component = function () {
             return this.grid[indY][indX];
         }
     }, {
-        key: 'getDistance',
-        value: function getDistance(playerX, playerY) {
+        key: 'calculateDistance',
+        value: function calculateDistance(player) {
             /* 
                 The distance calculated based on the positions of all players. 
                 First, grab the player from the playerList.
                     Calculate the distance between the point, from each potential
                 Move to the move that has the shorted distance 
             */
+
+            /*
+            0 - UP
+            1 - DOWN
+            2 - LEFT
+            3 - RIGHT
+            */
+
             var potentialMove = void 0;
             var moves = [];
             var direction = 0;
 
             for (var i = 0; i < size; i++) {
+                console.log("Calculating...");
                 if (direction = 0) potentialMove = this.y - this.size;
                 if (direction = 1) potentialMove = this.y + this.size;
                 if (direction = 2) potentialMove = this.x - this.size;
                 if (direction = 3) potentialMove = this.x + this.size;
 
-                var indX = direction == 2 || direction == 3 ? potentialMove / this.size : this.x / this.size;
-                var indY = direction == 0 || direction == 1 ? potentialMove / this.size : this.y / this.size;
+                var indX = direction == 2 || direction == 3 ? potentialMove : this.x;
+                var indY = direction == 0 || direction == 1 ? potentialMove : this.y;
 
-                distance = Math.sqrt(math.pow(playerX - indX) - math.pow(playerY - indY));
+                distance = Math.sqrt(math.pow(player.x - indX) - math.pow(player.y - indY));
                 moves.push({
                     key: direction,
                     distance: distance,
@@ -8649,6 +8658,7 @@ var Driver = exports.Driver = function () {
         this.player = thisPlayer;
         this.socket = socket;
         this.touchInput = touchInput;
+        this.moves = [];
     }
 
     _createClass(Driver, [{
@@ -8705,43 +8715,55 @@ var Driver = exports.Driver = function () {
     }, {
         key: "AI",
         value: function AI(component) {
-            if (player.npc = true) {
-                var self = this;
-                var smallest = 0;
-                socket.on("update", function (playerList) {
-                    return setInterval(function () {
-                        for (var i in playerList) {
-                            moves = calculateDistance(playerList[i]);
-                        }
-
-                        for (var i in moves) {
-                            if (moves[i] < smallest) {
-                                smallest = move[i];
-                            }
-                        }
-
-                        if (smallest.direction == 0) {
-                            component.moveUp();
-                            self.socket.emit("move", component.getPosition());
-                        } else if (smallest.direction == 1) {
-                            component.moveDown();
-                            self.socket.emit("move", component.getPosition());
-                        } else if (smallest.direction == 2) {
-                            component.moveLeft();
-                            self.socket.emit("move", component.getPosition());
-                        } else if (smallest.direction == 3) {
-                            component.moveRight();
-                            self.socket.emit("move", component.getPosition());
-                        }
-                    });
-                });
-            }
+            // socket.on("getPlayerList", playerList => {
+            //      for(var i in playerList){
+            //         console.log(component.name);
+            //         console.log(playerList[i].name);
+            //     }
+            //    })
+            /*console.log("Initiating AI");
+            if(player.npc = true){
+                    let self = this;
+                    let smallest = 0;
+                 socket.on("update", playerList => 
+                    setInterval(function(){
+                        for(var i in playerList){ 
+                            if(playerList.npc == false){
+                                 moves = calculateDistance(playerList[i]);
+                             }
+                           }
+                            for(var i in moves) {
+                               if (moves[i] < smallest) 
+                               {
+                               smallest = move[i];
+                               }
+                           }
+                                   if(smallest.direction == 0){
+                               component.moveUp();
+                               self.socket.emit("move", component.getPosition());
+                           }
+                           else if(smallest.direction == 1){
+                               component.moveDown();
+                               self.socket.emit("move", component.getPosition());
+                           }
+                           else if(smallest.direction == 2){
+                               component.moveLeft();
+                               self.socket.emit("move", component.getPosition());
+                           }
+                           else if(smallest.direction == 3){
+                               component.moveRight();
+                               self.socket.emit("move", component.getPosition());
+                           }
+                        })     
+                ) 
+            } */
         }
     }, {
         key: "init",
         value: function init() {
             this.keyListener(this.player);
             this.controller(this.player);
+            this.AI(this.player);
             console.log(this.player.getPosition());
             return this.player.getPosition();
         }
@@ -8993,6 +9015,7 @@ continueBtn.addEventListener("click", function () {
     socket.emit("setPosition", pos.options[pos.selectedIndex].value);
     hide(setup);
     show(waiting);
+
     socket.on("initPlayer", function (player) {
         var thisPlayer = new _Player2.default(player.id, player.x, player.y, playerName.value, mapInfo);
         var controller = new _Driver.Driver(thisPlayer, socket, btnController);
@@ -9001,6 +9024,12 @@ continueBtn.addEventListener("click", function () {
         [].concat(btnController).map(function (each) {
             return each.style.background = player.color;
         });
+    });
+    socket.on("initMonster", function (monster) {
+        var monster = new monster(monster.id, monster.x, monster.y, name.value, mapInfo);
+        var controller = new _Driver.Driver(monster, socket, null);
+        controller.init();
+        myColor.style.background = monster.color;
     });
 });
 /* Waiting */
@@ -9153,7 +9182,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://192.168.1.4:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",
