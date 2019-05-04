@@ -8461,7 +8461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
-    function Component(id, x, y, name, npc, mapComponent, drawTool, color) {
+    function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
         _classCallCheck(this, Component);
 
         this.id = id;
@@ -8474,12 +8474,38 @@ var Component = function () {
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
         this.color = color;
+        this.socket = socket;
     }
 
     _createClass(Component, [{
         key: 'mod',
         value: function mod(n, m) {
             return (n % m + m) % m;
+        }
+    }, {
+        key: 'checkCrash',
+        value: function checkCrash(futurePosition) {
+            var self = this;
+            var crash = false;
+
+            this.socket.on("update", function (playerList) {
+                console.warn("getting Playerlist:");
+                console.warn(playerList);
+                self.playerList = playerList;
+            });
+            for (var i in self.playerList) {
+                var player = self.playerList[i];
+                if (player.id != self.id) {
+                    if (futurePosition.x == player.x && futurePosition.y == player.y) {
+                        crash = true;
+                        break;
+                    }
+                }
+            }
+            console.warn(self.playerList);
+            console.warn("finished");
+            console.warn(crash);
+            return crash;
         }
     }, {
         key: 'getPosition',
@@ -8502,6 +8528,10 @@ var Component = function () {
                 x: null,
                 y: null
             };
+            var currentPosition = {
+                x: this.x / _Global2.default.getBSize(),
+                y: this.y / _Global2.default.getBSize()
+            };
             switch (direction) {
                 case 'up':
                     futurePosition.x = this.x;
@@ -8522,12 +8552,14 @@ var Component = function () {
             }
             var indX = futurePosition.x / this.size;
             var indY = futurePosition.y / this.size;
-            console.log(indX + ":" + indY);
-            if (this.grid[this.x / _Global2.default.getBSize()][this.y / _Global2.default.getBSize()] == 2) {
+            if (this.checkCrash(futurePosition) == true) {
+                console.warn("cant move");
+                return 0;
+            }
+            if (this.grid[currentPosition.x][currentPosition.y] == 2) {
                 indX = this.mod(indX, _Global2.default.getGrid()[0].length);
                 indY = this.mod(indY, _Global2.default.getGrid().length);
             }
-            console.log(indX + ":" + indY);
             return this.grid[indY][indX];
         }
     }, {
@@ -8741,10 +8773,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent) {
+    function Player(id, x, y, name, mapComponent, socket) {
         _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket));
 
         _this.alive = true;
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
@@ -8957,13 +8989,14 @@ continueBtn.addEventListener("click", function () {
     socket.emit("setPosition", pos.options[pos.selectedIndex].value);
     hide(setup);
     show(waiting);
-    socket.on("initPlayer", function (player) {
-        var thisPlayer = new _Player2.default(player.id, player.x, player.y, playerName.value, mapInfo);
+    socket.on("initPlayer", function (pack) {
+        /* pack[0] = player; pack[1] = playerList*/
+        var thisPlayer = new _Player2.default(pack[0].id, pack[0].x, pack[0].y, playerName.value, mapInfo, socket);
         var controller = new _Driver.Driver(thisPlayer, socket, btnController);
         controller.init();
-        myColor.style.background = player.color;
+        myColor.style.background = pack[0].color;
         [].concat(btnController).map(function (each) {
-            return each.style.background = player.color;
+            return each.style.background = pack[0].color;
         });
     });
 });
@@ -8976,7 +9009,6 @@ var downArrow = document.querySelector(".downArrow");
 var btnController = [leftArrow, rightArrow, upArrow, downArrow];
 var btnStart = document.querySelector("button[name='start']");
 socket.on("startAble", function () {
-    console.log("starting");
     btnStart.classList.remove("is-loading");
     if (firstPlayer == true) {
         btnStart.disabled = false;

@@ -8461,7 +8461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
-    function Component(id, x, y, name, npc, mapComponent, drawTool, color) {
+    function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
         _classCallCheck(this, Component);
 
         this.id = id;
@@ -8474,12 +8474,38 @@ var Component = function () {
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
         this.color = color;
+        this.socket = socket;
     }
 
     _createClass(Component, [{
         key: 'mod',
         value: function mod(n, m) {
             return (n % m + m) % m;
+        }
+    }, {
+        key: 'checkCrash',
+        value: function checkCrash(futurePosition) {
+            var self = this;
+            var crash = false;
+
+            this.socket.on("update", function (playerList) {
+                console.warn("getting Playerlist:");
+                console.warn(playerList);
+                self.playerList = playerList;
+            });
+            for (var i in self.playerList) {
+                var player = self.playerList[i];
+                if (player.id != self.id) {
+                    if (futurePosition.x == player.x && futurePosition.y == player.y) {
+                        crash = true;
+                        break;
+                    }
+                }
+            }
+            console.warn(self.playerList);
+            console.warn("finished");
+            console.warn(crash);
+            return crash;
         }
     }, {
         key: 'getPosition',
@@ -8502,6 +8528,10 @@ var Component = function () {
                 x: null,
                 y: null
             };
+            var currentPosition = {
+                x: this.x / _Global2.default.getBSize(),
+                y: this.y / _Global2.default.getBSize()
+            };
             switch (direction) {
                 case 'up':
                     futurePosition.x = this.x;
@@ -8522,12 +8552,14 @@ var Component = function () {
             }
             var indX = futurePosition.x / this.size;
             var indY = futurePosition.y / this.size;
-            console.log(indX + ":" + indY);
-            if (this.grid[this.x / _Global2.default.getBSize()][this.y / _Global2.default.getBSize()] == 2) {
+            if (this.checkCrash(futurePosition) == true) {
+                console.warn("cant move");
+                return 0;
+            }
+            if (this.grid[currentPosition.x][currentPosition.y] == 2) {
                 indX = this.mod(indX, _Global2.default.getGrid()[0].length);
                 indY = this.mod(indY, _Global2.default.getGrid().length);
             }
-            console.log(indX + ":" + indY);
             return this.grid[indY][indX];
         }
     }, {
@@ -8763,7 +8795,6 @@ var Map = function () {
                 for (var i = 0; i < this.grid[row].length; i++) {
                     /* */
                     this.object.fillStyle = this.grid[row][i] == "1" || this.grid[row][i] == "2" ? _Global2.default.getColor().path : _Global2.default.getColor().block;
-
                     this.object.fillRect(this.bSize * i, this.bSize * row, this.bSize, this.bSize);
                     this.object.strokeStyle = _Global2.default.getColor().border;
                     this.object.strokeRect(this.bSize * i, this.bSize * row, this.bSize, this.bSize);
@@ -8804,10 +8835,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent) {
+    function Player(id, x, y, name, mapComponent, socket) {
         _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket));
 
         _this.alive = true;
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
@@ -8995,7 +9026,7 @@ var GameEngine = function () {
                     newPlayer.style.background = player.color;
                     playerHTML.appendChild(newPlayer);
                     /* Render player */
-                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), drawTool, player.color);
+                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color);
                     console.log(component);
                     players.push(component);
                     component.render();

@@ -1,7 +1,8 @@
 import Global from '../Global';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
+
 export default class Component {
-    constructor(id, x, y, name, npc, mapComponent,drawTool, color) {
+    constructor(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -12,10 +13,31 @@ export default class Component {
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
         this.color = color;
+        this.socket = socket;
     }
 
     mod(n,m) {
         return ((n%m) + m)%m;
+    }
+
+    checkCrash(futurePosition) {
+        var self = this;
+        var crash = false;
+        
+        this.socket.on("update", playerList => {
+            self.playerList = playerList
+        })
+        for(var i in self.playerList) {
+            let player = self.playerList[i];
+            if(player.id != self.id) {
+                if(futurePosition.x == player.x && futurePosition.y == player.y) {
+                    crash = true;
+                    break;
+                }
+            }
+        }
+
+        return crash;
     }
 
     getPosition() {
@@ -35,6 +57,10 @@ export default class Component {
             x: null,
             y: null
         };
+        let currentPosition = {
+            x: this.x/Global.getBSize(),
+            y: this.y/Global.getBSize()
+        }
         switch(direction) {
             case 'up':
                 futurePosition.x = this.x;
@@ -55,12 +81,14 @@ export default class Component {
         }
         let indX = futurePosition.x/this.size;
         let indY = futurePosition.y/this.size;
-        console.log(indX + ":" + indY);
-        if(this.grid[this.x/Global.getBSize()][this.y/Global.getBSize()] == 2) {
+        if(this.checkCrash(futurePosition) == true) {
+            console.warn("cant move");
+            return 0;
+        }
+        if(this.grid[currentPosition.x][currentPosition.y] == 2) {
             indX = this.mod(indX,Global.getGrid()[0].length);
             indY = this.mod(indY,Global.getGrid().length);
         }
-        console.log(indX + ":" + indY);
         return this.grid[indY][indX];
     }
 

@@ -164,12 +164,13 @@ continueBtn.addEventListener("click", function () {
     socket.emit("setPosition", pos.options[pos.selectedIndex].value);
     hide(setup);
     show(waiting);
-    socket.on("initPlayer", (player) => {
-        var thisPlayer = new Player(player.id,player.x,player.y,playerName.value,mapInfo);
+    socket.on("initPlayer", (pack) => {
+        /* pack[0] = player; pack[1] = playerList*/
+        var thisPlayer = new Player(pack[0].id,pack[0].x,pack[0].y,playerName.value,mapInfo, socket);
         let controller = new Driver(thisPlayer, socket, btnController);
         controller.init();
-        myColor.style.background = player.color;
-        [...btnController].map(each => each.style.background = player.color);
+        myColor.style.background = pack[0].color;
+        [...btnController].map(each => each.style.background = pack[0].color);
     })
 })
 /* Waiting */
@@ -181,7 +182,6 @@ let downArrow = document.querySelector(".downArrow");
 let btnController = [leftArrow, rightArrow, upArrow, downArrow];
 let btnStart = document.querySelector("button[name='start']");
 socket.on("startAble", () => {
-    console.log("starting");
     btnStart.classList.remove("is-loading");
     if(firstPlayer == true) {
         btnStart.disabled = false;

@@ -131,11 +131,14 @@ io.on('connection', socket => {
                             break;
                     }
                     SESSION_LIST[sessionID].playerList[thisPlayer.id] = thisPlayer;
-                    socket.emit('initPlayer', thisPlayer)
+                    let pack = [thisPlayer, SESSION_LIST[sessionID].playerList];
+                    socket.emit('initPlayer', pack);
                     console.log(`Player: ${thisPlayer.id} from ${sessionID} joined the game as ${playerName}`);
                 })
+                /* checkCrash get playerList */
                 /* Player moves */
                 socket.on("move", usr => {
+                    socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
                     /* socketID must match, just send back socketID for dataID*/
                     SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
                     SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
@@ -194,6 +197,10 @@ setInterval(function(){
             }
         }
         socketSession.emit("update",playerList);
+        for(var i in socketDriver) {
+            var socketioDriver = socketDriver[i]
+            socketioDriver.emit("update", playerList);
+        }
         // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);
