@@ -10,9 +10,12 @@ const app = express();
 const serv = http.Server(app);
 const PORT = process.env.PORT || Global.getPort();
 let SESSION_LIST = {};
+let mapInfo = {};
 let maxPlayer = 2;
 let playerIndex = 0;
 let numberOfPlayer = 0;
+
+var showController = false;
 
 /* Hosting */
 

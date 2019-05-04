@@ -79,7 +79,6 @@ export default class Component {
                 futurePosition.y = this.y;
                 break;
         }
- 
         let indX = futurePosition.x/this.size;
         let indY = futurePosition.y/this.size;
        
@@ -96,7 +95,6 @@ export default class Component {
             console.warn("cant move");
             return 0;
         }
-
 
         return this.grid[indY][indX];
     }
