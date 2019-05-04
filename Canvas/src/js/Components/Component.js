@@ -67,6 +67,9 @@ export default class Component {
        let direction = 0;
        
        for(let i = 0; i < size; i++){
+           console.log(
+               "Calculating..."
+           )
            if(direction = 0)
             potentialMove = this.y - this.size;
            if(direction = 1)
@@ -79,7 +82,7 @@ export default class Component {
             let indX = (direction == 2 || direction == 3) ? potentialMove : this.x; 
             let indY = (direction == 0 || direction == 1) ? potentialMove : this.y;
 
-            distance = Math.sqrt(math.pow(playerX - indX) - math.pow(playerY - indY));
+            distance = Math.sqrt(math.pow(player.x - indX) - math.pow(player.y - indY));
             moves.push({
                 key: direction,
                 distance: distance,
