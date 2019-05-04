@@ -8563,6 +8563,47 @@ var Component = function () {
             return this.grid[indY][indX];
         }
     }, {
+        key: 'calculateDistance',
+        value: function calculateDistance(player) {
+            /* 
+                The distance calculated based on the positions of all players. 
+                First, grab the player from the playerList.
+                    Calculate the distance between the point, from each potential
+                Move to the move that has the shorted distance 
+            */
+
+            /*
+            0 - UP
+            1 - DOWN
+            2 - LEFT
+            3 - RIGHT
+            */
+
+            var potentialMove = void 0;
+            var moves = [];
+            var direction = 0;
+
+            for (var i = 0; i < size; i++) {
+                console.log("Calculating...");
+                if (direction = 0) potentialMove = this.y - this.size;
+                if (direction = 1) potentialMove = this.y + this.size;
+                if (direction = 2) potentialMove = this.x - this.size;
+                if (direction = 3) potentialMove = this.x + this.size;
+
+                var indX = direction == 2 || direction == 3 ? potentialMove : this.x;
+                var indY = direction == 0 || direction == 1 ? potentialMove : this.y;
+
+                distance = Math.sqrt(math.pow(player.x - indX) - math.pow(player.y - indY));
+                moves.push({
+                    key: direction,
+                    distance: distance,
+                    x: indX,
+                    y: indY
+                });
+            }
+            return moves;
+        }
+    }, {
         key: 'logError',
         value: function logError(e) {
             if (e instanceof TypeError) {
@@ -8661,7 +8702,7 @@ var Component = function () {
 
 exports.default = Component;
 
-},{"../Exceptions/InvalidMoveException":55,"../Global":57}],51:[function(require,module,exports){
+},{"../Exceptions/InvalidMoveException":56,"../Global":58}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8680,6 +8721,7 @@ var Driver = exports.Driver = function () {
         this.player = thisPlayer;
         this.socket = socket;
         this.touchInput = touchInput;
+        this.moves = [];
     }
 
     _createClass(Driver, [{
@@ -8734,10 +8776,58 @@ var Driver = exports.Driver = function () {
             };
         }
     }, {
+        key: "AI",
+        value: function AI(component) {
+
+            socket.on("getPlayerList", function (playerList) {
+                for (var i in playerList) {
+                    console.log(component.name);
+                    console.log(playerList[i].name);
+                }
+            });
+            /*console.log("Initiating AI");
+            if(player.npc = true){
+                    let self = this;
+                    let smallest = 0;
+                 socket.on("update", playerList => 
+                    setInterval(function(){
+                        for(var i in playerList){ 
+                            if(playerList.npc == false){
+                                 moves = calculateDistance(playerList[i]);
+                             }
+                           }
+                            for(var i in moves) {
+                               if (moves[i] < smallest) 
+                               {
+                               smallest = move[i];
+                               }
+                           }
+                                   if(smallest.direction == 0){
+                               component.moveUp();
+                               self.socket.emit("move", component.getPosition());
+                           }
+                           else if(smallest.direction == 1){
+                               component.moveDown();
+                               self.socket.emit("move", component.getPosition());
+                           }
+                           else if(smallest.direction == 2){
+                               component.moveLeft();
+                               self.socket.emit("move", component.getPosition());
+                           }
+                           else if(smallest.direction == 3){
+                               component.moveRight();
+                               self.socket.emit("move", component.getPosition());
+                           }
+                        })     
+                ) 
+            } */
+        }
+    }, {
         key: "init",
         value: function init() {
             this.keyListener(this.player);
             this.controller(this.player);
+            this.AI(this.player);
             console.log(this.player.getPosition());
             return this.player.getPosition();
         }
@@ -8808,7 +8898,7 @@ var Map = function () {
 
 exports.default = Map;
 
-},{"../GameEngine":56,"../Global":57}],53:[function(require,module,exports){
+},{"../GameEngine":57,"../Global":58}],53:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8831,7 +8921,6 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// import GameEngine from '../GameEngine'; // cause socket duplication
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
@@ -8863,6 +8952,60 @@ var Player = function (_Component) {
 exports.default = Player;
 
 },{"./Component":50}],54:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _Component2 = require('./Component');
+
+var _Component3 = _interopRequireDefault(_Component2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+// import GameEngine from '../GameEngine'; // cause socket duplication
+var Player = function (_Component) {
+    _inherits(Player, _Component);
+
+    function Player(id, x, y, name, mapComponent) {
+        _classCallCheck(this, Player);
+
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
+
+        _this.alive = true;
+        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
+        return _this;
+    }
+
+    _createClass(Player, [{
+        key: 'die',
+        value: function die() {
+            this.alive = false;
+        }
+    }, {
+        key: 'getPosition',
+        value: function getPosition() {
+            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
+        }
+    }]);
+
+    return Player;
+}(_Component3.default);
+
+exports.default = Player;
+
+},{"./Component":50}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8892,7 +9035,7 @@ var Exception = function () {
 
 exports.default = Exception;
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8925,7 +9068,7 @@ var InvalidMoveException = exports.InvalidMoveException = function (_Exception) 
     return InvalidMoveException;
 }(_Exception3.default);
 
-},{"./Exception":54}],56:[function(require,module,exports){
+},{"./Exception":55}],57:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8947,6 +9090,10 @@ var _socket2 = _interopRequireDefault(_socket);
 var _Player = require('./Components/Player');
 
 var _Player2 = _interopRequireDefault(_Player);
+
+var _Monster = require('./Components/Monster');
+
+var _Monster2 = _interopRequireDefault(_Monster);
 
 var _Global = require('./Global');
 
@@ -9041,7 +9188,7 @@ var GameEngine = function () {
 
 exports.default = GameEngine;
 
-},{"./Components/Component":50,"./Components/Driver":51,"./Components/Map":52,"./Components/Player":53,"./Global":57,"socket.io-client":35}],57:[function(require,module,exports){
+},{"./Components/Component":50,"./Components/Driver":51,"./Components/Map":52,"./Components/Monster":53,"./Components/Player":54,"./Global":58,"socket.io-client":35}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9103,7 +9250,7 @@ var Global = function () {
 
 exports.default = Global;
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 var _GameEngine = require('./GameEngine');
@@ -9119,4 +9266,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var main = new _GameEngine2.default(document.querySelector("canvas"), _Global2.default.resolution(), _Global2.default.resolution());
 main.render();
 
-},{"./GameEngine":56,"./Global":57}]},{},[58]);
+},{"./GameEngine":57,"./Global":58}]},{},[59]);

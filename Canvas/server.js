@@ -140,11 +140,24 @@ io.on('connection', socket => {
                 socket.on("move", usr => {
                     socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
                     /* socketID must match, just send back socketID for dataID*/
+
                     SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
                     SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
                 })
                 socket.on("start", () => {
                     SESSION_LIST[sessionID].showController = true;
+                    var monster = {
+                        id: "monster_npc", 
+                        x : 320,
+                        y : 320,
+                        name: "Monster",
+                        npc: true,
+                        color: Global.getColor().monster
+                    }
+                    SESSION_LIST[sessionID].playerList[monster.id] = monster;
+                    socket.emit('initMonster', monster);
+                    console.log(`Monster: ${monster.id} from ${sessionID} joined the game as ${monster.name}`);
+
                 }) 
                 /* Player leaves the game*/
                 socket.on("disconnect", () => {
@@ -201,6 +214,8 @@ setInterval(function(){
             var socketioDriver = socketDriver[i]
             socketioDriver.emit("update", playerList);
         }
+
+        
         // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);
