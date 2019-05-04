@@ -8546,6 +8546,7 @@ var Component = function () {
                     futurePosition.y = this.y;
                     break;
             }
+
             var indX = futurePosition.x / this.size;
             var indY = futurePosition.y / this.size;
 
@@ -8781,13 +8782,12 @@ var Driver = exports.Driver = function () {
     }, {
         key: "AI",
         value: function AI(component) {
-
-            socket.on("getPlayerList", function (playerList) {
-                for (var i in playerList) {
-                    console.log(component.name);
-                    console.log(playerList[i].name);
-                }
-            });
+            // socket.on("getPlayerList", playerList => {
+            //      for(var i in playerList){
+            //         console.log(component.name);
+            //         console.log(playerList[i].name);
+            //     }
+            //    })
             /*console.log("Initiating AI");
             if(player.npc = true){
                     let self = this;
@@ -9085,6 +9085,7 @@ continueBtn.addEventListener("click", function () {
     socket.on("initPlayer", function (pack) {
         /* pack[0] = player; pack[1] = playerList*/
         var thisPlayer = new _Player2.default(pack[0].id, pack[0].x, pack[0].y, playerName.value, mapInfo, socket);
+
         var controller = new _Driver.Driver(thisPlayer, socket, btnController);
         controller.init();
         myColor.style.background = pack[0].color;

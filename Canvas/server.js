@@ -146,18 +146,6 @@ io.on('connection', socket => {
                 })
                 socket.on("start", () => {
                     SESSION_LIST[sessionID].showController = true;
-                    var monster = {
-                        id: "monster_npc", 
-                        x : 320,
-                        y : 320,
-                        name: "Monster",
-                        npc: true,
-                        color: Global.getColor().monster
-                    }
-                    SESSION_LIST[sessionID].playerList[monster.id] = monster;
-                    socket.emit('initMonster', monster);
-                    console.log(`Monster: ${monster.id} from ${sessionID} joined the game as ${monster.name}`);
-
                 }) 
                 /* Player leaves the game*/
                 socket.on("disconnect", () => {

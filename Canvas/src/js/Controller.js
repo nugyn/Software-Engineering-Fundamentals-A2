@@ -173,12 +173,6 @@ continueBtn.addEventListener("click", function () {
         myColor.style.background = pack[0].color;
         [...btnController].map(each => each.style.background = pack[0].color);
     })
-    socket.on("initMonster", (monster) =>{
-        var monster = new monster(monster.id, monster.x, monster.y, name.value, mapInfo);
-        let controller = new Driver(monster, socket, null);
-        controller.init();
-        myColor.style.background = monster.color;
-    } )
 })
 /* Waiting */
 let myColor = document.querySelector('.myColor');

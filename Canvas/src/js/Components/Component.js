@@ -101,52 +101,6 @@ export default class Component {
         return this.grid[indY][indX];
     }
 
-    calculateDistance(player) {
-        /* 
-            The distance calculated based on the positions of all players. 
-            First, grab the player from the playerList.
-                Calculate the distance between the point, from each potential
-            Move to the move that has the shorted distance 
-        */
-
-        /*
-        0 - UP
-        1 - DOWN
-        2 - LEFT
-        3 - RIGHT
-        */
-
-       let potentialMove;
-       var moves = [];
-       let direction = 0;
-       
-       for(let i = 0; i < size; i++){
-           console.log(
-               "Calculating..."
-           )
-           if(direction = 0)
-            potentialMove = this.y - this.size;
-           if(direction = 1)
-            potentialMove = this.y + this.size;
-           if(direction = 2)
-            potentialMove = this.x - this.size;
-           if(direction = 3)
-            potentialMove = this.x + this.size;
-            
-            let indX = (direction == 2 || direction == 3) ? potentialMove : this.x; 
-            let indY = (direction == 0 || direction == 1) ? potentialMove : this.y;
-
-            distance = Math.sqrt(math.pow(player.x - indX) - math.pow(player.y - indY));
-            moves.push({
-                key: direction,
-                distance: distance,
-                x: indX,
-                y: indY
-            });            
-       }
-        return moves;   
-    }
-
     logError(e) {
         if(e instanceof TypeError) {
             console.warn(e);

@@ -8546,6 +8546,7 @@ var Component = function () {
                     futurePosition.y = this.y;
                     break;
             }
+
             var indX = futurePosition.x / this.size;
             var indY = futurePosition.y / this.size;
 
@@ -8781,13 +8782,12 @@ var Driver = exports.Driver = function () {
     }, {
         key: "AI",
         value: function AI(component) {
-
-            socket.on("getPlayerList", function (playerList) {
-                for (var i in playerList) {
-                    console.log(component.name);
-                    console.log(playerList[i].name);
-                }
-            });
+            // socket.on("getPlayerList", playerList => {
+            //      for(var i in playerList){
+            //         console.log(component.name);
+            //         console.log(playerList[i].name);
+            //     }
+            //    })
             /*console.log("Initiating AI");
             if(player.npc = true){
                     let self = this;
@@ -8927,10 +8927,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent, socket) {
+    function Player(id, x, y, name, mapComponent) {
         _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket));
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
 
         _this.alive = true;
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
@@ -8981,10 +8981,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent) {
+    function Player(id, x, y, name, mapComponent, socket) {
         _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket));
 
         _this.alive = true;
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
