@@ -8477,6 +8477,11 @@ var Component = function () {
     }
 
     _createClass(Component, [{
+        key: 'mod',
+        value: function mod(n, m) {
+            return (n % m + m) % m;
+        }
+    }, {
         key: 'getPosition',
         value: function getPosition() {
             return {
@@ -8487,29 +8492,42 @@ var Component = function () {
         }
     }, {
         key: 'control',
-        value: function control(boolean) {
-            this.controllable = boolean;
+        value: function control(value) {
+            this.controllable = value;
         }
     }, {
         key: 'getPotentialMove',
         value: function getPotentialMove(direction) {
-            var potentialMove = void 0;
+            var futurePosition = {
+                x: null,
+                y: null
+            };
             switch (direction) {
                 case 'up':
-                    potentialMove = this.y - this.size;
+                    futurePosition.x = this.x;
+                    futurePosition.y = this.y - this.size;;
                     break;
                 case 'down':
-                    potentialMove = this.y + this.size;
+                    futurePosition.x = this.x;
+                    futurePosition.y = this.y + this.size;
                     break;
                 case 'left':
-                    potentialMove = this.x - this.size;
+                    futurePosition.x = this.x - this.size;
+                    futurePosition.y = this.y;
                     break;
                 case 'right':
-                    potentialMove = this.x + this.size;
+                    futurePosition.x = this.x + this.size;
+                    futurePosition.y = this.y;
                     break;
             }
-            var indX = direction == 'left' || direction == 'right' ? potentialMove / this.size : this.x / this.size;
-            var indY = direction == 'up' || direction == 'down' ? potentialMove / this.size : this.y / this.size;
+            var indX = futurePosition.x / this.size;
+            var indY = futurePosition.y / this.size;
+            console.log(indX + ":" + indY);
+            if (this.grid[this.x / _Global2.default.getBSize()][this.y / _Global2.default.getBSize()] == 2) {
+                indX = this.mod(indX, _Global2.default.getGrid()[0].length);
+                indY = this.mod(indY, _Global2.default.getGrid().length);
+            }
+            console.log(indX + ":" + indY);
             return this.grid[indY][indX];
         }
     }, {
@@ -8519,6 +8537,7 @@ var Component = function () {
                 console.warn(e);
                 console.warn("Can't move beyond the grid");
             } else {
+                console.log(e);
                 console.warn(e.getMessage());
             }
         }
@@ -8530,6 +8549,9 @@ var Component = function () {
                     this.x += this.size;
                     console.warn(this.x);
                     return true;
+                } else if (this.getPotentialMove('right') == 2) {
+                    this.x += this.size;
+                    this.x = this.mod(this.x, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('right'));
                 }
@@ -8544,6 +8566,9 @@ var Component = function () {
                 if (this.getPotentialMove('left') == 1) {
                     this.x -= this.size;
                     return true;
+                } else if (this.getPotentialMove('left') == 2) {
+                    this.x -= this.size;
+                    this.x = this.mod(this.x, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('left'));
                 }
@@ -8558,6 +8583,9 @@ var Component = function () {
                 if (this.getPotentialMove('up') == 1) {
                     this.y -= this.size;
                     return true;
+                } else if (this.getPotentialMove('up') == 2) {
+                    this.y -= this.size;
+                    this.y = this.mod(this.y, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('up'));
                 }
@@ -8572,6 +8600,9 @@ var Component = function () {
                 if (this.getPotentialMove('down') == 1) {
                     this.y += this.size;
                     return true;
+                } else if (this.getPotentialMove('down') == 2) {
+                    this.y += this.size;
+                    this.y = this.mod(this.y, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('down'));
                 }
@@ -9071,7 +9102,7 @@ var Global = function () {
     }, {
         key: "getGrid",
         value: function getGrid() {
-            return [[1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1]];
+            return [[1, 1, 1, 1, 2, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [2, 1, 1, 1, 1, 1, 1, 1, 2], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 2, 1, 1, 1, 1]];
         }
     }, {
         key: "getBSize",

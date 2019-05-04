@@ -20,7 +20,7 @@ export default class Map{
         for (let row=0; row < this.grid.length; row++) {
             for(let i=0; i<this.grid[row].length; i++) {
                 /* */
-                this.object.fillStyle = (this.grid[row][i] == "1") ? 
+                this.object.fillStyle = (this.grid[row][i] == "1" || this.grid[row][i] == "2") ? 
                 Global.getColor().path : 
                 Global.getColor().block;
 
