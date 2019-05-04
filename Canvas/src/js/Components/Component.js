@@ -81,14 +81,21 @@ export default class Component {
         }
         let indX = futurePosition.x/this.size;
         let indY = futurePosition.y/this.size;
-        if(this.checkCrash(futurePosition) == true) {
-            console.warn("cant move");
-            return 0;
-        }
+       
         if(this.grid[currentPosition.x][currentPosition.y] == 2) {
             indX = this.mod(indX,Global.getGrid()[0].length);
             indY = this.mod(indY,Global.getGrid().length);
         }
+        let newPos = { 
+            x: indX*this.size,
+            y: indY*this.size
+        }
+        
+        if(this.checkCrash(newPos) == true) {
+            console.warn("cant move");
+            return 0;
+        }
+
         return this.grid[indY][indX];
     }
 

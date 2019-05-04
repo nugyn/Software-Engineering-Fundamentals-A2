@@ -8489,8 +8489,6 @@ var Component = function () {
             var crash = false;
 
             this.socket.on("update", function (playerList) {
-                console.warn("getting Playerlist:");
-                console.warn(playerList);
                 self.playerList = playerList;
             });
             for (var i in self.playerList) {
@@ -8502,9 +8500,7 @@ var Component = function () {
                     }
                 }
             }
-            console.warn(self.playerList);
-            console.warn("finished");
-            console.warn(crash);
+
             return crash;
         }
     }, {
@@ -8552,14 +8548,21 @@ var Component = function () {
             }
             var indX = futurePosition.x / this.size;
             var indY = futurePosition.y / this.size;
-            if (this.checkCrash(futurePosition) == true) {
-                console.warn("cant move");
-                return 0;
-            }
+
             if (this.grid[currentPosition.x][currentPosition.y] == 2) {
                 indX = this.mod(indX, _Global2.default.getGrid()[0].length);
                 indY = this.mod(indY, _Global2.default.getGrid().length);
             }
+            var newPos = {
+                x: indX * this.size,
+                y: indY * this.size
+            };
+
+            if (this.checkCrash(newPos) == true) {
+                console.warn("cant move");
+                return 0;
+            }
+
             return this.grid[indY][indX];
         }
     }, {
