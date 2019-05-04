@@ -99,6 +99,14 @@ io.on('connection', socket => {
                     SESSION_LIST[sessionID].maxPlayer = maxP;
                     console.log(`[+] Changed default maxPlayer for session ${sessionID} to ${maxPlayer}`);
                 })
+                var monster = {
+                    id: socket.client.id, 
+                    x : 200,
+                    y : 200,
+                    name: "Monster",
+                    npc: true,
+                    color: Global.getColor().monster
+                }
                 var thisPlayer = {
                     id: socket.client.id,
                     x: 0,
@@ -135,30 +143,18 @@ io.on('connection', socket => {
                             break;
                     }
                     SESSION_LIST[sessionID].playerList[thisPlayer.id] = thisPlayer;
+                    SESSION_LIST[sessionID].playerList[monster.id] = monster;
                     socket.emit('initPlayer', thisPlayer);
                     console.log(`Player: ${thisPlayer.id} from ${sessionID} joined the game as ${playerName}`);
                 })
                 /* Player moves */
                 socket.on("move", usr => {
-                    /* socketID must match, just send back socketID for dataID*/ 
-                    socket.emit('getPlayerList', playerList);
+                    /* socketID must match, just send back socketID for dataID*/
                     SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
                     SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
                 })
                 socket.on("start", () => {
                     SESSION_LIST[sessionID].showController = true;
-                    var monster = {
-                        id: "monster_npc", 
-                        x : 320,
-                        y : 320,
-                        name: "Monster",
-                        npc: true,
-                        color: Global.getColor().monster
-                    }
-                    SESSION_LIST[sessionID].playerList[monster.id] = monster;
-                    socket.emit('initMonster', monster);
-                    console.log(`Monster: ${monster.id} from ${sessionID} joined the game as ${monster.name}`);
-
                 }) 
                 /* Player leaves the game*/
                 socket.on("disconnect", () => {

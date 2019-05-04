@@ -2,7 +2,6 @@ import Map from './Components/Map';
 import { Driver } from './Components/Driver';
 import io from 'socket.io-client';
 import Player from './Components/Player';
-import Monster from './Components/Monster';
 import Global from './Global';
 import Component from './Components/Component';
 const socket = io(Global.getHost());

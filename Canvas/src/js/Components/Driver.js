@@ -60,23 +60,13 @@ export class Driver{
    
         
     AI(component){
-       // socket.on("getPlayerList", playerList => {
-      //      for(var i in playerList){
-       //         console.log(component.name);
-       //         console.log(playerList[i].name);
-       //     }
-    //    })
-        /*console.log("Initiating AI");
         if(player.npc = true){
                 let self = this;
                 let smallest = 0;
-
             socket.on("update", playerList => 
                 setInterval(function(){
                     for(var i in playerList){ 
-                        if(playerList.npc == false){
-                             moves = calculateDistance(playerList[i]);
-                         }
+                        moves = calculateDistance(playerList[i]);
                        }
 
                        for(var i in moves) {
@@ -104,7 +94,7 @@ export class Driver{
                        }
                     })     
             ) 
-        } */
+        }
     }
 
     init() {
