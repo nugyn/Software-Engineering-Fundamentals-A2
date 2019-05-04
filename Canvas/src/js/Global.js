@@ -33,7 +33,7 @@ export default class Global {
     }
 
     static getHost() {
-        return "http://localhost:" + this.getPort();
+        return "http://192.168.1.4:" + this.getPort();
     }
 
     static getPort() {
