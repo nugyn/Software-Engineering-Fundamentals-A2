@@ -164,15 +164,20 @@ continueBtn.addEventListener("click", function () {
     socket.emit("setPosition", pos.options[pos.selectedIndex].value);
     hide(setup);
     show(waiting);
-    socket.on("initPlayer", (pack) => {
-        /* pack[0] = player; pack[1] = playerList*/
-        var thisPlayer = new Player(pack[0].id,pack[0].x,pack[0].y,playerName.value,mapInfo, socket);
-
+   
+    socket.on("initPlayer", (player) => {
+        var thisPlayer = new Player(player.id,player.x,player.y,playerName.value,mapInfo);
         let controller = new Driver(thisPlayer, socket, btnController);
         controller.init();
-        myColor.style.background = pack[0].color;
-        [...btnController].map(each => each.style.background = pack[0].color);
+        myColor.style.background = player.color;
+        [...btnController].map(each => each.style.background = player.color);
     })
+    socket.on("initMonster", (monster) =>{
+        var monster = new monster(monster.id, monster.x, monster.y, name.value, mapInfo);
+        let controller = new Driver(monster, socket, null);
+        controller.init();
+        myColor.style.background = monster.color;
+    } )
 })
 /* Waiting */
 let myColor = document.querySelector('.myColor');
@@ -183,6 +188,7 @@ let downArrow = document.querySelector(".downArrow");
 let btnController = [leftArrow, rightArrow, upArrow, downArrow];
 let btnStart = document.querySelector("button[name='start']");
 socket.on("startAble", () => {
+    console.log("starting");
     btnStart.classList.remove("is-loading");
     if(firstPlayer == true) {
         btnStart.disabled = false;
