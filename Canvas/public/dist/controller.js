@@ -8513,6 +8513,38 @@ var Component = function () {
             return this.grid[indY][indX];
         }
     }, {
+        key: 'getDistance',
+        value: function getDistance(playerX, playerY) {
+            /* 
+                The distance calculated based on the positions of all players. 
+                First, grab the player from the playerList.
+                    Calculate the distance between the point, from each potential
+                Move to the move that has the shorted distance 
+            */
+            var potentialMove = void 0;
+            var moves = [];
+            var direction = 0;
+
+            for (var i = 0; i < size; i++) {
+                if (direction = 0) potentialMove = this.y - this.size;
+                if (direction = 1) potentialMove = this.y + this.size;
+                if (direction = 2) potentialMove = this.x - this.size;
+                if (direction = 3) potentialMove = this.x + this.size;
+
+                var indX = direction == 2 || direction == 3 ? potentialMove / this.size : this.x / this.size;
+                var indY = direction == 0 || direction == 1 ? potentialMove / this.size : this.y / this.size;
+
+                distance = Math.sqrt(math.pow(playerX - indX) - math.pow(playerY - indY));
+                moves.push({
+                    key: direction,
+                    distance: distance,
+                    x: indX,
+                    y: indY
+                });
+            }
+            return moves;
+        }
+    }, {
         key: 'logError',
         value: function logError(e) {
             if (e instanceof TypeError) {
@@ -8669,6 +8701,41 @@ var Driver = exports.Driver = function () {
                 component.moveDown();
                 self.socket.emit("move", component.getPosition());
             };
+        }
+    }, {
+        key: "AI",
+        value: function AI(component) {
+            if (player.npc = true) {
+                var self = this;
+                var smallest = 0;
+                socket.on("update", function (playerList) {
+                    return setInterval(function () {
+                        for (var i in playerList) {
+                            moves = calculateDistance(playerList[i]);
+                        }
+
+                        for (var i in moves) {
+                            if (moves[i] < smallest) {
+                                smallest = move[i];
+                            }
+                        }
+
+                        if (smallest.direction == 0) {
+                            component.moveUp();
+                            self.socket.emit("move", component.getPosition());
+                        } else if (smallest.direction == 1) {
+                            component.moveDown();
+                            self.socket.emit("move", component.getPosition());
+                        } else if (smallest.direction == 2) {
+                            component.moveLeft();
+                            self.socket.emit("move", component.getPosition());
+                        } else if (smallest.direction == 3) {
+                            component.moveRight();
+                            self.socket.emit("move", component.getPosition());
+                        }
+                    });
+                });
+            }
         }
     }, {
         key: "init",
