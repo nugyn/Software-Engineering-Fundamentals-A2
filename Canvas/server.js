@@ -135,14 +135,14 @@ io.on('connection', socket => {
                             break;
                     }
                     SESSION_LIST[sessionID].playerList[thisPlayer.id] = thisPlayer;
-                    socket.emit('initPlayer', thisPlayer);
+                    let pack = [thisPlayer, SESSION_LIST[sessionID].playerList];
+                    socket.emit('initPlayer', pack);
                     console.log(`Player: ${thisPlayer.id} from ${sessionID} joined the game as ${playerName}`);
                 })
                 /* Player moves */
                 socket.on("move", usr => {
                     /* socketID must match, just send back socketID for dataID*/ 
-                    socket.emit('getPlayerList', playerList);
-                    SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
+                    socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);                    SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
                     SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
                 })
                 socket.on("start", () => {
@@ -156,7 +156,7 @@ io.on('connection', socket => {
                         color: Global.getColor().monster
                     }
                     SESSION_LIST[sessionID].playerList[monster.id] = monster;
-                    socket.emit('initMonster', monster);
+                    socket.emit('initMonster', playerList);
                     console.log(`Monster: ${monster.id} from ${sessionID} joined the game as ${monster.name}`);
 
                 }) 
@@ -210,7 +210,11 @@ setInterval(function(){
                 socketSession.emit("gameStart");
             }
         }
-        socketSession.emit("update", playerList);
+        socketSession.emit("update",playerList);
+        for(var i in socketDriver) {
+            var socketioDriver = socketDriver[i]
+            socketioDriver.emit("update", playerList);
+        }
 
         // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }

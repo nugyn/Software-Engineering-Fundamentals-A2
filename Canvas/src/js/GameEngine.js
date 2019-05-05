@@ -7,22 +7,63 @@ import Global from './Global';
 import Component from './Components/Component';
 const socket = io(Global.getHost());
 
-export default class GameEngine { 
+export default class GameEngine {
     constructor(canvas, width, height) {
-        this.width = width; 
+        this.width = width;
         this.height = height;
         this.canvas = canvas;
         this.map = new Map(this.canvas, socket);
-        this.setResolution(canvas, width,height);
+        this.setResolution(canvas, width, height);
     }
 
     setup() {
         this.map.drawMap();
     }
 
-    setResolution(canvas,width,height) {
+    setResolution(canvas, width, height) {
         canvas.width = width;
         canvas.height = height;
+    }
+
+    initAI(component){
+
+        console.warn("initAI works");
+        console.warn(component.npc);
+        if (component.npc == true) {
+            console.warn("Initiating AI");
+                let self = this;
+                let smallest = 0;
+
+                // for (var i in playerList) {
+                //     if (playerList.npc == false) {
+                //         moves = calculateDistance(playerList[i]);
+                //     }
+                // }
+
+                // for (var i in moves) {
+                //     if (moves[i] < smallest) {
+                //         smallest = move[i];
+                //     }
+                // }
+
+                if (smallest == 0) {
+                    console.warn("it moved");
+                    component.moveUp();
+                    socket.emit("move", component.getPosition());
+                }
+                else if (smallest == 1) {
+                    component.moveDown();
+                    socket.emit("move", component.getPosition());
+                }
+                else if (smallest == 2) {
+                    component.moveLeft();
+                    socket.emit("move", component.getPosition());
+                }
+                else if (smallest == 3) {
+                    component.moveRight();
+                    socket.emit("move", component.getPosition());
+                }
+            }
     }
 
     render() {
@@ -45,17 +86,17 @@ export default class GameEngine {
         socket.on("wait", () => {
             status.innerHTML = "Wating for other players to join..."
         })
-        socket.on("gameStart", () =>{
+        socket.on("gameStart", () => {
             sessionView.style.display = 'none';
         });
         socket.on("update", playerList => {
             let playerHTML = document.querySelector(".players");
-            const drawTool =  this.canvas.getContext("2d");
-            drawTool.clearRect(0,0,this.width, this.height);
+            const drawTool = this.canvas.getContext("2d");
+            drawTool.clearRect(0, 0, this.width, this.height);
             this.setup();
             playerHTML.innerHTML = '';
             var players = [];
-            for(var i in playerList) {
+            for (var i in playerList) {
                 let player = playerList[i];
                 /* Create players in waiting area */
                 var newPlayer = document.createElement('div');
@@ -64,14 +105,38 @@ export default class GameEngine {
                 playerHTML.appendChild(newPlayer);
                 /* Render player */
                 let component = new Component(player.id, player.x, player.y, player.name, player.npc,
-                    self.map.getInfo(), drawTool, player.color);
+                    self.map.getInfo(), socket, drawTool, player.color);
                 console.log(component);
                 players.push(component);
                 component.render();
+
+                /* init AI */
+                if(player.npc == true){
+                console.warn("initAI");
+                console.warn("Passed in:" + player.npc);
+                let monster = new Monster(player.id, player.x, player.y, player.name, player.npc,
+                    self.map.getInfo(), socket, drawTool, player.color);
+                this.initAI(monster);
+                }
+
             }
             console.log(players);
         })
 
+        // socket.on("initMonster", playerList => {
+        //     for (var i in playerList[i]) {
+        //         let player = playerList[i];
+        //         if(player.npc == true){
+        //             console.warn("this work"
+        //             )
+        //             initAI(player);
+        //         }
+        //     }
+        // })
+
+        
+
     }
 
+    
 }

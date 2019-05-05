@@ -1,9 +1,9 @@
 import Component from './Component';
 export default class Player extends Component{
- constructor(id, x, y, name, mapComponent){
-    super(id,x,y,name, false, mapComponent);
+ constructor(id, x, y, name, mapComponent, socket){
+    super(id,x,y,name, true, mapComponent, socket);
     this.alive = true;
-    super.control(true);
+    super.control(false);
 }
 
 die() {

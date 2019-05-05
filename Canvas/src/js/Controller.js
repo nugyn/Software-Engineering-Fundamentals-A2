@@ -165,19 +165,16 @@ continueBtn.addEventListener("click", function () {
     hide(setup);
     show(waiting);
    
-    socket.on("initPlayer", (player) => {
-        var thisPlayer = new Player(player.id,player.x,player.y,playerName.value,mapInfo);
+    socket.on("initPlayer", (pack) => {
+        /* pack[0] = player; pack[1] = playerList*/
+        var thisPlayer = new Player(pack[0].id,pack[0].x,pack[0].y,playerName.value,mapInfo, socket);
+
         let controller = new Driver(thisPlayer, socket, btnController);
         controller.init();
-        myColor.style.background = player.color;
-        [...btnController].map(each => each.style.background = player.color);
+        myColor.style.background = pack[0].color;
+        [...btnController].map(each => each.style.background = pack[0].color);
     })
-    socket.on("initMonster", (monster) =>{
-        var monster = new monster(monster.id, monster.x, monster.y, name.value, mapInfo);
-        let controller = new Driver(monster, socket, null);
-        controller.init();
-        myColor.style.background = monster.color;
-    } )
+   
 })
 /* Waiting */
 let myColor = document.querySelector('.myColor');

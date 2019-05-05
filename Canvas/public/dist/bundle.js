@@ -8461,7 +8461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
-    function Component(id, x, y, name, npc, mapComponent, drawTool, color) {
+    function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
         _classCallCheck(this, Component);
 
         this.id = id;
@@ -8474,9 +8474,36 @@ var Component = function () {
         this.size = mapComponent.bSize;
         this.drawTool = drawTool;
         this.color = color;
+        this.socket = socket;
     }
 
     _createClass(Component, [{
+        key: 'mod',
+        value: function mod(n, m) {
+            return (n % m + m) % m;
+        }
+    }, {
+        key: 'checkCrash',
+        value: function checkCrash(futurePosition) {
+            var self = this;
+            var crash = false;
+
+            this.socket.on("update", function (playerList) {
+                self.playerList = playerList;
+            });
+            for (var i in self.playerList) {
+                var player = self.playerList[i];
+                if (player.id != self.id) {
+                    if (futurePosition.x == player.x && futurePosition.y == player.y) {
+                        crash = true;
+                        break;
+                    }
+                }
+            }
+
+            return crash;
+        }
+    }, {
         key: 'getPosition',
         value: function getPosition() {
             return {
@@ -8487,54 +8514,89 @@ var Component = function () {
         }
     }, {
         key: 'control',
-        value: function control(boolean) {
-            this.controllable = boolean;
+        value: function control(value) {
+            this.controllable = value;
         }
     }, {
         key: 'getPotentialMove',
         value: function getPotentialMove(direction) {
-            var potentialMove = void 0;
+            var futurePosition = {
+                x: null,
+                y: null
+            };
+            var currentPosition = {
+                x: this.x / _Global2.default.getBSize(),
+                y: this.y / _Global2.default.getBSize()
+            };
             switch (direction) {
                 case 'up':
-                    potentialMove = this.y - this.size;
+                    futurePosition.x = this.x;
+                    futurePosition.y = this.y - this.size;;
                     break;
                 case 'down':
-                    potentialMove = this.y + this.size;
+                    futurePosition.x = this.x;
+                    futurePosition.y = this.y + this.size;
                     break;
                 case 'left':
-                    potentialMove = this.x - this.size;
+                    futurePosition.x = this.x - this.size;
+                    futurePosition.y = this.y;
                     break;
                 case 'right':
-                    potentialMove = this.x + this.size;
+                    futurePosition.x = this.x + this.size;
+                    futurePosition.y = this.y;
                     break;
             }
-            var indX = direction == 'left' || direction == 'right' ? potentialMove / this.size : this.x / this.size;
-            var indY = direction == 'up' || direction == 'down' ? potentialMove / this.size : this.y / this.size;
+            var indX = futurePosition.x / this.size;
+            var indY = futurePosition.y / this.size;
+
+            if (this.grid[currentPosition.x][currentPosition.y] == 2) {
+                indX = this.mod(indX, _Global2.default.getGrid()[0].length);
+                indY = this.mod(indY, _Global2.default.getGrid().length);
+            }
+            var newPos = {
+                x: indX * this.size,
+                y: indY * this.size
+            };
+
+            if (this.checkCrash(newPos) == true) {
+                console.warn("cant move");
+                return 0;
+            }
+
             return this.grid[indY][indX];
         }
     }, {
-        key: 'getDistance',
-        value: function getDistance(playerX, playerY) {
+        key: 'calculateDistance',
+        value: function calculateDistance(player) {
             /* 
                 The distance calculated based on the positions of all players. 
                 First, grab the player from the playerList.
                     Calculate the distance between the point, from each potential
                 Move to the move that has the shorted distance 
             */
+
+            /*
+            0 - UP
+            1 - DOWN
+            2 - LEFT
+            3 - RIGHT
+            */
+
             var potentialMove = void 0;
             var moves = [];
             var direction = 0;
 
             for (var i = 0; i < size; i++) {
+                console.log("Calculating...");
                 if (direction = 0) potentialMove = this.y - this.size;
                 if (direction = 1) potentialMove = this.y + this.size;
                 if (direction = 2) potentialMove = this.x - this.size;
                 if (direction = 3) potentialMove = this.x + this.size;
 
-                var indX = direction == 2 || direction == 3 ? potentialMove / this.size : this.x / this.size;
-                var indY = direction == 0 || direction == 1 ? potentialMove / this.size : this.y / this.size;
+                var indX = direction == 2 || direction == 3 ? potentialMove : this.x;
+                var indY = direction == 0 || direction == 1 ? potentialMove : this.y;
 
-                distance = Math.sqrt(math.pow(playerX - indX) - math.pow(playerY - indY));
+                distance = Math.sqrt(math.pow(player.x - indX) - math.pow(player.y - indY));
                 moves.push({
                     key: direction,
                     distance: distance,
@@ -8562,6 +8624,9 @@ var Component = function () {
                     this.x += this.size;
                     console.warn(this.x);
                     return true;
+                } else if (this.getPotentialMove('right') == 2) {
+                    this.x += this.size;
+                    this.x = this.mod(this.x, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('right'));
                 }
@@ -8576,6 +8641,9 @@ var Component = function () {
                 if (this.getPotentialMove('left') == 1) {
                     this.x -= this.size;
                     return true;
+                } else if (this.getPotentialMove('left') == 2) {
+                    this.x -= this.size;
+                    this.x = this.mod(this.x, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('left'));
                 }
@@ -8590,6 +8658,9 @@ var Component = function () {
                 if (this.getPotentialMove('up') == 1) {
                     this.y -= this.size;
                     return true;
+                } else if (this.getPotentialMove('up') == 2) {
+                    this.y -= this.size;
+                    this.y = this.mod(this.y, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('up'));
                 }
@@ -8604,6 +8675,9 @@ var Component = function () {
                 if (this.getPotentialMove('down') == 1) {
                     this.y += this.size;
                     return true;
+                } else if (this.getPotentialMove('down') == 2) {
+                    this.y += this.size;
+                    this.y = this.mod(this.y, _Global2.default.resolution());
                 } else {
                     throw new _InvalidMoveException.InvalidMoveException(this.getPotentialMove('down'));
                 }
@@ -8630,7 +8704,7 @@ var Component = function () {
 
 exports.default = Component;
 
-},{"../Exceptions/InvalidMoveException":55,"../Global":57}],51:[function(require,module,exports){
+},{"../Exceptions/InvalidMoveException":56,"../Global":58}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8649,6 +8723,7 @@ var Driver = exports.Driver = function () {
         this.player = thisPlayer;
         this.socket = socket;
         this.touchInput = touchInput;
+        this.moves = [];
     }
 
     _createClass(Driver, [{
@@ -8701,41 +8776,6 @@ var Driver = exports.Driver = function () {
                 component.moveDown();
                 self.socket.emit("move", component.getPosition());
             };
-        }
-    }, {
-        key: "AI",
-        value: function AI(component) {
-            if (player.npc = true) {
-                var self = this;
-                var smallest = 0;
-                socket.on("update", function (playerList) {
-                    return setInterval(function () {
-                        for (var i in playerList) {
-                            moves = calculateDistance(playerList[i]);
-                        }
-
-                        for (var i in moves) {
-                            if (moves[i] < smallest) {
-                                smallest = move[i];
-                            }
-                        }
-
-                        if (smallest.direction == 0) {
-                            component.moveUp();
-                            self.socket.emit("move", component.getPosition());
-                        } else if (smallest.direction == 1) {
-                            component.moveDown();
-                            self.socket.emit("move", component.getPosition());
-                        } else if (smallest.direction == 2) {
-                            component.moveLeft();
-                            self.socket.emit("move", component.getPosition());
-                        } else if (smallest.direction == 3) {
-                            component.moveRight();
-                            self.socket.emit("move", component.getPosition());
-                        }
-                    });
-                });
-            }
         }
     }, {
         key: "init",
@@ -8798,8 +8838,7 @@ var Map = function () {
             for (var row = 0; row < this.grid.length; row++) {
                 for (var i = 0; i < this.grid[row].length; i++) {
                     /* */
-                    this.object.fillStyle = this.grid[row][i] == "1" ? _Global2.default.getColor().path : _Global2.default.getColor().block;
-
+                    this.object.fillStyle = this.grid[row][i] == "1" || this.grid[row][i] == "2" ? _Global2.default.getColor().path : _Global2.default.getColor().block;
                     this.object.fillRect(this.bSize * i, this.bSize * row, this.bSize, this.bSize);
                     this.object.strokeStyle = _Global2.default.getColor().border;
                     this.object.strokeRect(this.bSize * i, this.bSize * row, this.bSize, this.bSize);
@@ -8813,7 +8852,60 @@ var Map = function () {
 
 exports.default = Map;
 
-},{"../GameEngine":56,"../Global":57}],53:[function(require,module,exports){
+},{"../GameEngine":57,"../Global":58}],53:[function(require,module,exports){
+'use strict';
+
+Object.defineProperty(exports, "__esModule", {
+    value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
+
+var _Component2 = require('./Component');
+
+var _Component3 = _interopRequireDefault(_Component2);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var Player = function (_Component) {
+    _inherits(Player, _Component);
+
+    function Player(id, x, y, name, mapComponent, socket) {
+        _classCallCheck(this, Player);
+
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, true, mapComponent, socket));
+
+        _this.alive = true;
+        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, false);
+        return _this;
+    }
+
+    _createClass(Player, [{
+        key: 'die',
+        value: function die() {
+            this.alive = false;
+        }
+    }, {
+        key: 'getPosition',
+        value: function getPosition() {
+            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
+        }
+    }]);
+
+    return Player;
+}(_Component3.default);
+
+exports.default = Player;
+
+},{"./Component":50}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8840,10 +8932,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent) {
+    function Player(id, x, y, name, mapComponent, socket) {
         _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket));
 
         _this.alive = true;
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
@@ -8867,7 +8959,7 @@ var Player = function (_Component) {
 
 exports.default = Player;
 
-},{"./Component":50}],54:[function(require,module,exports){
+},{"./Component":50}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8897,7 +8989,7 @@ var Exception = function () {
 
 exports.default = Exception;
 
-},{}],55:[function(require,module,exports){
+},{}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8930,7 +9022,7 @@ var InvalidMoveException = exports.InvalidMoveException = function (_Exception) 
     return InvalidMoveException;
 }(_Exception3.default);
 
-},{"./Exception":54}],56:[function(require,module,exports){
+},{"./Exception":55}],57:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8952,6 +9044,10 @@ var _socket2 = _interopRequireDefault(_socket);
 var _Player = require('./Components/Player');
 
 var _Player2 = _interopRequireDefault(_Player);
+
+var _Monster = require('./Components/Monster');
+
+var _Monster2 = _interopRequireDefault(_Monster);
 
 var _Global = require('./Global');
 
@@ -8988,6 +9084,45 @@ var GameEngine = function () {
         value: function setResolution(canvas, width, height) {
             canvas.width = width;
             canvas.height = height;
+        }
+    }, {
+        key: 'initAI',
+        value: function initAI(component) {
+
+            console.warn("initAI works");
+            console.warn(component.npc);
+            if (component.npc == true) {
+                console.warn("Initiating AI");
+                var self = this;
+                var smallest = 0;
+
+                // for (var i in playerList) {
+                //     if (playerList.npc == false) {
+                //         moves = calculateDistance(playerList[i]);
+                //     }
+                // }
+
+                // for (var i in moves) {
+                //     if (moves[i] < smallest) {
+                //         smallest = move[i];
+                //     }
+                // }
+
+                if (smallest == 0) {
+                    console.warn("it moved");
+                    component.moveUp();
+                    socket.emit("move", component.getPosition());
+                } else if (smallest == 1) {
+                    component.moveDown();
+                    socket.emit("move", component.getPosition());
+                } else if (smallest == 2) {
+                    component.moveLeft();
+                    socket.emit("move", component.getPosition());
+                } else if (smallest == 3) {
+                    component.moveRight();
+                    socket.emit("move", component.getPosition());
+                }
+            }
         }
     }, {
         key: 'render',
@@ -9031,13 +9166,33 @@ var GameEngine = function () {
                     newPlayer.style.background = player.color;
                     playerHTML.appendChild(newPlayer);
                     /* Render player */
-                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), drawTool, player.color);
+                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color);
                     console.log(component);
                     players.push(component);
                     component.render();
+
+                    /* init AI */
+                    if (player.npc == true) {
+                        console.warn("initAI");
+                        console.warn("Passed in:" + player.npc);
+                        var monster = new _Monster2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color);
+                        _this.initAI(monster);
+                    }
                 }
                 console.log(players);
             });
+
+            // socket.on("initMonster", playerList => {
+            //     for (var i in playerList[i]) {
+            //         let player = playerList[i];
+            //         if(player.npc == true){
+            //             console.warn("this work"
+            //             )
+            //             initAI(player);
+            //         }
+            //     }
+            // })
+
         }
     }]);
 
@@ -9046,7 +9201,7 @@ var GameEngine = function () {
 
 exports.default = GameEngine;
 
-},{"./Components/Component":50,"./Components/Driver":51,"./Components/Map":52,"./Components/Player":53,"./Global":57,"socket.io-client":35}],57:[function(require,module,exports){
+},{"./Components/Component":50,"./Components/Driver":51,"./Components/Map":52,"./Components/Monster":53,"./Components/Player":54,"./Global":58,"socket.io-client":35}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9079,7 +9234,7 @@ var Global = function () {
     }, {
         key: "getGrid",
         value: function getGrid() {
-            return [[1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 1, 1, 1, 1, 1]];
+            return [[1, 1, 1, 1, 2, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [2, 1, 1, 1, 1, 1, 1, 1, 2], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 2, 1, 1, 1, 1]];
         }
     }, {
         key: "getBSize",
@@ -9094,7 +9249,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://192.168.1.4:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",
@@ -9108,7 +9263,7 @@ var Global = function () {
 
 exports.default = Global;
 
-},{}],58:[function(require,module,exports){
+},{}],59:[function(require,module,exports){
 'use strict';
 
 var _GameEngine = require('./GameEngine');
@@ -9124,4 +9279,4 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var main = new _GameEngine2.default(document.querySelector("canvas"), _Global2.default.resolution(), _Global2.default.resolution());
 main.render();
 
-},{"./GameEngine":56,"./Global":57}]},{},[58]);
+},{"./GameEngine":57,"./Global":58}]},{},[59]);
