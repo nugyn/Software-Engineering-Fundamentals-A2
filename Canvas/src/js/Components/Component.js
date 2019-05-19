@@ -1,53 +1,113 @@
-import GameEngine from '../GameEngine';
+import Global from '../Global';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
-export class Component {
-    constructor(x,y, object, name, npc) {
+
+export default class Component {
+    constructor(id, x, y, name, npc, mapComponent, socket, drawTool, color, alive) {
+        this.id = id;
         this.x = x;
         this.y = y;
         this.name = name;
         this.npc = npc;
-        this.size = object.bSize;
-        this.object = object.object;
         this.controllable = false;
-        this.grid = object.grid;
+        this.grid = mapComponent.grid;
+        this.size = mapComponent.bSize;
+        this.drawTool = drawTool;
+        this.color = color;
+        this.socket = socket;
+        this.alive = alive;
+    }
+
+    mod(n,m) {
+        return ((n%m) + m)%m;
+    }
+
+    checkCrash(futurePosition) {
+        var self = this;
+        var crash = false;
+        
+        this.socket.on("update", playerList => {
+            self.playerList = playerList
+        })
+        for(var i in self.playerList) {
+            let player = self.playerList[i];
+            if(player.id != self.id) {
+                if(futurePosition.x == player.x && futurePosition.y == player.y && 
+                    player.alive == true) {
+                    crash = true;
+                    break;
+                }
+            }
+        }
+
+        return crash;
     }
 
     getPosition() {
         return {
+            id: this.id,
             x: this.x,
-            y: this.y
+            y: this.y,
+            alive: this.alive
         }
     }
 
-    control(boolean) {
-        this.controllable = boolean;
+    control(value) {
+        this.controllable = value;
     }
 
     getPotentialMove(direction) {
-        let potentialMove;
+        let futurePosition = {
+            x: null,
+            y: null
+        };
+        let currentPosition = {
+            x: this.x/Global.getBSize(),
+            y: this.y/Global.getBSize()
+        }
         switch(direction) {
             case 'up':
-                potentialMove = this.y - this.size;
+                futurePosition.x = this.x;
+                futurePosition.y = this.y - this.size;;
                 break;
             case 'down':
-                potentialMove = this.y + this.size;
+                futurePosition.x = this.x;
+                futurePosition.y = this.y + this.size;
                 break;
             case 'left':
-                potentialMove = this.x - this.size;
+                futurePosition.x = this.x - this.size;
+                futurePosition.y = this.y;
                 break;
             case 'right':
-                potentialMove = this.x + this.size;
+                futurePosition.x = this.x + this.size;
+                futurePosition.y = this.y;
                 break;
         }
-        let indX = (direction == 'left' || direction =='right') ? potentialMove/this.size : this.x/this.size;
-        let indY = (direction == 'up' || direction =='down') ? potentialMove/this.size : this.y/this.size
+        let indX = futurePosition.x/this.size;
+        let indY = futurePosition.y/this.size;
+       
+        if(this.grid[currentPosition.x][currentPosition.y] == 2) {
+            indX = this.mod(indX,Global.getGrid()[0].length);
+            indY = this.mod(indY,Global.getGrid().length);
+        }
+        let newPos = { 
+            x: indX*this.size,
+            y: indY*this.size
+        }
+        
+        if(this.checkCrash(newPos) == true) {
+            console.warn("cant move");
+            return 0;
+        }
+
         return this.grid[indY][indX];
     }
 
     logError(e) {
         if(e instanceof TypeError) {
+            console.warn(e);
             console.warn("Can't move beyond the grid");
         } else {
+            console.log(e);
             console.warn(e.getMessage());
         }
     }
@@ -55,7 +115,13 @@ export class Component {
         try{
             if(this.getPotentialMove('right') == 1) {
                 this.x += this.size;
-            } else {
+                console.warn(this.x);
+                return true;
+            } else if(this.getPotentialMove('right') == 2) {
+                this.x += this.size;
+                this.x = this.mod(this.x, Global.resolution());
+            }
+            else {
                 throw new InvalidMoveException(this.getPotentialMove('right'));
             }
         } catch (e){
@@ -67,6 +133,10 @@ export class Component {
         try{
             if(this.getPotentialMove('left') == 1) {
                 this.x -= this.size;
+                return true;
+            } else if(this.getPotentialMove('left') == 2) {
+                this.x -= this.size;
+                this.x = this.mod(this.x, Global.resolution());
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('left'));
             }
@@ -79,6 +149,10 @@ export class Component {
         try{
             if(this.getPotentialMove('up') == 1) {
                 this.y -= this.size;
+                return true;
+            } else if(this.getPotentialMove('up') == 2) {
+                this.y -= this.size;
+                this.y = this.mod(this.y, Global.resolution());
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('up'));
             }
@@ -91,6 +165,10 @@ export class Component {
         try{
             if(this.getPotentialMove('down') == 1) {
                 this.y += this.size;
+                return true;
+            } else if(this.getPotentialMove('down') == 2) {
+                this.y += this.size;
+                this.y = this.mod(this.y, Global.resolution());
             } else {
                 throw new InvalidMoveException(this.getPotentialMove('down'));
             }
@@ -100,12 +178,15 @@ export class Component {
     }
 
     render(){
-        document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-        this.object.fillRect(this.x,this.y,this.size,this.size);
-        this.object.fillStyle = GameEngine.getColor().border;
-        this.object.font="13px Arial";
-        this.object.textAlign = "center";
-        this.object.textBaseline="middle";
-        this.object.fillText(this.name,this.x + this.size/2,this.y + this.size/2);
+        // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
+        if(this.alive == true) {
+            this.drawTool.fillStyle = this.color;
+            this.drawTool.fillRect(this.x,this.y,this.size,this.size);
+            this.drawTool.fillStyle = Global.getColor().name;
+            this.drawTool.font="13px Arial";
+            this.drawTool.textAlign = "center";
+            this.drawTool.textBaseline="middle";
+            this.drawTool.fillText(this.name,this.x + this.size/2,this.y + this.size/2);
+        }
     }
 }

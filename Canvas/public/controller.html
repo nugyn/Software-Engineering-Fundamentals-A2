@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.4/css/bulma.min.css">
+    <script defer src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"></script>
+    <link rel="stylesheet" href="./dist/css/controller.css">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+    <title>Join Monster Mash</title>
+</head>
+<body>
+    <div class="session">
+        <div class="session-info">
+            <h1 class="title">Monster Mash</h1>
+            <p class="subtitle">Please type in your session ID.</p>
+            <input class="input is-large sessionInput" name="sessionID" type="number" placeholder="_ _ _ _ _ _">
+            <button name="connect" class="button is-medium is-fullwidth is-link is-rounded" disabled>
+                Connect
+            </button>
+        </div>
+    </div>
+          
+    <section class="section register">
+        <div class="container">
+
+            <h1 class="title">
+                Join Monster Mash
+            </h1>
+
+            <p class="subtitle">
+                Simple, put your name in and <strong>Join</strong>!
+            </p>
+
+            <div class="field">
+                <label class="label">Name</label>
+                <div class="control">
+                <input class="input" name="playerName" type="text" placeholder="e.g ILoveBrownies19" required>
+                </div>
+            </div>
+
+            <div class="field">
+                <p class="control">
+                <button name="join" class="button is-medium is-fullwidth is-primary is-rounded" disabled>
+                    Join
+                </button>
+                </p>
+            </div>
+
+            
+        </div>
+    </section>
+    <section class="section setup">
+
+        <div class="container">
+            <article class="message is-warning limit">
+                    <div class="message-body">
+                        Hey <strong class="playerName">ILoveBrownies19</strong>, <br />
+                        We are sorry that the session reaches the limit number of players.<br />
+                        Please come back later :).
+                    </div>
+            </article>
+            <div class="playable">
+                <p class="subtitle">
+                        Hey <strong class="playerName">ILoveBrownies19</strong>!
+                </p>
+                <div class="isFirst">
+                    <p class="subtitle">
+                            Since you're the first player. We need to go through some intial setups!
+                    </p>
+                    <div style="display: flex; justify-content: space-between">
+                        <p class="subtitle">First, let me know the <strong>maximum player allowed</strong> in this room:</p>
+                        <div class="select is-rounded">
+                                <select name="maxPlayer">
+                                    <option>2</option>
+                                    <option>3</option>
+                                    <option>4</option>
+                                </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between">
+                    <p class="subtitle">Almost done, what is your <strong>drop off zone</strong>:</p>
+                    <div class="select is-rounded">
+                            <select name="position">
+                                <option id="top-left">top-left</option>
+                                <option id="top-right">top-right</option>
+                                <option id="bottom-left">bottom-left</option>
+                                <option id="bottom-right">bottom-right</option>
+                            </select>
+                    </div>
+                </div>
+    
+                <button name="continue" class="button is-medium is-fullwidth is-info is-rounded">Continue</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="section waiting">
+        <center>
+                <div class="container">
+                        <h1 class="title">
+                                Way to go, <strong class="playerName">ILoveBrownies19</strong>!
+                        </h1>
+                        <p class="subtitle">Just waiting for other players to join :)</p>
+                        <p class="subtitle">Your color is:</p>
+                        <div class="myColor" style="background:lightblue"></div>
+                        <br />
+                        </div>
+                        <button name="start" class="button is-medium is-fullwidth is-primary is-rounded is-loading" disabled>Loading</button>
+                    </div>
+        </center>
+    </section>
+
+    <div class="loading">
+            <img src="./dist/assets/loading.svg">
+    </div>
+
+    <section class="controller">
+        <div class="leftArrow"><p class="description">left</p><i class="fas fa-caret-up"></i></div>
+        <div class="up-down-control">
+            <div class="downArrow"><p class="description">down</p><i class="fas fa-caret-left"></i></div>
+            <div class="upArrow"><p class="description">up</p><i class="fas fa-caret-right"></i></div>
+        </div>
+        <div class="rightArrow"><p class="description">right</p><i class="fas fa-caret-down"></i></div>
+    </section>
+
+    <section class="gameOver">
+        <div>Game Over ☠️</div>
+    </section>
+
+    <section class="winner">
+        <div>Congratulations! You won 👑</div>
+    </section>
+
+    <script src="./dist/controller.js"></script>
+</body>
+</html>

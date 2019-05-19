@@ -1,40 +1,32 @@
 import GameEngine from '../GameEngine';
+import Global from '../Global';
 export default class Map{
-    constructor(canvas, width,height) {
-        this.grid = [
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,0,0,0,1,0,0,0,1],
-            [1,1,1,1,1,1,1,1,1],
-        ];
-        this.bSize = width/this.grid[0].length;
+    constructor(canvas, socket) {
+        this.grid = Global.getGrid();
+        this.bSize = Global.getBSize();
         this.object = canvas.getContext('2d');
-    }
-    renderObject() {
+        this.socket = socket;
+    }                               
+    getInfo() {
         return {
-            object: this.object,
             bSize: this.bSize,
             grid: this.grid
         }
     }
-    async drawMap() {
+    drawMap() {
+        /* Send map info to controller */
+        this.socket.emit("mapInfo", this.getInfo());
+        /* Draw the map */
         for (let row=0; row < this.grid.length; row++) {
             for(let i=0; i<this.grid[row].length; i++) {
                 /* */
-                this.object.fillStyle = (this.grid[row][i] == "1") ? 
-                                        GameEngine.getColor().path : 
-                                        GameEngine.getColor().block;
-
+                this.object.fillStyle = (this.grid[row][i] == "1" || this.grid[row][i] == "2") ? 
+                Global.getColor().path : 
+                Global.getColor().block;
                 this.object.fillRect(this.bSize*i,this.bSize*row,this.bSize,this.bSize);
-                this.object.strokeStyle= GameEngine.getColor().border;
+                this.object.strokeStyle= Global.getColor().border;
                 this.object.strokeRect(this.bSize*i,this.bSize*row,this.bSize,this.bSize);
             }
         }
     }
-
 }

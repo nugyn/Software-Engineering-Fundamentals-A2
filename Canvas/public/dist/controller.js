@@ -8668,7 +8668,7 @@ var Component = function () {
 
 exports.default = Component;
 
-},{"../Exceptions/InvalidMoveException":56,"../Global":58}],51:[function(require,module,exports){
+},{"../Exceptions/InvalidMoveException":55,"../Global":56}],51:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8767,121 +8767,6 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
-var _GameEngine = require('../GameEngine');
-
-var _GameEngine2 = _interopRequireDefault(_GameEngine);
-
-var _Global = require('../Global');
-
-var _Global2 = _interopRequireDefault(_Global);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var Map = function () {
-    function Map(canvas, socket) {
-        _classCallCheck(this, Map);
-
-        this.grid = _Global2.default.getGrid();
-        this.bSize = _Global2.default.getBSize();
-        this.object = canvas.getContext('2d');
-        this.socket = socket;
-    }
-
-    _createClass(Map, [{
-        key: 'getInfo',
-        value: function getInfo() {
-            return {
-                bSize: this.bSize,
-                grid: this.grid
-            };
-        }
-    }, {
-        key: 'drawMap',
-        value: function drawMap() {
-            /* Send map info to controller */
-            this.socket.emit("mapInfo", this.getInfo());
-            /* Draw the map */
-            for (var row = 0; row < this.grid.length; row++) {
-                for (var i = 0; i < this.grid[row].length; i++) {
-                    /* */
-                    this.object.fillStyle = this.grid[row][i] == "1" || this.grid[row][i] == "2" ? _Global2.default.getColor().path : _Global2.default.getColor().block;
-                    this.object.fillRect(this.bSize * i, this.bSize * row, this.bSize, this.bSize);
-                    this.object.strokeStyle = _Global2.default.getColor().border;
-                    this.object.strokeRect(this.bSize * i, this.bSize * row, this.bSize, this.bSize);
-                }
-            }
-        }
-    }]);
-
-    return Map;
-}();
-
-exports.default = Map;
-
-},{"../GameEngine":57,"../Global":58}],53:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
-
-var _Component2 = require('./Component');
-
-var _Component3 = _interopRequireDefault(_Component2);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var Player = function (_Component) {
-    _inherits(Player, _Component);
-
-    function Player(id, x, y, name, mapComponent) {
-        _classCallCheck(this, Player);
-
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
-
-        _this.alive = true;
-        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
-        return _this;
-    }
-
-    _createClass(Player, [{
-        key: 'die',
-        value: function die() {
-            this.alive = false;
-        }
-    }, {
-        key: 'getPosition',
-        value: function getPosition() {
-            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
-        }
-    }]);
-
-    return Player;
-}(_Component3.default);
-
-exports.default = Player;
-
-},{"./Component":50}],54:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
 var _Component2 = require('./Component');
@@ -8928,7 +8813,261 @@ var Player = function (_Component) {
 
 exports.default = Player;
 
-},{"./Component":50}],55:[function(require,module,exports){
+},{"./Component":50}],53:[function(require,module,exports){
+'use strict';
+
+var _socket = require('socket.io-client');
+
+var _socket2 = _interopRequireDefault(_socket);
+
+var _Player = require('./Components/Player');
+
+var _Player2 = _interopRequireDefault(_Player);
+
+var _Driver = require('./Components/Driver');
+
+var _Global = require('./Global');
+
+var _Global2 = _interopRequireDefault(_Global);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _toConsumableArray(arr) { if (Array.isArray(arr)) { for (var i = 0, arr2 = Array(arr.length); i < arr.length; i++) { arr2[i] = arr[i]; } return arr2; } else { return Array.from(arr); } }
+
+var socket = (0, _socket2.default)(_Global2.default.getHost());
+var register = document.querySelector("section.register");
+var setup = document.querySelector("section.setup");
+var waiting = document.querySelector("section.waiting");
+var loading = document.querySelector(".loading");
+var controller = document.querySelector(".controller");
+var pname = document.querySelectorAll(".playerName");
+var mapInfo = {};
+var firstPlayer = false;
+window.onload = function () {
+    hide(controller);
+};
+/* Support functions */
+function fadeOut(element) {
+    var op = 1; // initial opacity
+    var timer = setInterval(function () {
+        if (op <= 0.1) {
+            clearInterval(timer);
+            element.style.display = 'none';
+        }
+        element.style.opacity = op;
+        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        op -= op * 0.1;
+    }, 50);
+}
+
+function fadeIn(element) {
+    var op = 0.1; // initial opacity
+    element.style.display = 'block';
+    var timer = setInterval(function () {
+        if (op >= 1) {
+            clearInterval(timer);
+        }
+        element.style.opacity = op;
+        element.style.filter = 'alpha(opacity=' + op * 100 + ")";
+        op += op * 0.1;
+    }, 10);
+}
+
+function hide(element) {
+    element.style.display = 'none';
+}
+
+function show(element) {
+    if (element == setupMatch) {
+        firstPlayer = true;
+    }
+    element.style.display = 'block';
+}
+
+function isEmpty(obj) {
+    for (var prop in obj) {
+        if (obj.hasOwnProperty(prop)) return false;
+    }
+
+    return true;
+}
+var inputCheck = function inputCheck(e) {
+    if (e.target.value.length > 0) {
+        joinBtn.disabled = false;
+    } else {
+        joinBtn.disabled = true;
+    }
+};
+
+var sessionCheck = function sessionCheck(e) {
+    if (e.target.value.length == 6) {
+        btnConnect.disabled = false;
+    } else {
+        btnConnect.disabled = true;
+    }
+};
+/* Join session */
+var session = document.querySelector(".session");
+var sessionInput = document.querySelector("input[name='sessionID']");
+var btnConnect = document.querySelector("button[name='connect']");
+sessionInput.addEventListener("keyup", function (e) {
+    return sessionCheck(e);
+}, false);
+sessionInput.addEventListener("keydown", function (e) {
+    return sessionCheck(e);
+}, false);
+btnConnect.addEventListener("click", function () {
+    console.log(sessionInput.value);
+    socket.emit("checkSession", sessionInput.value);
+    socket.on("sessionValid", function () {
+        hide(session);
+        socket.on("loadMap", function (data) {
+            console.log(data);
+            if (!isEmpty(data)) {
+                /* If there is someone opens the map */
+                Object.assign(mapInfo, data);
+            }
+        });
+    });
+    socket.on("nosession", function () {
+        alert("Invalid session id, please try again");
+    });
+}, false);
+
+/* Register */
+var playerName = document.querySelector("input[name='playerName']");
+var joinBtn = document.querySelector("button[name='join']");
+var setupMatch = document.querySelector(".isFirst");
+var playerSetting = document.querySelector(".playable");
+var limit = document.querySelector(".limit");
+
+playerName.addEventListener("keyup", function (e) {
+    return inputCheck(e);
+}, false);
+playerName.addEventListener("keydown", function (e) {
+    return inputCheck(e);
+}, false);
+
+joinBtn.addEventListener("click", function () {
+    fadeIn(loading);
+    console.log(playerName.value);
+    [].concat(_toConsumableArray(pname)).map(function (each) {
+        return each.innerHTML = playerName.value;
+    });
+    if (!isEmpty(mapInfo)) {
+        hide(register);
+        show(setup);
+        socket.emit("isPlayer", playerName.value);
+        socket.on("matchInfo", function (data) {
+            console.log("match info");
+            console.log(data);
+            if (data.playerIndex == 1) {
+                /* If it's first player */
+                show(setupMatch);
+                show(playerSetting);
+            } else if (data.playerIndex <= data.maxPlayer && data.playerIndex > 1) {
+                hide(setupMatch);
+                show(playerSetting);
+            } else {
+                hide(playerSetting);
+                show(limit);
+            }
+        });
+        socket.on("getPosition", function (data) {
+            console.log(data);
+            for (var i in data) {
+                if (data[i] == true) {
+                    console.log(pos.options.namedItem(i));
+                    pos.options.namedItem(i).disabled = true;
+                } else {
+                    pos.options.namedItem(i).selected = "selected";
+                }
+            }
+        });
+    } else {
+        alert("There is no match existed");
+    }
+    fadeOut(loading);
+}, false);
+
+/* Setup */
+var maxP = document.querySelector("select[name='maxPlayer']");
+var pos = document.querySelector("select[name='position']");
+var continueBtn = document.querySelector("button[name='continue']");
+continueBtn.addEventListener("click", function () {
+    console.log(maxP.options[maxP.selectedIndex].value);
+    if (firstPlayer == true) {
+        socket.emit("setMaxPlayer", maxP.options[maxP.selectedIndex].value);
+    }
+    socket.emit("setPosition", pos.options[pos.selectedIndex].value);
+    hide(setup);
+    show(waiting);
+    socket.on("initPlayer", function (pack) {
+        /* pack[0] = player; pack[1] = playerList*/
+        var thisPlayer = new _Player2.default(pack[0].id, pack[0].x, pack[0].y, playerName.value, mapInfo, socket);
+
+        var controller = new _Driver.Driver(thisPlayer, socket, btnController);
+        controller.init();
+        myColor.style.background = pack[0].color;
+        [].concat(btnController).map(function (each) {
+            return each.style.background = pack[0].color;
+        });
+    });
+});
+/* Waiting */
+var myColor = document.querySelector('.myColor');
+var leftArrow = document.querySelector(".leftArrow");
+var rightArrow = document.querySelector(".rightArrow");
+var upArrow = document.querySelector(".upArrow");
+var downArrow = document.querySelector(".downArrow");
+var btnController = [leftArrow, rightArrow, upArrow, downArrow];
+var btnStart = document.querySelector("button[name='start']");
+socket.on("startAble", function () {
+    btnStart.classList.remove("is-loading");
+    if (firstPlayer == true) {
+        btnStart.disabled = false;
+        btnStart.innerHTML = "Start Game";
+    } else {
+        btnStart.innerHTML = "Waiting for the first player to start game";
+    }
+});
+
+socket.on("wait", function () {
+    btnStart.classList.add("is-loading");
+    btnStart.disabled = true;
+    btnStart.innerHTML = "Loading";
+});
+
+btnStart.addEventListener("click", function () {
+    socket.emit("start");
+});
+
+socket.on("showController", function () {
+    hide(waiting);
+    controller.style.display = 'grid';
+});
+var gameOver = document.querySelector(".gameOver");
+socket.on("die", function () {
+    gameOver.style.display = "flex";
+});
+
+var winner = document.querySelector(".winner");
+socket.on("winner", function () {
+    winner.style.display = "flex";
+});
+
+socket.on("sessionQuit", function () {
+    if (!alert("Host quitted! Refreshing the page...")) {
+        window.location.reload();
+    }
+});
+controller.addEventListener("click", function () {
+    var el = document.documentElement,
+        rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;
+    rfs.call(el);
+});
+
+},{"./Components/Driver":51,"./Components/Player":52,"./Global":56,"socket.io-client":35}],54:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8958,7 +9097,7 @@ var Exception = function () {
 
 exports.default = Exception;
 
-},{}],56:[function(require,module,exports){
+},{}],55:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8991,136 +9130,7 @@ var InvalidMoveException = exports.InvalidMoveException = function (_Exception) 
     return InvalidMoveException;
 }(_Exception3.default);
 
-},{"./Exception":55}],57:[function(require,module,exports){
-'use strict';
-
-Object.defineProperty(exports, "__esModule", {
-    value: true
-});
-
-var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
-
-var _Map = require('./Components/Map');
-
-var _Map2 = _interopRequireDefault(_Map);
-
-var _Driver = require('./Components/Driver');
-
-var _socket = require('socket.io-client');
-
-var _socket2 = _interopRequireDefault(_socket);
-
-var _Player = require('./Components/Player');
-
-var _Player2 = _interopRequireDefault(_Player);
-
-var _Monster = require('./Components/Monster');
-
-var _Monster2 = _interopRequireDefault(_Monster);
-
-var _Global = require('./Global');
-
-var _Global2 = _interopRequireDefault(_Global);
-
-var _Component = require('./Components/Component');
-
-var _Component2 = _interopRequireDefault(_Component);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-var socket = (0, _socket2.default)(_Global2.default.getHost());
-
-var GameEngine = function () {
-    function GameEngine(canvas, width, height) {
-        _classCallCheck(this, GameEngine);
-
-        this.width = width;
-        this.height = height;
-        this.canvas = canvas;
-        this.map = new _Map2.default(this.canvas, socket);
-        this.setResolution(canvas, width, height);
-    }
-
-    _createClass(GameEngine, [{
-        key: 'setup',
-        value: function setup() {
-            this.map.drawMap();
-        }
-    }, {
-        key: 'setResolution',
-        value: function setResolution(canvas, width, height) {
-            canvas.width = width;
-            canvas.height = height;
-        }
-    }, {
-        key: 'render',
-        value: function render() {
-            var _this = this;
-
-            var sessionView = document.querySelector(".session");
-            var session = document.querySelector(".sessionInput");
-            var joinlink = document.querySelector(".joinlink");
-            var qr = document.querySelector(".qr");
-            var status = document.querySelector(".status");
-            var winnerPanel = document.querySelector(".winner");
-            this.setup();
-            var self = this;
-            socket.emit("isSession"); /* let server know that this is a view*/
-            socket.on("getSession", function (sessionID) {
-                session.value = sessionID;
-            });
-            joinlink.href = _Global2.default.getHost() + "/join";
-            qr.src = qr.src + _Global2.default.getHost() + "/join";
-            socket.on("startAble", function () {
-                status.innerHTML = "Waiting for <strong>the first player</strong> to start the game";
-            });
-            socket.on("wait", function () {
-                status.innerHTML = "Wating for other players to join...";
-            });
-            socket.on("gameStart", function () {
-                sessionView.style.display = 'none';
-            });
-            socket.on("update", function (playerList) {
-                var playerHTML = document.querySelector(".players");
-                var drawTool = _this.canvas.getContext("2d");
-                drawTool.clearRect(0, 0, _this.width, _this.height);
-                _this.setup();
-                playerHTML.innerHTML = '';
-                var players = [];
-                for (var i in playerList) {
-                    var player = playerList[i];
-                    /* Create players in waiting area */
-                    var newPlayer = document.createElement('div');
-                    newPlayer.className = "playerInfo";
-                    newPlayer.style.background = player.color;
-                    playerHTML.appendChild(newPlayer);
-                    /* Render player */
-                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
-                    console.log(component);
-                    players.push(component);
-                    component.render();
-                }
-                console.log(players);
-            });
-            socket.on("endGame", function (winner) {
-                var winnerPlayer = document.querySelector(".playerName");
-                var winnerColor = document.querySelector(".winnerInfo");
-
-                winnerPanel.style.display = "block";
-                winnerPlayer.innerHTML = winner.name;
-                winnerColor.style.background = winner.color;
-            });
-        }
-    }]);
-
-    return GameEngine;
-}();
-
-exports.default = GameEngine;
-
-},{"./Components/Component":50,"./Components/Driver":51,"./Components/Map":52,"./Components/Monster":53,"./Components/Player":54,"./Global":58,"socket.io-client":35}],58:[function(require,module,exports){
+},{"./Exception":54}],56:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9182,20 +9192,4 @@ var Global = function () {
 
 exports.default = Global;
 
-},{}],59:[function(require,module,exports){
-'use strict';
-
-var _GameEngine = require('./GameEngine');
-
-var _GameEngine2 = _interopRequireDefault(_GameEngine);
-
-var _Global = require('./Global');
-
-var _Global2 = _interopRequireDefault(_Global);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-var main = new _GameEngine2.default(document.querySelector("canvas"), _Global2.default.resolution(), _Global2.default.resolution());
-main.render();
-
-},{"./GameEngine":57,"./Global":58}]},{},[59]);
+},{}]},{},[53]);
