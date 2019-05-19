@@ -9050,6 +9050,17 @@ var gameOver = document.querySelector(".gameOver");
 socket.on("die", function () {
     gameOver.style.display = "flex";
 });
+
+var winner = document.querySelector(".winner");
+socket.on("winner", function () {
+    winner.style.display = "flex";
+});
+
+socket.on("sessionQuit", function () {
+    if (!alert("Host quitted! Refreshing the page...")) {
+        window.location.reload();
+    }
+});
 controller.addEventListener("click", function () {
     var el = document.documentElement,
         rfs = el.requestFullScreen || el.webkitRequestFullScreen || el.mozRequestFullScreen;

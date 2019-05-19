@@ -67,7 +67,12 @@ io.on('connection', socket => {
         SESSION_LIST[sessionID].playerList = {};
         SESSION_LIST[sessionID].drivers = {};
         SESSION_LIST[sessionID].showController = false;
+        SESSION_LIST[sessionID].numberOfDeaths = 0;
         socket.on("disconnect", () => {
+            for(var i in SESSION_LIST[sessionID].drivers) {
+                var socketioDriver = SESSION_LIST[sessionID].drivers[i];
+                socketioDriver.emit("sessionQuit");
+            }
             delete SESSION_LIST[sessionID]
         });
     }); /* is SESSION */
@@ -153,11 +158,13 @@ io.on('connection', socket => {
                 }) 
                 /* Player leaves the game*/
                 socket.on("disconnect", () => {
-                    SESSION_LIST[sessionID].playerIndex -= 1;
-                    SESSION_LIST[sessionID].numberOfPlayer -= 1;
-                    SESSION_LIST[sessionID].positionTaken[pos] = false;
-                    delete  SESSION_LIST[sessionID].socket;
-                    delete  SESSION_LIST[sessionID].playerList[thisPlayer.id];
+                    if(SESSION_LIST[sessionID] != null) {
+                        SESSION_LIST[sessionID].playerIndex -= 1;
+                        SESSION_LIST[sessionID].numberOfPlayer -= 1;
+                        SESSION_LIST[sessionID].positionTaken[pos] = false;
+                        delete  SESSION_LIST[sessionID].socket;
+                        delete  SESSION_LIST[sessionID].playerList[thisPlayer.id];
+                    }
                 })
                 if(SESSION_LIST[sessionID].numberOfPlayer <  SESSION_LIST[sessionID].maxPlayer) {
                     SESSION_LIST[sessionID].showController = false;
@@ -181,6 +188,8 @@ setInterval(function(){
         var playerList = SESSION_LIST[i].playerList;
         var socketSession = SESSION_LIST[i].socketio; /* Map view */
         var socketDriver = SESSION_LIST[i].drivers; /* Mobile view */
+        var sessionNoDeaths = SESSION_LIST[i].numberOfDeaths;
+        var sessionNoPlayers = SESSION_LIST[i].numberOfPlayer;
         if(SESSION_LIST[i].numberOfPlayer == SESSION_LIST[i].maxPlayer) {
             for(var i in socketDriver) {
                 var socketioDriver = socketDriver[i]
@@ -206,13 +215,28 @@ setInterval(function(){
             var socketioDriver = socketDriver[i]
             socketioDriver.emit("update", playerList);
         }
-        
+
         for(var i in playerList) {
             let player = playerList[i];
             if(player.alive == false) {
+                sessionNoDeaths++;
                 socketDriver[player.id].emit("die");
             }
         }
+
+        if(sessionNoDeaths >= sessionNoPlayers - 1 && sessionNoDeaths != 0) {
+            let winner;
+            for(var i in playerList) {
+                let player = playerList[i];
+                if(player.alive == true) {
+                    socketDriver[player.id].emit("winner");
+                    winner = player
+                }
+            }
+            socketSession.emit("endGame", winner);
+        }
+
+
         // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);

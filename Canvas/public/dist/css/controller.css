@@ -114,7 +114,7 @@ p.description{
     margin-bottom: 1em;
 }
 
-section.gameOver{
+section.gameOver, section.winner{
     display: flex;
     position: fixed;
     background: rgba(26,26,26,.63);
@@ -129,8 +129,8 @@ section.gameOver{
     display: none;
 }
 
-section.gameOver div {
-    font-size: 5em;
+section.gameOver div, section.winner div {
+    font-size: 4em;
     font-weight: 700;
     color: white;
     transform: rotate(90deg);

@@ -9064,6 +9064,7 @@ var GameEngine = function () {
             var joinlink = document.querySelector(".joinlink");
             var qr = document.querySelector(".qr");
             var status = document.querySelector(".status");
+            var winnerPanel = document.querySelector(".winner");
             this.setup();
             var self = this;
             socket.emit("isSession"); /* let server know that this is a view*/
@@ -9102,6 +9103,14 @@ var GameEngine = function () {
                     component.render();
                 }
                 console.log(players);
+            });
+            socket.on("endGame", function (winner) {
+                var winnerPlayer = document.querySelector(".playerName");
+                var winnerColor = document.querySelector(".winnerInfo");
+
+                winnerPanel.style.display = "block";
+                winnerPlayer.innerHTML = winner.name;
+                winnerColor.style.background = winner.color;
             });
         }
     }]);

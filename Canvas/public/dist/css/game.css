@@ -62,3 +62,16 @@ canvas{
 .qr{
     margin-top: 1em;
 }
+
+.winner {
+    display: none;
+}
+
+.playerName {
+    font-weight: 700!important;
+    color: #F78C6C;
+}
+
+.winnerInfo{
+    margin: 0 auto;
+}

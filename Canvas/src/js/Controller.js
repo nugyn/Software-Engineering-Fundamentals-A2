@@ -210,6 +210,17 @@ let gameOver = document.querySelector(".gameOver");
 socket.on("die", () => {
     gameOver.style.display = "flex";
 })
+
+let winner = document.querySelector(".winner");
+socket.on("winner", () => {
+    winner.style.display = "flex";
+})
+
+socket.on("sessionQuit", () => {
+    if(!alert("Host quitted! Refreshing the page...")){
+        window.location.reload();
+    }
+})
 controller.addEventListener("click", function() {
     var
           el = document.documentElement

@@ -31,6 +31,7 @@ export default class GameEngine {
         let joinlink = document.querySelector(".joinlink");
         let qr = document.querySelector(".qr");
         let status = document.querySelector(".status");
+        let winnerPanel = document.querySelector(".winner");
         this.setup();
         var self = this;
         socket.emit("isSession"); /* let server know that this is a view*/
@@ -70,6 +71,14 @@ export default class GameEngine {
                 component.render();
             }
             console.log(players);
+        });
+        socket.on("endGame", (winner) => {
+            let winnerPlayer = document.querySelector(".playerName");
+            let winnerColor = document.querySelector(".winnerInfo");
+
+            winnerPanel.style.display = "block";
+            winnerPlayer.innerHTML = winner.name;
+            winnerColor.style.background = winner.color;
         })
 
     }
