@@ -91,9 +91,10 @@ io.on('connection', socket => {
         if(found) {
             console.log(sessionID);
             console.log(SESSION_LIST[sessionID])
-            SESSION_LIST[sessionID].drivers[socket.client.id] = socket;
             socket.emit("loadMap", SESSION_LIST[sessionID].mapInfo);
             /* Init player to activate driver.js*/
+            SESSION_LIST[sessionID].drivers[socket.client.id] = socket;
+
             socket.on("isPlayer", (playerName) => {
                 SESSION_LIST[sessionID].playerIndex += 1;
                 socket.emit("matchInfo", {maxPlayer: SESSION_LIST[sessionID].maxPlayer, 
