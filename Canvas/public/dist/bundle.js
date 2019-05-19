@@ -8461,7 +8461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
-    function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
+    function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color, alive) {
         _classCallCheck(this, Component);
 
         this.id = id;
@@ -8475,6 +8475,7 @@ var Component = function () {
         this.drawTool = drawTool;
         this.color = color;
         this.socket = socket;
+        this.alive = alive;
     }
 
     _createClass(Component, [{
@@ -8494,7 +8495,7 @@ var Component = function () {
             for (var i in self.playerList) {
                 var player = self.playerList[i];
                 if (player.id != self.id) {
-                    if (futurePosition.x == player.x && futurePosition.y == player.y) {
+                    if (futurePosition.x == player.x && futurePosition.y == player.y && player.alive == true) {
                         crash = true;
                         break;
                     }
@@ -8509,7 +8510,8 @@ var Component = function () {
             return {
                 id: this.id,
                 x: this.x,
-                y: this.y
+                y: this.y,
+                alive: this.alive
             };
         }
     }, {
@@ -8649,13 +8651,15 @@ var Component = function () {
         key: 'render',
         value: function render() {
             // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-            this.drawTool.fillStyle = this.color;
-            this.drawTool.fillRect(this.x, this.y, this.size, this.size);
-            this.drawTool.fillStyle = _Global2.default.getColor().name;
-            this.drawTool.font = "13px Arial";
-            this.drawTool.textAlign = "center";
-            this.drawTool.textBaseline = "middle";
-            this.drawTool.fillText(this.name, this.x + this.size / 2, this.y + this.size / 2);
+            if (this.alive == true) {
+                this.drawTool.fillStyle = this.color;
+                this.drawTool.fillRect(this.x, this.y, this.size, this.size);
+                this.drawTool.fillStyle = _Global2.default.getColor().name;
+                this.drawTool.font = "13px Arial";
+                this.drawTool.textAlign = "center";
+                this.drawTool.textBaseline = "middle";
+                this.drawTool.fillText(this.name, this.x + this.size / 2, this.y + this.size / 2);
+            }
         }
     }]);
 
@@ -8709,6 +8713,10 @@ var Driver = exports.Driver = function () {
                     case 40:
                         /* down arrow */
                         component.moveDown();
+                        break;
+                    case 75:
+                        console.log("die");
+                        component.die();
                         break;
                 }
                 self.socket.emit("move", component.getPosition());
@@ -8906,6 +8914,7 @@ var Player = function (_Component) {
         key: 'die',
         value: function die() {
             this.alive = false;
+            console.log(this);
         }
     }, {
         key: 'getPosition',
@@ -9087,7 +9096,7 @@ var GameEngine = function () {
                     newPlayer.style.background = player.color;
                     playerHTML.appendChild(newPlayer);
                     /* Render player */
-                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color);
+                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
                     console.log(component);
                     players.push(component);
                     component.render();

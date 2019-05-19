@@ -104,7 +104,8 @@ io.on('connection', socket => {
                     y: 0,
                     name: playerName,
                     npc: false,
-                    color: Global.getColor().player
+                    color: Global.getColor().player,
+                    alive: true
                 }
                 var pos = null; 
                 socket.on("setPosition", position => {
@@ -143,9 +144,9 @@ io.on('connection', socket => {
                 socket.on("move", usr => {
                     socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
                     /* socketID must match, just send back socketID for dataID*/
-
                     SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
                     SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
+                    SESSION_LIST[sessionID].playerList[usr.id].alive = usr.alive;
                 })
                 socket.on("start", () => {
                     SESSION_LIST[sessionID].showController = true;
@@ -205,8 +206,13 @@ setInterval(function(){
             var socketioDriver = socketDriver[i]
             socketioDriver.emit("update", playerList);
         }
-
         
+        for(var i in playerList) {
+            let player = playerList[i];
+            if(player.alive == false) {
+                socketDriver[player.id].emit("die");
+            }
+        }
         // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);

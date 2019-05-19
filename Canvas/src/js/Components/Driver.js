@@ -29,6 +29,10 @@ export class Driver{
                     /* down arrow */
                     component.moveDown();
                     break;
+                case 75:
+                    console.log("die")
+                    component.die();
+                    break;
             }
             self.socket.emit("move", component.getPosition());
 

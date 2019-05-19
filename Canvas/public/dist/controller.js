@@ -8461,7 +8461,7 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
-    function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
+    function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color, alive) {
         _classCallCheck(this, Component);
 
         this.id = id;
@@ -8475,6 +8475,7 @@ var Component = function () {
         this.drawTool = drawTool;
         this.color = color;
         this.socket = socket;
+        this.alive = alive;
     }
 
     _createClass(Component, [{
@@ -8494,7 +8495,7 @@ var Component = function () {
             for (var i in self.playerList) {
                 var player = self.playerList[i];
                 if (player.id != self.id) {
-                    if (futurePosition.x == player.x && futurePosition.y == player.y) {
+                    if (futurePosition.x == player.x && futurePosition.y == player.y && player.alive == true) {
                         crash = true;
                         break;
                     }
@@ -8509,7 +8510,8 @@ var Component = function () {
             return {
                 id: this.id,
                 x: this.x,
-                y: this.y
+                y: this.y,
+                alive: this.alive
             };
         }
     }, {
@@ -8649,13 +8651,15 @@ var Component = function () {
         key: 'render',
         value: function render() {
             // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-            this.drawTool.fillStyle = this.color;
-            this.drawTool.fillRect(this.x, this.y, this.size, this.size);
-            this.drawTool.fillStyle = _Global2.default.getColor().name;
-            this.drawTool.font = "13px Arial";
-            this.drawTool.textAlign = "center";
-            this.drawTool.textBaseline = "middle";
-            this.drawTool.fillText(this.name, this.x + this.size / 2, this.y + this.size / 2);
+            if (this.alive == true) {
+                this.drawTool.fillStyle = this.color;
+                this.drawTool.fillRect(this.x, this.y, this.size, this.size);
+                this.drawTool.fillStyle = _Global2.default.getColor().name;
+                this.drawTool.font = "13px Arial";
+                this.drawTool.textAlign = "center";
+                this.drawTool.textBaseline = "middle";
+                this.drawTool.fillText(this.name, this.x + this.size / 2, this.y + this.size / 2);
+            }
         }
     }]);
 
@@ -8709,6 +8713,10 @@ var Driver = exports.Driver = function () {
                     case 40:
                         /* down arrow */
                         component.moveDown();
+                        break;
+                    case 75:
+                        console.log("die");
+                        component.die();
                         break;
                 }
                 self.socket.emit("move", component.getPosition());
@@ -8791,6 +8799,7 @@ var Player = function (_Component) {
         key: 'die',
         value: function die() {
             this.alive = false;
+            console.log(this);
         }
     }, {
         key: 'getPosition',
@@ -8869,7 +8878,7 @@ function hide(element) {
 }
 
 function show(element) {
-    if (element == isFirst) {
+    if (element == setupMatch) {
         firstPlayer = true;
     }
     element.style.display = 'block';
@@ -8928,8 +8937,8 @@ btnConnect.addEventListener("click", function () {
 /* Register */
 var playerName = document.querySelector("input[name='playerName']");
 var joinBtn = document.querySelector("button[name='join']");
-var isFirst = document.querySelector(".isFirst");
-var playable = document.querySelector(".playable");
+var setupMatch = document.querySelector(".isFirst");
+var playerSetting = document.querySelector(".playable");
 var limit = document.querySelector(".limit");
 
 playerName.addEventListener("keyup", function (e) {
@@ -8954,13 +8963,13 @@ joinBtn.addEventListener("click", function () {
             console.log(data);
             if (data.playerIndex == 1) {
                 /* If it's first player */
-                show(isFirst);
-                show(playable);
+                show(setupMatch);
+                show(playerSetting);
             } else if (data.playerIndex <= data.maxPlayer && data.playerIndex > 1) {
-                hide(isFirst);
-                show(playable);
+                hide(setupMatch);
+                show(playerSetting);
             } else {
-                hide(playable);
+                hide(playerSetting);
                 show(limit);
             }
         });
@@ -9036,6 +9045,10 @@ btnStart.addEventListener("click", function () {
 socket.on("showController", function () {
     hide(waiting);
     controller.style.display = 'grid';
+});
+var gameOver = document.querySelector(".gameOver");
+socket.on("die", function () {
+    gameOver.style.display = "flex";
 });
 controller.addEventListener("click", function () {
     var el = document.documentElement,

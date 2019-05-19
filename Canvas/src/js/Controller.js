@@ -48,7 +48,7 @@ function hide(element) {
 
 
 function show(element) {
-    if(element == isFirst) {
+    if(element == setupMatch) {
         firstPlayer = true;
     }
     element.style.display = 'block';
@@ -104,8 +104,8 @@ btnConnect.addEventListener("click", () => {
 /* Register */
 let playerName = document.querySelector("input[name='playerName']");
 let joinBtn = document.querySelector("button[name='join']");
-let isFirst = document.querySelector(".isFirst");
-let playable = document.querySelector(".playable");
+let setupMatch = document.querySelector(".isFirst");
+let playerSetting = document.querySelector(".playable");
 let limit = document.querySelector(".limit");
 
 
@@ -125,13 +125,13 @@ joinBtn.addEventListener("click", function (){
             console.log(data);
             if(data.playerIndex == 1) {
                 /* If it's first player */
-                show(isFirst);
-                show(playable);
+                show(setupMatch);
+                show(playerSetting);
             } else if (data.playerIndex <= data.maxPlayer && data.playerIndex > 1){
-                hide(isFirst);
-                show(playable);
+                hide(setupMatch);
+                show(playerSetting);
             } else {
-                hide(playable);
+                hide(playerSetting);
                 show(limit);
             }
         })
@@ -205,6 +205,10 @@ btnStart.addEventListener("click", function() {
 socket.on("showController", () => {
     hide(waiting);
     controller.style.display = 'grid';
+})
+let gameOver = document.querySelector(".gameOver");
+socket.on("die", () => {
+    gameOver.style.display = "flex";
 })
 controller.addEventListener("click", function() {
     var

@@ -2,7 +2,7 @@ import Global from '../Global';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
 
 export default class Component {
-    constructor(id, x, y, name, npc, mapComponent, socket, drawTool, color) {
+    constructor(id, x, y, name, npc, mapComponent, socket, drawTool, color, alive) {
         this.id = id;
         this.x = x;
         this.y = y;
@@ -14,6 +14,7 @@ export default class Component {
         this.drawTool = drawTool;
         this.color = color;
         this.socket = socket;
+        this.alive = alive;
     }
 
     mod(n,m) {
@@ -30,7 +31,8 @@ export default class Component {
         for(var i in self.playerList) {
             let player = self.playerList[i];
             if(player.id != self.id) {
-                if(futurePosition.x == player.x && futurePosition.y == player.y) {
+                if(futurePosition.x == player.x && futurePosition.y == player.y && 
+                    player.alive == true) {
                     crash = true;
                     break;
                 }
@@ -44,7 +46,8 @@ export default class Component {
         return {
             id: this.id,
             x: this.x,
-            y: this.y
+            y: this.y,
+            alive: this.alive
         }
     }
 
@@ -176,12 +179,14 @@ export default class Component {
 
     render(){
         // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-        this.drawTool.fillStyle = this.color;
-        this.drawTool.fillRect(this.x,this.y,this.size,this.size);
-        this.drawTool.fillStyle = Global.getColor().name;
-        this.drawTool.font="13px Arial";
-        this.drawTool.textAlign = "center";
-        this.drawTool.textBaseline="middle";
-        this.drawTool.fillText(this.name,this.x + this.size/2,this.y + this.size/2);
+        if(this.alive == true) {
+            this.drawTool.fillStyle = this.color;
+            this.drawTool.fillRect(this.x,this.y,this.size,this.size);
+            this.drawTool.fillStyle = Global.getColor().name;
+            this.drawTool.font="13px Arial";
+            this.drawTool.textAlign = "center";
+            this.drawTool.textBaseline="middle";
+            this.drawTool.fillText(this.name,this.x + this.size/2,this.y + this.size/2);
+        }
     }
 }

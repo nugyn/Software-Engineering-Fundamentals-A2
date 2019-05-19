@@ -9,6 +9,7 @@ export default class Player extends Component{
 
     die() {
         this.alive = false;
+        console.log(this);
     }
 
     getPosition() {
