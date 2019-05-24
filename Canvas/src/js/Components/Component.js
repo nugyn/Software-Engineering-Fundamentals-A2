@@ -178,7 +178,7 @@ export default class Component {
 
     render(){
         // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-        if(this.alive == true) {
+        if(this.alive || this.npc) {
             this.drawTool.fillStyle = this.color;
             this.drawTool.fillRect(this.x,this.y,this.size,this.size);
             this.drawTool.fillStyle = Global.getColor().name;

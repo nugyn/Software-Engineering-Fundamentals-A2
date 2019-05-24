@@ -68,6 +68,11 @@ io.on('connection', socket => {
         SESSION_LIST[sessionID].drivers = {};
         SESSION_LIST[sessionID].showController = false;
         SESSION_LIST[sessionID].numberOfDeaths = 0;
+
+        socket.on("kill", (player) => {
+            SESSION_LIST[sessionID].playerList[player.id].alive = false;
+        });
+
         socket.on("disconnect", () => {
             for(var i in SESSION_LIST[sessionID].drivers) {
                 var socketioDriver = SESSION_LIST[sessionID].drivers[i];
@@ -163,7 +168,7 @@ io.on('connection', socket => {
                         name: "monster",
                         npc: true,
                         color: Global.getColor().monster,
-                        alive: true
+                        alive: null
                     }
                     SESSION_LIST[sessionID].playerList[monster.id] = monster;
                 }) 
@@ -222,6 +227,7 @@ setInterval(function(){
             }
         }
         socketSession.emit("update",playerList);
+
         for(var i in socketDriver) {
             var socketioDriver = socketDriver[i]
             socketioDriver.emit("update", playerList);
