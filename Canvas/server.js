@@ -72,6 +72,14 @@ io.on('connection', socket => {
         socket.on("kill", (player) => {
             SESSION_LIST[sessionID].playerList[player.id].alive = false;
         });
+        /* For monster*/
+        socket.on("move", usr => {
+            socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
+            /* socketID must match, just send back socketID for dataID*/
+            SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
+            SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
+            SESSION_LIST[sessionID].playerList[usr.id].alive = usr.alive;
+        });
 
         socket.on("disconnect", () => {
             for(var i in SESSION_LIST[sessionID].drivers) {
@@ -153,12 +161,13 @@ io.on('connection', socket => {
                 /* checkCrash get playerList */
                 /* Player moves */
                 socket.on("move", usr => {
+                    console.log(`Player ${usr.id} is moving`);
                     socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
                     /* socketID must match, just send back socketID for dataID*/
                     SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
                     SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
                     SESSION_LIST[sessionID].playerList[usr.id].alive = usr.alive;
-                })
+                });
                 socket.on("start", () => {
                     SESSION_LIST[sessionID].showController = true;
                     var monster = {
@@ -170,6 +179,7 @@ io.on('connection', socket => {
                         color: Global.getColor().monster,
                         alive: null
                     }
+                    SESSION_LIST[sessionID].socketio.emit("makeMonster", monster);
                     SESSION_LIST[sessionID].playerList[monster.id] = monster;
                 }) 
                 /* Player leaves the game*/

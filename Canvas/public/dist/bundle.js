@@ -8854,8 +8854,8 @@ var Player = function (_Component) {
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "control", _this).call(_this, false);
         _this.npc = true;
         _this.playerList = playerList;
-        _this.checkKill();
         _this.socket = socket;
+        _this.automove();
         return _this;
     }
 
@@ -8873,6 +8873,42 @@ var Player = function (_Component) {
                     this.socket.emit("kill", player);
                 }
             }
+        }
+    }, {
+        key: "automove",
+        value: function automove() {
+            var stepMove = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 3, 3, 0, 1, 1, 1, 2, 2, 3, 3, 3, 3];
+            var self = this;
+            console.warn(stepMove);
+            setInterval(function () {
+                // var choices = Math.floor(Math.random() * Math.floor(4));
+                for (var i in stepMove) {
+                    switch (i) {
+                        case 0:
+                            self.moveLeft();
+                            break;
+                        case 1:
+                            self.moveUp();
+                            break;
+                        case 2:
+                            self.moveDown();
+                            break;
+                        case 3:
+                            self.moveRight();
+                            break;
+                    }
+                    self.socket.emit("move", self.getPosition());
+                }
+            }, 2000);
+        }
+    }, {
+        key: "init",
+        value: function init() {
+            var self = this;
+            this.socket.on("update", function (playerList) {
+                self.playerList = playerList;
+                self.checkKill();
+            });
         }
     }]);
 
@@ -9090,6 +9126,14 @@ var GameEngine = function () {
             socket.on("gameStart", function () {
                 sessionView.style.display = 'none';
             });
+
+            socket.on("makeMonster", function () {
+                console.warn("success!!!");
+            });
+            // let monster = new Monster(player.id, player.x, player.y, player.name, 
+            // self.map.getInfo(), 
+            // socket, drawTool, player.color, playerList);
+
             socket.on("update", function (playerList) {
                 var playerHTML = document.querySelector(".players");
                 var drawTool = _this.canvas.getContext("2d");
@@ -9108,6 +9152,7 @@ var GameEngine = function () {
                     var component = void 0;
                     if (player.npc) {
                         component = new _Monster2.default(player.id, player.x, player.y, player.name, self.map.getInfo(), socket, drawTool, player.color, playerList);
+                        component.init();
                     } else {
                         component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
                     }

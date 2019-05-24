@@ -6,8 +6,8 @@ export default class Player extends Component{
         super.control(false);
         this.npc = true;
         this.playerList = playerList;
-        this.checkKill();
         this.socket = socket;
+        this.automove();        
     }
 
     getPosition() {
@@ -21,5 +21,41 @@ export default class Player extends Component{
                 this.socket.emit("kill", player);
             }
         }
+    }
+    automove() {
+        var stepMove = [
+            0,0,0,0,0,1,1,1,1,1,0,0,0,0,
+            2,2,2,2,3,3,3,3,0,1,1,1,2,2,
+            3,3,3,3
+        ]
+        var self = this;
+        console.warn(stepMove);
+        setInterval(function () {
+            // var choices = Math.floor(Math.random() * Math.floor(4));
+            for(var i in stepMove) {
+                switch(i) {
+                    case 0:
+                        self.moveLeft();
+                        break;
+                    case 1:
+                        self.moveUp();
+                        break;
+                    case 2:
+                        self.moveDown();
+                        break;
+                    case 3:
+                        self.moveRight();
+                        break;
+                }
+                self.socket.emit("move", self.getPosition());
+            }
+        }, 2000);
+    }
+    init() {
+        var self = this;
+        this.socket.on("update", playerList => {
+            self.playerList = playerList;
+            self.checkKill();
+        })
     }
 }

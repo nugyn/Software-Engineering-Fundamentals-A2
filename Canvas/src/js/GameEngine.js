@@ -49,6 +49,14 @@ export default class GameEngine {
         socket.on("gameStart", () =>{
             sessionView.style.display = 'none';
         });
+        
+        socket.on("makeMonster", () => {
+            console.warn("success!!!");
+        })
+        // let monster = new Monster(player.id, player.x, player.y, player.name, 
+        // self.map.getInfo(), 
+        // socket, drawTool, player.color, playerList);
+
         socket.on("update", playerList => {
             let playerHTML = document.querySelector(".players");
             const drawTool =  this.canvas.getContext("2d");
@@ -67,6 +75,7 @@ export default class GameEngine {
                 let component;
                 if(player.npc) {
                     component = new Monster(player.id, player.x, player.y, player.name, self.map.getInfo(), socket, drawTool, player.color, playerList);
+                    component.init();
                 } else {
                     component = new Component(player.id, player.x, player.y, player.name, player.npc,
                         self.map.getInfo(), socket, drawTool, player.color, player.alive);
