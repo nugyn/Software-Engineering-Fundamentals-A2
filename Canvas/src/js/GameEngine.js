@@ -64,8 +64,13 @@ export default class GameEngine {
                 newPlayer.style.background = player.color;
                 playerHTML.appendChild(newPlayer);
                 /* Render player */
-                let component = new Component(player.id, player.x, player.y, player.name, player.npc,
-                    self.map.getInfo(), socket, drawTool, player.color, player.alive);
+                let component;
+                if(player.npc) {
+                    component = new Monster(player.id, player.x, player.y, player.name, self.map.getInfo(), socket, drawTool, player.color, playerList);
+                } else {
+                    component = new Component(player.id, player.x, player.y, player.name, player.npc,
+                        self.map.getInfo(), socket, drawTool, player.color, player.alive);
+                }
                 console.log(component);
                 players.push(component);
                 component.render();

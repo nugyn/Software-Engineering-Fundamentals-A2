@@ -8650,7 +8650,7 @@ var Component = function () {
         key: 'render',
         value: function render() {
             // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-            if (this.alive == true) {
+            if (this.alive || this.npc) {
                 this.drawTool.fillStyle = this.color;
                 this.drawTool.fillRect(this.x, this.y, this.size, this.size);
                 this.drawTool.fillStyle = _Global2.default.getColor().name;

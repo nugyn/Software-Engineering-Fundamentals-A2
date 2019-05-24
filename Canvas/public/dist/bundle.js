@@ -8650,7 +8650,7 @@ var Component = function () {
         key: 'render',
         value: function render() {
             // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
-            if (this.alive == true) {
+            if (this.alive || this.npc) {
                 this.drawTool.fillStyle = this.color;
                 this.drawTool.fillRect(this.x, this.y, this.size, this.size);
                 this.drawTool.fillStyle = _Global2.default.getColor().name;
@@ -8820,7 +8820,7 @@ var Map = function () {
 exports.default = Map;
 
 },{"../GameEngine":57,"../Global":58}],53:[function(require,module,exports){
-'use strict';
+"use strict";
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -8830,7 +8830,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _Component2 = require('./Component');
+var _Component2 = require("./Component");
 
 var _Component3 = _interopRequireDefault(_Component2);
 
@@ -8845,21 +8845,34 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent) {
+    function Player(id, x, y, name, mapComponent, socket, drawTool, monsterColor, playerList) {
         _classCallCheck(this, Player);
 
-        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
+        var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket, drawTool, monsterColor));
 
-        _this.alive = true;
-        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, false);
+        _this.alive = null;
+        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "control", _this).call(_this, false);
         _this.npc = true;
+        _this.playerList = playerList;
+        _this.checkKill();
+        _this.socket = socket;
         return _this;
     }
 
     _createClass(Player, [{
-        key: 'getPosition',
+        key: "getPosition",
         value: function getPosition() {
-            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
+            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "getPosition", this).call(this);
+        }
+    }, {
+        key: "checkKill",
+        value: function checkKill() {
+            for (var i in this.playerList) {
+                var player = this.playerList[i];
+                if (this.x == player.x && this.y == player.y && !player.npc) {
+                    this.socket.emit("kill", player);
+                }
+            }
         }
     }]);
 
@@ -9092,7 +9105,12 @@ var GameEngine = function () {
                     newPlayer.style.background = player.color;
                     playerHTML.appendChild(newPlayer);
                     /* Render player */
-                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
+                    var component = void 0;
+                    if (player.npc) {
+                        component = new _Monster2.default(player.id, player.x, player.y, player.name, self.map.getInfo(), socket, drawTool, player.color, playerList);
+                    } else {
+                        component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
+                    }
                     console.log(component);
                     players.push(component);
                     component.render();
