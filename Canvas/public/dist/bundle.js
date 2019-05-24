@@ -9181,7 +9181,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://localhost:" + this.getPort();
+            return "http://10.132.111.148:" + this.getPort();
         }
     }, {
         key: "getPort",
