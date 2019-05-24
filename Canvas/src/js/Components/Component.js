@@ -22,9 +22,9 @@ export default class Component {
     }
 
     checkCrash(futurePosition) {
+        if(this.npc) return false;
         var self = this;
         var crash = false;
-        
         this.socket.on("update", playerList => {
             self.playerList = playerList
         })
@@ -32,13 +32,12 @@ export default class Component {
             let player = self.playerList[i];
             if(player.id != self.id) {
                 if(futurePosition.x == player.x && futurePosition.y == player.y && 
-                    player.alive == true) {
+                    player.alive == true && player.npc == false) {
                     crash = true;
                     break;
                 }
             }
         }
-
         return crash;
     }
 

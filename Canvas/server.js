@@ -156,6 +156,16 @@ io.on('connection', socket => {
                 })
                 socket.on("start", () => {
                     SESSION_LIST[sessionID].showController = true;
+                    var monster = {
+                        id: "monster",
+                        x: Global.resolution()/2 - Global.getBSize()/2,
+                        y: Global.resolution()/2 - Global.getBSize()/2,
+                        name: "monster",
+                        npc: true,
+                        color: Global.getColor().monster,
+                        alive: true
+                    }
+                    SESSION_LIST[sessionID].playerList[monster.id] = monster;
                 }) 
                 /* Player leaves the game*/
                 socket.on("disconnect", () => {

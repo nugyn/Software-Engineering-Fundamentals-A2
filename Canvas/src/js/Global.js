@@ -29,11 +29,11 @@ export default class Global {
         return this.resolution()/this.getGrid()[0].length;
     }
     static resolution() {
-        return 720;
+        return 450;
     }
 
     static getHost() {
-        return "http://10.132.105.239:" + this.getPort();
+        return "http://localhost:" + this.getPort();
     }
 
     static getPort() {

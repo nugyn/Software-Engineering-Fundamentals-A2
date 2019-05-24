@@ -8486,22 +8486,21 @@ var Component = function () {
     }, {
         key: 'checkCrash',
         value: function checkCrash(futurePosition) {
+            if (this.npc) return false;
             var self = this;
             var crash = false;
-
             this.socket.on("update", function (playerList) {
                 self.playerList = playerList;
             });
             for (var i in self.playerList) {
                 var player = self.playerList[i];
                 if (player.id != self.id) {
-                    if (futurePosition.x == player.x && futurePosition.y == player.y && player.alive == true) {
+                    if (futurePosition.x == player.x && futurePosition.y == player.y && player.alive == true && player.npc == false) {
                         crash = true;
                         break;
                     }
                 }
             }
-
             return crash;
         }
     }, {
@@ -9173,12 +9172,12 @@ var Global = function () {
     }, {
         key: "resolution",
         value: function resolution() {
-            return 720;
+            return 450;
         }
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://10.132.105.239:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",
