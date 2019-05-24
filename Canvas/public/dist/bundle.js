@@ -8486,22 +8486,21 @@ var Component = function () {
     }, {
         key: 'checkCrash',
         value: function checkCrash(futurePosition) {
+            if (this.npc) return false;
             var self = this;
             var crash = false;
-
             this.socket.on("update", function (playerList) {
                 self.playerList = playerList;
             });
             for (var i in self.playerList) {
                 var player = self.playerList[i];
                 if (player.id != self.id) {
-                    if (futurePosition.x == player.x && futurePosition.y == player.y && player.alive == true) {
+                    if (futurePosition.x == player.x && futurePosition.y == player.y && player.alive == true && player.npc == false) {
                         crash = true;
                         break;
                     }
                 }
             }
-
             return crash;
         }
     }, {
@@ -8852,16 +8851,12 @@ var Player = function (_Component) {
         var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent));
 
         _this.alive = true;
-        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, true);
+        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, false);
+        _this.npc = true;
         return _this;
     }
 
     _createClass(Player, [{
-        key: 'die',
-        value: function die() {
-            this.alive = false;
-        }
-    }, {
         key: 'getPosition',
         value: function getPosition() {
             return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
@@ -9163,12 +9158,12 @@ var Global = function () {
     }, {
         key: "resolution",
         value: function resolution() {
-            return 720;
+            return 450;
         }
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://10.132.105.239:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",
