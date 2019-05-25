@@ -3211,7 +3211,7 @@ Socket.prototype.filterUpgrades = function (upgrades) {
   return filteredUpgrades;
 };
 
-},{"./transport":14,"./transports/index":15,"component-emitter":10,"debug":21,"engine.io-parser":23,"indexof":30,"parseqs":32,"parseuri":33}],14:[function(require,module,exports){
+},{"./transport":14,"./transports/index":15,"component-emitter":10,"debug":21,"engine.io-parser":23,"indexof":30,"parseqs":34,"parseuri":35}],14:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -4335,7 +4335,7 @@ Polling.prototype.uri = function () {
   return schema + '://' + (ipv6 ? '[' + this.hostname + ']' : this.hostname) + port + this.path + query;
 };
 
-},{"../transport":14,"component-inherit":11,"debug":21,"engine.io-parser":23,"parseqs":32,"xmlhttprequest-ssl":20,"yeast":49}],19:[function(require,module,exports){
+},{"../transport":14,"component-inherit":11,"debug":21,"engine.io-parser":23,"parseqs":34,"xmlhttprequest-ssl":20,"yeast":51}],19:[function(require,module,exports){
 (function (Buffer){
 /**
  * Module dependencies.
@@ -4632,7 +4632,7 @@ WS.prototype.check = function () {
 };
 
 }).call(this,require("buffer").Buffer)
-},{"../transport":14,"buffer":8,"component-inherit":11,"debug":21,"engine.io-parser":23,"parseqs":32,"ws":7,"yeast":49}],20:[function(require,module,exports){
+},{"../transport":14,"buffer":8,"component-inherit":11,"debug":21,"engine.io-parser":23,"parseqs":34,"ws":7,"yeast":51}],20:[function(require,module,exports){
 // browser shim for xmlhttprequest module
 
 var hasCORS = require('has-cors');
@@ -4870,7 +4870,7 @@ function localstorage() {
 }
 
 }).call(this,require('_process'))
-},{"./debug":22,"_process":34}],22:[function(require,module,exports){
+},{"./debug":22,"_process":36}],22:[function(require,module,exports){
 
 /**
  * This is the common logic for both the Node.js and web browser
@@ -5097,7 +5097,7 @@ function coerce(val) {
   return val;
 }
 
-},{"ms":31}],23:[function(require,module,exports){
+},{"ms":32}],23:[function(require,module,exports){
 /**
  * Module dependencies.
  */
@@ -6129,6 +6129,424 @@ module.exports = function(arr, obj){
   return -1;
 };
 },{}],31:[function(require,module,exports){
+'use strict';
+
+var ip = exports;
+var Buffer = require('buffer').Buffer;
+var os = require('os');
+
+ip.toBuffer = function(ip, buff, offset) {
+  offset = ~~offset;
+
+  var result;
+
+  if (this.isV4Format(ip)) {
+    result = buff || new Buffer(offset + 4);
+    ip.split(/\./g).map(function(byte) {
+      result[offset++] = parseInt(byte, 10) & 0xff;
+    });
+  } else if (this.isV6Format(ip)) {
+    var sections = ip.split(':', 8);
+
+    var i;
+    for (i = 0; i < sections.length; i++) {
+      var isv4 = this.isV4Format(sections[i]);
+      var v4Buffer;
+
+      if (isv4) {
+        v4Buffer = this.toBuffer(sections[i]);
+        sections[i] = v4Buffer.slice(0, 2).toString('hex');
+      }
+
+      if (v4Buffer && ++i < 8) {
+        sections.splice(i, 0, v4Buffer.slice(2, 4).toString('hex'));
+      }
+    }
+
+    if (sections[0] === '') {
+      while (sections.length < 8) sections.unshift('0');
+    } else if (sections[sections.length - 1] === '') {
+      while (sections.length < 8) sections.push('0');
+    } else if (sections.length < 8) {
+      for (i = 0; i < sections.length && sections[i] !== ''; i++);
+      var argv = [ i, 1 ];
+      for (i = 9 - sections.length; i > 0; i--) {
+        argv.push('0');
+      }
+      sections.splice.apply(sections, argv);
+    }
+
+    result = buff || new Buffer(offset + 16);
+    for (i = 0; i < sections.length; i++) {
+      var word = parseInt(sections[i], 16);
+      result[offset++] = (word >> 8) & 0xff;
+      result[offset++] = word & 0xff;
+    }
+  }
+
+  if (!result) {
+    throw Error('Invalid ip address: ' + ip);
+  }
+
+  return result;
+};
+
+ip.toString = function(buff, offset, length) {
+  offset = ~~offset;
+  length = length || (buff.length - offset);
+
+  var result = [];
+  if (length === 4) {
+    // IPv4
+    for (var i = 0; i < length; i++) {
+      result.push(buff[offset + i]);
+    }
+    result = result.join('.');
+  } else if (length === 16) {
+    // IPv6
+    for (var i = 0; i < length; i += 2) {
+      result.push(buff.readUInt16BE(offset + i).toString(16));
+    }
+    result = result.join(':');
+    result = result.replace(/(^|:)0(:0)*:0(:|$)/, '$1::$3');
+    result = result.replace(/:{3,4}/, '::');
+  }
+
+  return result;
+};
+
+var ipv4Regex = /^(\d{1,3}\.){3,3}\d{1,3}$/;
+var ipv6Regex =
+    /^(::)?(((\d{1,3}\.){3}(\d{1,3}){1})?([0-9a-f]){0,4}:{0,2}){1,8}(::)?$/i;
+
+ip.isV4Format = function(ip) {
+  return ipv4Regex.test(ip);
+};
+
+ip.isV6Format = function(ip) {
+  return ipv6Regex.test(ip);
+};
+function _normalizeFamily(family) {
+  return family ? family.toLowerCase() : 'ipv4';
+}
+
+ip.fromPrefixLen = function(prefixlen, family) {
+  if (prefixlen > 32) {
+    family = 'ipv6';
+  } else {
+    family = _normalizeFamily(family);
+  }
+
+  var len = 4;
+  if (family === 'ipv6') {
+    len = 16;
+  }
+  var buff = new Buffer(len);
+
+  for (var i = 0, n = buff.length; i < n; ++i) {
+    var bits = 8;
+    if (prefixlen < 8) {
+      bits = prefixlen;
+    }
+    prefixlen -= bits;
+
+    buff[i] = ~(0xff >> bits) & 0xff;
+  }
+
+  return ip.toString(buff);
+};
+
+ip.mask = function(addr, mask) {
+  addr = ip.toBuffer(addr);
+  mask = ip.toBuffer(mask);
+
+  var result = new Buffer(Math.max(addr.length, mask.length));
+
+  var i = 0;
+  // Same protocol - do bitwise and
+  if (addr.length === mask.length) {
+    for (i = 0; i < addr.length; i++) {
+      result[i] = addr[i] & mask[i];
+    }
+  } else if (mask.length === 4) {
+    // IPv6 address and IPv4 mask
+    // (Mask low bits)
+    for (i = 0; i < mask.length; i++) {
+      result[i] = addr[addr.length - 4  + i] & mask[i];
+    }
+  } else {
+    // IPv6 mask and IPv4 addr
+    for (var i = 0; i < result.length - 6; i++) {
+      result[i] = 0;
+    }
+
+    // ::ffff:ipv4
+    result[10] = 0xff;
+    result[11] = 0xff;
+    for (i = 0; i < addr.length; i++) {
+      result[i + 12] = addr[i] & mask[i + 12];
+    }
+    i = i + 12;
+  }
+  for (; i < result.length; i++)
+    result[i] = 0;
+
+  return ip.toString(result);
+};
+
+ip.cidr = function(cidrString) {
+  var cidrParts = cidrString.split('/');
+
+  var addr = cidrParts[0];
+  if (cidrParts.length !== 2)
+    throw new Error('invalid CIDR subnet: ' + addr);
+
+  var mask = ip.fromPrefixLen(parseInt(cidrParts[1], 10));
+
+  return ip.mask(addr, mask);
+};
+
+ip.subnet = function(addr, mask) {
+  var networkAddress = ip.toLong(ip.mask(addr, mask));
+
+  // Calculate the mask's length.
+  var maskBuffer = ip.toBuffer(mask);
+  var maskLength = 0;
+
+  for (var i = 0; i < maskBuffer.length; i++) {
+    if (maskBuffer[i] === 0xff) {
+      maskLength += 8;
+    } else {
+      var octet = maskBuffer[i] & 0xff;
+      while (octet) {
+        octet = (octet << 1) & 0xff;
+        maskLength++;
+      }
+    }
+  }
+
+  var numberOfAddresses = Math.pow(2, 32 - maskLength);
+
+  return {
+    networkAddress: ip.fromLong(networkAddress),
+    firstAddress: numberOfAddresses <= 2 ?
+                    ip.fromLong(networkAddress) :
+                    ip.fromLong(networkAddress + 1),
+    lastAddress: numberOfAddresses <= 2 ?
+                    ip.fromLong(networkAddress + numberOfAddresses - 1) :
+                    ip.fromLong(networkAddress + numberOfAddresses - 2),
+    broadcastAddress: ip.fromLong(networkAddress + numberOfAddresses - 1),
+    subnetMask: mask,
+    subnetMaskLength: maskLength,
+    numHosts: numberOfAddresses <= 2 ?
+                numberOfAddresses : numberOfAddresses - 2,
+    length: numberOfAddresses,
+    contains: function(other) {
+      return networkAddress === ip.toLong(ip.mask(other, mask));
+    }
+  };
+};
+
+ip.cidrSubnet = function(cidrString) {
+  var cidrParts = cidrString.split('/');
+
+  var addr = cidrParts[0];
+  if (cidrParts.length !== 2)
+    throw new Error('invalid CIDR subnet: ' + addr);
+
+  var mask = ip.fromPrefixLen(parseInt(cidrParts[1], 10));
+
+  return ip.subnet(addr, mask);
+};
+
+ip.not = function(addr) {
+  var buff = ip.toBuffer(addr);
+  for (var i = 0; i < buff.length; i++) {
+    buff[i] = 0xff ^ buff[i];
+  }
+  return ip.toString(buff);
+};
+
+ip.or = function(a, b) {
+  a = ip.toBuffer(a);
+  b = ip.toBuffer(b);
+
+  // same protocol
+  if (a.length === b.length) {
+    for (var i = 0; i < a.length; ++i) {
+      a[i] |= b[i];
+    }
+    return ip.toString(a);
+
+  // mixed protocols
+  } else {
+    var buff = a;
+    var other = b;
+    if (b.length > a.length) {
+      buff = b;
+      other = a;
+    }
+
+    var offset = buff.length - other.length;
+    for (var i = offset; i < buff.length; ++i) {
+      buff[i] |= other[i - offset];
+    }
+
+    return ip.toString(buff);
+  }
+};
+
+ip.isEqual = function(a, b) {
+  a = ip.toBuffer(a);
+  b = ip.toBuffer(b);
+
+  // Same protocol
+  if (a.length === b.length) {
+    for (var i = 0; i < a.length; i++) {
+      if (a[i] !== b[i]) return false;
+    }
+    return true;
+  }
+
+  // Swap
+  if (b.length === 4) {
+    var t = b;
+    b = a;
+    a = t;
+  }
+
+  // a - IPv4, b - IPv6
+  for (var i = 0; i < 10; i++) {
+    if (b[i] !== 0) return false;
+  }
+
+  var word = b.readUInt16BE(10);
+  if (word !== 0 && word !== 0xffff) return false;
+
+  for (var i = 0; i < 4; i++) {
+    if (a[i] !== b[i + 12]) return false;
+  }
+
+  return true;
+};
+
+ip.isPrivate = function(addr) {
+  return /^(::f{4}:)?10\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$/i
+      .test(addr) ||
+    /^(::f{4}:)?192\.168\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr) ||
+    /^(::f{4}:)?172\.(1[6-9]|2\d|30|31)\.([0-9]{1,3})\.([0-9]{1,3})$/i
+      .test(addr) ||
+    /^(::f{4}:)?127\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr) ||
+    /^(::f{4}:)?169\.254\.([0-9]{1,3})\.([0-9]{1,3})$/i.test(addr) ||
+    /^f[cd][0-9a-f]{2}:/i.test(addr) ||
+    /^fe80:/i.test(addr) ||
+    /^::1$/.test(addr) ||
+    /^::$/.test(addr);
+};
+
+ip.isPublic = function(addr) {
+  return !ip.isPrivate(addr);
+};
+
+ip.isLoopback = function(addr) {
+  return /^(::f{4}:)?127\.([0-9]{1,3})\.([0-9]{1,3})\.([0-9]{1,3})/
+      .test(addr) ||
+    /^fe80::1$/.test(addr) ||
+    /^::1$/.test(addr) ||
+    /^::$/.test(addr);
+};
+
+ip.loopback = function(family) {
+  //
+  // Default to `ipv4`
+  //
+  family = _normalizeFamily(family);
+
+  if (family !== 'ipv4' && family !== 'ipv6') {
+    throw new Error('family must be ipv4 or ipv6');
+  }
+
+  return family === 'ipv4' ? '127.0.0.1' : 'fe80::1';
+};
+
+//
+// ### function address (name, family)
+// #### @name {string|'public'|'private'} **Optional** Name or security
+//      of the network interface.
+// #### @family {ipv4|ipv6} **Optional** IP family of the address (defaults
+//      to ipv4).
+//
+// Returns the address for the network interface on the current system with
+// the specified `name`:
+//   * String: First `family` address of the interface.
+//             If not found see `undefined`.
+//   * 'public': the first public ip address of family.
+//   * 'private': the first private ip address of family.
+//   * undefined: First address with `ipv4` or loopback address `127.0.0.1`.
+//
+ip.address = function(name, family) {
+  var interfaces = os.networkInterfaces();
+  var all;
+
+  //
+  // Default to `ipv4`
+  //
+  family = _normalizeFamily(family);
+
+  //
+  // If a specific network interface has been named,
+  // return the address.
+  //
+  if (name && name !== 'private' && name !== 'public') {
+    var res = interfaces[name].filter(function(details) {
+      var itemFamily = details.family.toLowerCase();
+      return itemFamily === family;
+    });
+    if (res.length === 0)
+      return undefined;
+    return res[0].address;
+  }
+
+  var all = Object.keys(interfaces).map(function (nic) {
+    //
+    // Note: name will only be `public` or `private`
+    // when this is called.
+    //
+    var addresses = interfaces[nic].filter(function (details) {
+      details.family = details.family.toLowerCase();
+      if (details.family !== family || ip.isLoopback(details.address)) {
+        return false;
+      } else if (!name) {
+        return true;
+      }
+
+      return name === 'public' ? ip.isPrivate(details.address) :
+          ip.isPublic(details.address);
+    });
+
+    return addresses.length ? addresses[0].address : undefined;
+  }).filter(Boolean);
+
+  return !all.length ? ip.loopback(family) : all[0];
+};
+
+ip.toLong = function(ip) {
+  var ipl = 0;
+  ip.split('.').forEach(function(octet) {
+    ipl <<= 8;
+    ipl += parseInt(octet);
+  });
+  return(ipl >>> 0);
+};
+
+ip.fromLong = function(ipl) {
+  return ((ipl >>> 24) + '.' +
+      (ipl >> 16 & 255) + '.' +
+      (ipl >> 8 & 255) + '.' +
+      (ipl & 255) );
+};
+
+},{"buffer":8,"os":33}],32:[function(require,module,exports){
 /**
  * Helpers.
  */
@@ -6282,7 +6700,58 @@ function plural(ms, n, name) {
   return Math.ceil(ms / n) + ' ' + name + 's';
 }
 
-},{}],32:[function(require,module,exports){
+},{}],33:[function(require,module,exports){
+exports.endianness = function () { return 'LE' };
+
+exports.hostname = function () {
+    if (typeof location !== 'undefined') {
+        return location.hostname
+    }
+    else return '';
+};
+
+exports.loadavg = function () { return [] };
+
+exports.uptime = function () { return 0 };
+
+exports.freemem = function () {
+    return Number.MAX_VALUE;
+};
+
+exports.totalmem = function () {
+    return Number.MAX_VALUE;
+};
+
+exports.cpus = function () { return [] };
+
+exports.type = function () { return 'Browser' };
+
+exports.release = function () {
+    if (typeof navigator !== 'undefined') {
+        return navigator.appVersion;
+    }
+    return '';
+};
+
+exports.networkInterfaces
+= exports.getNetworkInterfaces
+= function () { return {} };
+
+exports.arch = function () { return 'javascript' };
+
+exports.platform = function () { return 'browser' };
+
+exports.tmpdir = exports.tmpDir = function () {
+    return '/tmp';
+};
+
+exports.EOL = '\n';
+
+exports.homedir = function () {
+	return '/'
+};
+
+},{}],34:[function(require,module,exports){
 /**
  * Compiles a querystring
  * Returns string representation of the object
@@ -6321,7 +6790,7 @@ exports.decode = function(qs){
   return qry;
 };
 
-},{}],33:[function(require,module,exports){
+},{}],35:[function(require,module,exports){
 /**
  * Parses an URI
  *
@@ -6362,7 +6831,7 @@ module.exports = function parseuri(str) {
     return uri;
 };
 
-},{}],34:[function(require,module,exports){
+},{}],36:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -6548,7 +7017,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],35:[function(require,module,exports){
+},{}],37:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -6644,7 +7113,7 @@ exports.connect = lookup;
 exports.Manager = require('./manager');
 exports.Socket = require('./socket');
 
-},{"./manager":36,"./socket":38,"./url":39,"debug":40,"socket.io-parser":43}],36:[function(require,module,exports){
+},{"./manager":38,"./socket":40,"./url":41,"debug":42,"socket.io-parser":45}],38:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7219,7 +7688,7 @@ Manager.prototype.onreconnect = function () {
   this.emitAll('reconnect', attempt);
 };
 
-},{"./on":37,"./socket":38,"backo2":3,"component-bind":9,"component-emitter":10,"debug":40,"engine.io-client":12,"indexof":30,"socket.io-parser":43}],37:[function(require,module,exports){
+},{"./on":39,"./socket":40,"backo2":3,"component-bind":9,"component-emitter":10,"debug":42,"engine.io-client":12,"indexof":30,"socket.io-parser":45}],39:[function(require,module,exports){
 
 /**
  * Module exports.
@@ -7245,7 +7714,7 @@ function on (obj, ev, fn) {
   };
 }
 
-},{}],38:[function(require,module,exports){
+},{}],40:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7685,7 +8154,7 @@ Socket.prototype.binary = function (binary) {
   return this;
 };
 
-},{"./on":37,"component-bind":9,"component-emitter":10,"debug":40,"has-binary2":26,"parseqs":32,"socket.io-parser":43,"to-array":48}],39:[function(require,module,exports){
+},{"./on":39,"component-bind":9,"component-emitter":10,"debug":42,"has-binary2":26,"parseqs":34,"socket.io-parser":45,"to-array":50}],41:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -7762,11 +8231,11 @@ function url (uri, loc) {
   return obj;
 }
 
-},{"debug":40,"parseuri":33}],40:[function(require,module,exports){
+},{"debug":42,"parseuri":35}],42:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"./debug":41,"_process":34,"dup":21}],41:[function(require,module,exports){
+},{"./debug":43,"_process":36,"dup":21}],43:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22,"ms":31}],42:[function(require,module,exports){
+},{"dup":22,"ms":32}],44:[function(require,module,exports){
 /*global Blob,File*/
 
 /**
@@ -7909,7 +8378,7 @@ exports.removeBlobs = function(data, callback) {
   }
 };
 
-},{"./is-buffer":44,"isarray":47}],43:[function(require,module,exports){
+},{"./is-buffer":46,"isarray":49}],45:[function(require,module,exports){
 
 /**
  * Module dependencies.
@@ -8326,7 +8795,7 @@ function error(msg) {
   };
 }
 
-},{"./binary":42,"./is-buffer":44,"component-emitter":10,"debug":45,"isarray":47}],44:[function(require,module,exports){
+},{"./binary":44,"./is-buffer":46,"component-emitter":10,"debug":47,"isarray":49}],46:[function(require,module,exports){
 (function (Buffer){
 
 module.exports = isBuf;
@@ -8350,13 +8819,13 @@ function isBuf(obj) {
 }
 
 }).call(this,require("buffer").Buffer)
-},{"buffer":8}],45:[function(require,module,exports){
+},{"buffer":8}],47:[function(require,module,exports){
 arguments[4][21][0].apply(exports,arguments)
-},{"./debug":46,"_process":34,"dup":21}],46:[function(require,module,exports){
+},{"./debug":48,"_process":36,"dup":21}],48:[function(require,module,exports){
 arguments[4][22][0].apply(exports,arguments)
-},{"dup":22,"ms":31}],47:[function(require,module,exports){
+},{"dup":22,"ms":32}],49:[function(require,module,exports){
 arguments[4][27][0].apply(exports,arguments)
-},{"dup":27}],48:[function(require,module,exports){
+},{"dup":27}],50:[function(require,module,exports){
 module.exports = toArray
 
 function toArray(list, index) {
@@ -8371,7 +8840,7 @@ function toArray(list, index) {
     return array
 }
 
-},{}],49:[function(require,module,exports){
+},{}],51:[function(require,module,exports){
 'use strict';
 
 var alphabet = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz-_'.split('')
@@ -8441,7 +8910,7 @@ yeast.encode = encode;
 yeast.decode = decode;
 module.exports = yeast;
 
-},{}],50:[function(require,module,exports){
+},{}],52:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8461,6 +8930,11 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Component = function () {
+    /* 
+    Component:
+    Is a generalise of Player and Monster, This class acts as the main class
+    for rendering and checking movement validation.
+    */
     function Component(id, x, y, name, npc, mapComponent, socket, drawTool, color, alive) {
         _classCallCheck(this, Component);
 
@@ -8481,11 +8955,21 @@ var Component = function () {
     _createClass(Component, [{
         key: 'mod',
         value: function mod(n, m) {
+            /*
+            Over-write the default mod calculation, which is a bug in javascript.
+            */
             return (n % m + m) % m;
         }
     }, {
         key: 'checkCrash',
         value: function checkCrash(futurePosition) {
+            /* 
+            If the player is an npc, this function will not be performed, because NPC
+            can move through the players.
+            
+            Else, it will calculate the future movement of the player and check if it crashes 
+            with another player position.
+            */
             if (this.npc) return false;
             var self = this;
             var crash = false;
@@ -8506,6 +8990,9 @@ var Component = function () {
     }, {
         key: 'getPosition',
         value: function getPosition() {
+            /* 
+            Return the position, player id, x and y and its status.
+            */
             return {
                 id: this.id,
                 x: this.x,
@@ -8516,11 +9003,20 @@ var Component = function () {
     }, {
         key: 'control',
         value: function control(value) {
+            /* 
+            This will allows the component to be controllable.
+            */
             this.controllable = value;
         }
     }, {
         key: 'getPotentialMove',
         value: function getPotentialMove(direction) {
+            /* 
+            This function perform a future prediction for player movement. If the 
+            future position of a player is invalid (comparing to the Map Matrix)
+             It will be fale.
+             This function also check if 2 players crashing by calling checkCrash();
+            */
             var futurePosition = {
                 x: null,
                 y: null
@@ -8569,17 +9065,22 @@ var Component = function () {
     }, {
         key: 'logError',
         value: function logError(e) {
+            /* 
+            Log the error message for debug
+            */
             if (e instanceof TypeError) {
-                console.warn(e);
                 console.warn("Can't move beyond the grid");
             } else {
-                console.log(e);
                 console.warn(e.getMessage());
             }
         }
     }, {
         key: 'moveRight',
         value: function moveRight() {
+            /*
+            Make the component move right, this will call check getPotentialMove().
+            If It's an invalid move, it will throw an exception.
+            */
             try {
                 if (this.getPotentialMove('right') == 1) {
                     this.x += this.size;
@@ -8598,6 +9099,10 @@ var Component = function () {
     }, {
         key: 'moveLeft',
         value: function moveLeft() {
+            /*
+            Make the component move left, this will call check getPotentialMove().
+            If It's an invalid move, it will throw an exception.
+            */
             try {
                 if (this.getPotentialMove('left') == 1) {
                     this.x -= this.size;
@@ -8615,6 +9120,10 @@ var Component = function () {
     }, {
         key: 'moveUp',
         value: function moveUp() {
+            /*
+            Make the component move up, this will call check getPotentialMove().
+            If It's an invalid move, it will throw an exception.
+            */
             try {
                 if (this.getPotentialMove('up') == 1) {
                     this.y -= this.size;
@@ -8632,6 +9141,10 @@ var Component = function () {
     }, {
         key: 'moveDown',
         value: function moveDown() {
+            /*
+            Make the component move down, this will call check getPotentialMove().
+            If It's an invalid move, it will throw an exception.
+            */
             try {
                 if (this.getPotentialMove('down') == 1) {
                     this.y += this.size;
@@ -8649,7 +9162,9 @@ var Component = function () {
     }, {
         key: 'render',
         value: function render() {
-            // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
+            /* 
+            Render player and align it to the matrix map.
+            */
             if (this.alive || this.npc) {
                 this.drawTool.fillStyle = this.color;
                 this.drawTool.fillRect(this.x, this.y, this.size, this.size);
@@ -8667,7 +9182,7 @@ var Component = function () {
 
 exports.default = Component;
 
-},{"../Exceptions/InvalidMoveException":56,"../Global":58}],51:[function(require,module,exports){
+},{"../Exceptions/InvalidMoveException":58,"../Global":60}],53:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -8679,10 +9194,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Driver = exports.Driver = function () {
+    /* 
+    Driver:
+    Acts as an input listener for every device including touch screen and keyboards.
+    */
     function Driver(thisPlayer, socket, touchInput) {
         _classCallCheck(this, Driver);
 
-        // this.renderObject = renderObject;
         this.player = thisPlayer;
         this.socket = socket;
         this.touchInput = touchInput;
@@ -8692,6 +9210,9 @@ var Driver = exports.Driver = function () {
     _createClass(Driver, [{
         key: "keyListener",
         value: function keyListener(component) {
+            /*
+            Listen to user's keyboard input.
+            */
             var self = this;
             window.onkeyup = function (e) {
                 console.log(self.socket);
@@ -8724,9 +9245,11 @@ var Driver = exports.Driver = function () {
     }, {
         key: "controller",
         value: function controller(component) {
+            /* 
+            Listen to touch input from mobile.
+            */
             var keyList = this.touchInput;
             var self = this;
-            /* Same order as key Listener */
             keyList[0].onclick = function () {
                 component.moveLeft();
                 self.socket.emit("move", component.getPosition());
@@ -8747,6 +9270,9 @@ var Driver = exports.Driver = function () {
     }, {
         key: "init",
         value: function init() {
+            /* 
+            Init the object, and start listening to both inputs.
+            */
             this.keyListener(this.player);
             this.controller(this.player);
             console.log(this.player.getPosition());
@@ -8757,7 +9283,7 @@ var Driver = exports.Driver = function () {
     return Driver;
 }();
 
-},{}],52:[function(require,module,exports){
+},{}],54:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8779,6 +9305,10 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Map = function () {
+    /*
+    Map:
+    Render and draw the map to the view.
+    */
     function Map(canvas, socket) {
         _classCallCheck(this, Map);
 
@@ -8791,6 +9321,9 @@ var Map = function () {
     _createClass(Map, [{
         key: 'getInfo',
         value: function getInfo() {
+            /* 
+            Return block size and 2D array grid.
+            */
             return {
                 bSize: this.bSize,
                 grid: this.grid
@@ -8799,12 +9332,13 @@ var Map = function () {
     }, {
         key: 'drawMap',
         value: function drawMap() {
-            /* Send map info to controller */
+            /* 
+            This function will send the information of the map to the server and also
+            draw the map on the view.
+            */
             this.socket.emit("mapInfo", this.getInfo());
-            /* Draw the map */
             for (var row = 0; row < this.grid.length; row++) {
                 for (var i = 0; i < this.grid[row].length; i++) {
-                    /* */
                     this.object.fillStyle = this.grid[row][i] == "1" || this.grid[row][i] == "2" ? _Global2.default.getColor().path : _Global2.default.getColor().block;
                     this.object.fillRect(this.bSize * i, this.bSize * row, this.bSize, this.bSize);
                     this.object.strokeStyle = _Global2.default.getColor().border;
@@ -8819,7 +9353,7 @@ var Map = function () {
 
 exports.default = Map;
 
-},{"../GameEngine":57,"../Global":58}],53:[function(require,module,exports){
+},{"../GameEngine":59,"../Global":60}],55:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8845,6 +9379,11 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
+    /* 
+    Monster:
+    Is a special type of component, which has basic performance of a component but
+    also has the ability to move itself using AI. And kill players.
+    */
     function Player(id, x, y, name, mapComponent, socket, drawTool, monsterColor) {
         _classCallCheck(this, Player);
 
@@ -8861,11 +9400,18 @@ var Player = function (_Component) {
     _createClass(Player, [{
         key: 'getPosition',
         value: function getPosition() {
+            /* 
+            Return the current object's position.
+            */
             return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
         }
     }, {
         key: 'checkKill',
         value: function checkKill() {
+            /* 
+            Look through the player list, kill the player which share the same position
+            with the monster.
+            */
             for (var i in this.playerList) {
                 var player = this.playerList[i];
                 if (this.x == player.x && this.y == player.y && !player.npc) {
@@ -8876,6 +9422,12 @@ var Player = function (_Component) {
     }, {
         key: 'automove',
         value: function automove() {
+            /* 
+            Recursive loop for path-finding algorithm using BFS search.
+            This algorithm recursively returns the 2 shortest paths to the nearest player
+            and compare to each other.
+            It chooses the shortest path and generate a matrix of movement based on the coordinates.
+            */
             var _0x2808 = ['moveLeft', 'moveUp', 'moveDown', 'moveRight', 'socket', 'emit', 'move', 'getPosition', 'warn', 'floor', 'random', 'auto'];
             (function (_0x12b8cb, _0xcaa103) {
                 var _0x93270e = function _0x93270e(_0x38696d) {
@@ -8918,6 +9470,10 @@ var Player = function (_Component) {
         value: function init() {
             var _this2 = this;
 
+            /* 
+            Create a socket listener, listen for movement of every player on the map, 
+            and perform check kill
+            */
             var self = this;
             this.socket.on("update", function (playerList) {
                 self.playerList = playerList;
@@ -8934,7 +9490,7 @@ var Player = function (_Component) {
 
 exports.default = Player;
 
-},{"./Component":50}],54:[function(require,module,exports){
+},{"./Component":52}],56:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -8957,10 +9513,14 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
-// import GameEngine from '../GameEngine'; // cause socket duplication
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
+    /* 
+    Player:
+    Has all of the basic functions of a component, but can die and be controllable
+    by driver.
+    */
     function Player(id, x, y, name, mapComponent, socket) {
         _classCallCheck(this, Player);
 
@@ -8975,7 +9535,6 @@ var Player = function (_Component) {
         key: 'die',
         value: function die() {
             this.alive = false;
-            console.log(this);
         }
     }, {
         key: 'getPosition',
@@ -8989,7 +9548,7 @@ var Player = function (_Component) {
 
 exports.default = Player;
 
-},{"./Component":50}],55:[function(require,module,exports){
+},{"./Component":52}],57:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9001,6 +9560,10 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Exception = function () {
+    /* 
+    Exception:
+    Manage all of the exception throw since Javascript doesn't provide one.
+    */
     function Exception(message) {
         _classCallCheck(this, Exception);
 
@@ -9019,7 +9582,7 @@ var Exception = function () {
 
 exports.default = Exception;
 
-},{}],56:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9042,6 +9605,10 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var InvalidMoveException = exports.InvalidMoveException = function (_Exception) {
     _inherits(InvalidMoveException, _Exception);
 
+    /* 
+    Invalid Move Exception
+    A special type of exception for invalid movement.
+    */
     function InvalidMoveException(e) {
         _classCallCheck(this, InvalidMoveException);
 
@@ -9052,7 +9619,7 @@ var InvalidMoveException = exports.InvalidMoveException = function (_Exception) 
     return InvalidMoveException;
 }(_Exception3.default);
 
-},{"./Exception":55}],57:[function(require,module,exports){
+},{"./Exception":57}],59:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, "__esModule", {
@@ -9094,6 +9661,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 var socket = (0, _socket2.default)(_Global2.default.getHost());
 
 var GameEngine = function () {
+    /* 
+    GameEngine:
+    Its job is to render board, monster and all the players on the host side.
+    It also switchs between different views on the host side.
+    */
     function GameEngine(canvas, width, height) {
         _classCallCheck(this, GameEngine);
 
@@ -9107,11 +9679,13 @@ var GameEngine = function () {
     _createClass(GameEngine, [{
         key: 'setup',
         value: function setup() {
+            /* Draw the map */
             this.map.drawMap();
         }
     }, {
         key: 'setResolution',
         value: function setResolution(canvas, width, height) {
+            /* Set the resolution of the view, setting from Global.js*/
             canvas.width = width;
             canvas.height = height;
         }
@@ -9120,6 +9694,7 @@ var GameEngine = function () {
         value: function render() {
             var _this = this;
 
+            /* Render the game on the host */
             var sessionView = document.querySelector(".session");
             var session = document.querySelector(".sessionInput");
             var joinlink = document.querySelector(".joinlink");
@@ -9130,28 +9705,41 @@ var GameEngine = function () {
 
             this.setup();
             var self = this;
-            socket.emit("isSession"); /* let server know that this is a view*/
+            /* let server know that this is a view*/
+            socket.emit("isSession");
+
+            /* get Session from the server */
             socket.on("getSession", function (sessionID) {
                 session.value = sessionID;
             });
+
+            /* Setup join link and draw QR code */
             joinlink.href = _Global2.default.getHost() + "/join";
             qr.src = qr.src + _Global2.default.getHost() + "/join";
+
+            /* When the game is startable */
             socket.on("startAble", function () {
                 status.innerHTML = "Waiting for <strong>the first player</strong> to start the game";
             });
+
+            /* Wait for all players to join */
             socket.on("wait", function () {
                 status.innerHTML = "Wating for other players to join...";
             });
+
+            /* When server broadcasts the gameStart */
             socket.on("gameStart", function () {
                 sessionView.style.display = 'none';
             });
 
+            /* When server broadcasts make monster */
             socket.on("makeMonster", function (monster) {
                 console.warn("success!!!");
                 var monster = new _Monster2.default(monster.id, monster.x, monster.y, monster.name, self.map.getInfo(), socket, drawTool, monster.color);
                 monster.init();
             });
 
+            /* When server broadcasts to update */
             socket.on("update", function (playerList) {
                 var playerHTML = document.querySelector(".players");
                 drawTool.clearRect(0, 0, _this.width, _this.height);
@@ -9167,12 +9755,12 @@ var GameEngine = function () {
                     playerHTML.appendChild(newPlayer);
                     /* Render player */
                     var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
-                    console.log(component);
                     players.push(component);
                     component.render();
                 }
-                console.log(players);
             });
+
+            /* When the game ends */
             socket.on("endGame", function (winner) {
                 var winnerPlayer = document.querySelector(".playerName");
                 var winnerColor = document.querySelector(".winnerInfo");
@@ -9189,7 +9777,7 @@ var GameEngine = function () {
 
 exports.default = GameEngine;
 
-},{"./Components/Component":50,"./Components/Driver":51,"./Components/Map":52,"./Components/Monster":53,"./Components/Player":54,"./Global":58,"socket.io-client":35}],58:[function(require,module,exports){
+},{"./Components/Component":52,"./Components/Driver":53,"./Components/Map":54,"./Components/Monster":55,"./Components/Player":56,"./Global":60,"socket.io-client":37}],60:[function(require,module,exports){
 "use strict";
 
 Object.defineProperty(exports, "__esModule", {
@@ -9198,9 +9786,14 @@ Object.defineProperty(exports, "__esModule", {
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
+var _ip = require("ip");
+
+var ip = _interopRequireWildcard(_ip);
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
-/* Store all the constant */
 var Global = function () {
     function Global() {
         _classCallCheck(this, Global);
@@ -9208,7 +9801,15 @@ var Global = function () {
 
     _createClass(Global, null, [{
         key: "getColor",
+
+        /* 
+        Global:
+        Store all of the static variable, grid, resolution, host, port.
+        */
         value: function getColor() {
+            /* 
+            Default the color path
+            */
             return {
                 path: "#77B6EA",
                 block: "#37393A",
@@ -9222,26 +9823,41 @@ var Global = function () {
     }, {
         key: "getGrid",
         value: function getGrid() {
+            /* 
+            Store the grid data
+            */
             return [[1, 1, 1, 1, 2, 1, 1, 1, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [2, 1, 1, 1, 1, 1, 1, 1, 2], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 0, 0, 0, 1, 0, 0, 0, 1], [1, 1, 1, 1, 2, 1, 1, 1, 1]];
         }
     }, {
         key: "getBSize",
         value: function getBSize() {
+            /* 
+            Calculate the block size of a player based on resolution and grid
+            */
             return this.resolution() / this.getGrid()[0].length;
         }
     }, {
         key: "resolution",
         value: function resolution() {
+            /* 
+            Set resolution of the canvas
+            */
             return 720;
         }
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://10.132.111.148:" + this.getPort();
+            /* 
+            Set host domain
+            */
+            return "http://" + ip.address() + ":" + this.getPort();
         }
     }, {
         key: "getPort",
         value: function getPort() {
+            /* 
+            Set port
+            */
             return 8080;
         }
     }]);
@@ -9251,7 +9867,7 @@ var Global = function () {
 
 exports.default = Global;
 
-},{}],59:[function(require,module,exports){
+},{"ip":31}],61:[function(require,module,exports){
 'use strict';
 
 var _GameEngine = require('./GameEngine');
@@ -9264,7 +9880,10 @@ var _Global2 = _interopRequireDefault(_Global);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+/* 
+Main function link DOM with the Game Engine
+*/
 var main = new _GameEngine2.default(document.querySelector("canvas"), _Global2.default.resolution(), _Global2.default.resolution());
 main.render();
 
-},{"./GameEngine":57,"./Global":58}]},{},[59]);
+},{"./GameEngine":59,"./Global":60}]},{},[61]);

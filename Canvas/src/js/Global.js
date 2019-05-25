@@ -1,3 +1,4 @@
+import * as ip from 'ip';
 export default class Global {
     /* 
     Global:
@@ -51,7 +52,7 @@ export default class Global {
         /* 
         Set host domain
         */
-        return "http://10.132.111.148:" + this.getPort();
+        return "http://" + ip.address() + ":" + this.getPort();
     }
 
     static getPort() {
