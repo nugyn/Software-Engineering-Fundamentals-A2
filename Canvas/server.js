@@ -72,7 +72,7 @@ io.on('connection', socket => {
         socket.on("kill", (player) => {
             SESSION_LIST[sessionID].playerList[player.id].alive = false;
         });
-        /* For monster*/
+        /* For monster */
         socket.on("move", usr => {
             socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
             /* socketID must match, just send back socketID for dataID*/

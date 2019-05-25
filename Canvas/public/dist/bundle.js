@@ -8845,7 +8845,7 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent, socket, drawTool, monsterColor, playerList) {
+    function Player(id, x, y, name, mapComponent, socket, drawTool, monsterColor) {
         _classCallCheck(this, Player);
 
         var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket, drawTool, monsterColor));
@@ -8853,7 +8853,6 @@ var Player = function (_Component) {
         _this.alive = null;
         _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "control", _this).call(_this, false);
         _this.npc = true;
-        _this.playerList = playerList;
         _this.socket = socket;
         _this.automove();
         return _this;
@@ -8877,37 +8876,51 @@ var Player = function (_Component) {
     }, {
         key: "automove",
         value: function automove() {
-            var stepMove = [0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 3, 3, 0, 1, 1, 1, 2, 2, 3, 3, 3, 3];
+            var patternA = [1, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 1, 3, 3, 3, 3, 1, 1, 1, 1, 0, 0, 0, 0];
+            var patternB = [2, 2, 2, 2, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 3, 3];
+
             var self = this;
             console.warn(stepMove);
-            setInterval(function () {
-                // var choices = Math.floor(Math.random() * Math.floor(4));
-                for (var i in stepMove) {
-                    switch (i) {
-                        case 0:
-                            self.moveLeft();
-                            break;
-                        case 1:
-                            self.moveUp();
-                            break;
-                        case 2:
-                            self.moveDown();
-                            break;
-                        case 3:
-                            self.moveRight();
-                            break;
-                    }
-                    self.socket.emit("move", self.getPosition());
+            var choices = Math.floor(Math.random() * Math.floor(2));
+            var stepMove = choices == 1 ? stepMove = [].concat(patternA) : [].concat(patternB);
+            // var time = 0;
+            this.auto = setInterval(function () {
+                // var choice = (time % 2 == 0) ? stepMove.pop() : stepMove.shift();
+                var choice = stepMove.pop();
+                if (choice == undefined) {
+                    // time += 1;
+                    choices = Math.floor(Math.random() * Math.floor(2));
+                    stepMove = choices == 1 ? stepMove = [].concat(patternA) : [].concat(patternB);
                 }
-            }, 2000);
+                switch (choice) {
+                    case 0:
+                        self.moveLeft();
+                        break;
+                    case 1:
+                        self.moveUp();
+                        break;
+                    case 2:
+                        self.moveDown();
+                        break;
+                    case 3:
+                        self.moveRight();
+                        break;
+                }
+                self.socket.emit("move", self.getPosition());
+            }, 1000 / 5);
         }
     }, {
         key: "init",
         value: function init() {
+            var _this2 = this;
+
             var self = this;
             this.socket.on("update", function (playerList) {
                 self.playerList = playerList;
                 self.checkKill();
+            });
+            this.socket.on("endGame", function () {
+                clearInterval(_this2.auto);
             });
         }
     }]);
@@ -9109,6 +9122,8 @@ var GameEngine = function () {
             var qr = document.querySelector(".qr");
             var status = document.querySelector(".status");
             var winnerPanel = document.querySelector(".winner");
+            var drawTool = this.canvas.getContext("2d");
+
             this.setup();
             var self = this;
             socket.emit("isSession"); /* let server know that this is a view*/
@@ -9127,16 +9142,14 @@ var GameEngine = function () {
                 sessionView.style.display = 'none';
             });
 
-            socket.on("makeMonster", function () {
+            socket.on("makeMonster", function (monster) {
                 console.warn("success!!!");
+                var monster = new _Monster2.default(monster.id, monster.x, monster.y, monster.name, self.map.getInfo(), socket, drawTool, monster.color);
+                monster.init();
             });
-            // let monster = new Monster(player.id, player.x, player.y, player.name, 
-            // self.map.getInfo(), 
-            // socket, drawTool, player.color, playerList);
 
             socket.on("update", function (playerList) {
                 var playerHTML = document.querySelector(".players");
-                var drawTool = _this.canvas.getContext("2d");
                 drawTool.clearRect(0, 0, _this.width, _this.height);
                 _this.setup();
                 playerHTML.innerHTML = '';
@@ -9149,13 +9162,7 @@ var GameEngine = function () {
                     newPlayer.style.background = player.color;
                     playerHTML.appendChild(newPlayer);
                     /* Render player */
-                    var component = void 0;
-                    if (player.npc) {
-                        component = new _Monster2.default(player.id, player.x, player.y, player.name, self.map.getInfo(), socket, drawTool, player.color, playerList);
-                        component.init();
-                    } else {
-                        component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
-                    }
+                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
                     console.log(component);
                     players.push(component);
                     component.render();
@@ -9226,7 +9233,7 @@ var Global = function () {
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://10.132.111.148:" + this.getPort();
+            return "http://localhost:" + this.getPort();
         }
     }, {
         key: "getPort",

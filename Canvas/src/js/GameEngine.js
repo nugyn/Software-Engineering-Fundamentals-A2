@@ -32,6 +32,8 @@ export default class GameEngine {
         let qr = document.querySelector(".qr");
         let status = document.querySelector(".status");
         let winnerPanel = document.querySelector(".winner");
+        const drawTool =  this.canvas.getContext("2d");
+
         this.setup();
         var self = this;
         socket.emit("isSession"); /* let server know that this is a view*/
@@ -49,17 +51,16 @@ export default class GameEngine {
         socket.on("gameStart", () =>{
             sessionView.style.display = 'none';
         });
-        
-        socket.on("makeMonster", () => {
+
+        socket.on("makeMonster", (monster) => {
             console.warn("success!!!");
+            var monster = new Monster(monster.id, monster.x, monster.y, monster.name, 
+                self.map.getInfo(), socket, drawTool, monster.color);
+            monster.init();
         })
-        // let monster = new Monster(player.id, player.x, player.y, player.name, 
-        // self.map.getInfo(), 
-        // socket, drawTool, player.color, playerList);
 
         socket.on("update", playerList => {
             let playerHTML = document.querySelector(".players");
-            const drawTool =  this.canvas.getContext("2d");
             drawTool.clearRect(0,0,this.width, this.height);
             this.setup();
             playerHTML.innerHTML = '';
@@ -72,14 +73,8 @@ export default class GameEngine {
                 newPlayer.style.background = player.color;
                 playerHTML.appendChild(newPlayer);
                 /* Render player */
-                let component;
-                if(player.npc) {
-                    component = new Monster(player.id, player.x, player.y, player.name, self.map.getInfo(), socket, drawTool, player.color, playerList);
-                    component.init();
-                } else {
-                    component = new Component(player.id, player.x, player.y, player.name, player.npc,
+                let component = new Component(player.id, player.x, player.y, player.name, player.npc,
                         self.map.getInfo(), socket, drawTool, player.color, player.alive);
-                }
                 console.log(component);
                 players.push(component);
                 component.render();
