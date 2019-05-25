@@ -8820,7 +8820,7 @@ var Map = function () {
 exports.default = Map;
 
 },{"../GameEngine":57,"../Global":58}],53:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -8830,7 +8830,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _Component2 = require("./Component");
+var _Component2 = require('./Component');
 
 var _Component3 = _interopRequireDefault(_Component2);
 
@@ -8851,7 +8851,7 @@ var Player = function (_Component) {
         var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket, drawTool, monsterColor));
 
         _this.alive = null;
-        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "control", _this).call(_this, false);
+        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, false);
         _this.npc = true;
         _this.socket = socket;
         _this.automove();
@@ -8859,12 +8859,12 @@ var Player = function (_Component) {
     }
 
     _createClass(Player, [{
-        key: "getPosition",
+        key: 'getPosition',
         value: function getPosition() {
-            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "getPosition", this).call(this);
+            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
         }
     }, {
-        key: "checkKill",
+        key: 'checkKill',
         value: function checkKill() {
             for (var i in this.playerList) {
                 var player = this.playerList[i];
@@ -8874,43 +8874,47 @@ var Player = function (_Component) {
             }
         }
     }, {
-        key: "automove",
+        key: 'automove',
         value: function automove() {
-            var patternA = [1, 1, 1, 1, 0, 0, 0, 0, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 1, 3, 3, 3, 3, 1, 1, 1, 1, 0, 0, 0, 0];
-            var patternB = [2, 2, 2, 2, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 3, 3, 3, 3, 3, 3, 3, 3, 2, 2, 2, 2, 2, 2, 2, 2, 0, 0, 0, 0, 2, 0, 0, 0, 0, 2, 2, 2, 2, 3, 3, 3, 3];
-
+            var _0x2808 = ['moveLeft', 'moveUp', 'moveDown', 'moveRight', 'socket', 'emit', 'move', 'getPosition', 'warn', 'floor', 'random', 'auto'];
+            (function (_0x12b8cb, _0xcaa103) {
+                var _0x93270e = function _0x93270e(_0x38696d) {
+                    while (--_0x38696d) {
+                        _0x12b8cb['push'](_0x12b8cb['shift']());
+                    }
+                };_0x93270e(++_0xcaa103);
+            })(_0x2808, 0x1a0);
+            var _0x3cc7 = function _0x3cc7(_0x2c39e5, _0x4fc4a9) {
+                _0x2c39e5 = _0x2c39e5 - 0x0;
+                var _0x129853 = _0x2808[_0x2c39e5];
+                return _0x129853;
+            };
+            var shotestPathA = [0x1, 0x1, 0x1, 0x1, 0x0, 0x0, 0x0, 0x0, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x3, 0x3, 0x3, 0x3, 0x1, 0x3, 0x3, 0x3, 0x3, 0x1, 0x1, 0x1, 0x1, 0x0, 0x0, 0x0, 0x0];
+            var shotestPathB = [0x2, 0x2, 0x2, 0x2, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x0, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x0, 0x2, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x3];
             var self = this;
-            console.warn(stepMove);
-            var choices = Math.floor(Math.random() * Math.floor(2));
-            var stepMove = choices == 1 ? stepMove = [].concat(patternA) : [].concat(patternB);
-            // var time = 0;
-            this.auto = setInterval(function () {
-                // var choice = (time % 2 == 0) ? stepMove.pop() : stepMove.shift();
-                var choice = stepMove.pop();
-                if (choice == undefined) {
-                    // time += 1;
-                    choices = Math.floor(Math.random() * Math.floor(2));
-                    stepMove = choices == 1 ? stepMove = [].concat(patternA) : [].concat(patternB);
+            var choices = Math[_0x3cc7('0x1')](Math[_0x3cc7('0x2')]() * Math['floor'](0x2));
+            var stepMove = choices == 0x1 ? stepMove = [].concat(shotestPathA) : [].concat(shotestPathB);
+            this[_0x3cc7('0x3')] = setInterval(function () {
+                var _0x2efe3c = stepMove['pop']();
+                if (_0x2efe3c == undefined) {
+                    choices = Math[_0x3cc7('0x1')](Math[_0x3cc7('0x2')]() * Math[_0x3cc7('0x1')](0x2));
+                    stepMove = choices == 0x1 ? stepMove = [].concat(shotestPathA) : [].concat(shotestPathB);
                 }
-                switch (choice) {
-                    case 0:
-                        self.moveLeft();
-                        break;
-                    case 1:
-                        self.moveUp();
-                        break;
-                    case 2:
-                        self.moveDown();
-                        break;
-                    case 3:
-                        self.moveRight();
-                        break;
+                switch (_0x2efe3c) {
+                    case 0x0:
+                        self[_0x3cc7('0x4')]();break;
+                    case 0x1:
+                        self[_0x3cc7('0x5')]();break;
+                    case 0x2:
+                        self[_0x3cc7('0x6')]();break;
+                    case 0x3:
+                        self[_0x3cc7('0x7')]();break;
                 }
-                self.socket.emit("move", self.getPosition());
-            }, 1000 / 5);
+                self[_0x3cc7('0x8')][_0x3cc7('0x9')](_0x3cc7('0xa'), self[_0x3cc7('0xb')]());
+            }, 0x3e8 / 0x3);
         }
     }, {
-        key: "init",
+        key: 'init',
         value: function init() {
             var _this2 = this;
 
@@ -9228,12 +9232,12 @@ var Global = function () {
     }, {
         key: "resolution",
         value: function resolution() {
-            return 450;
+            return 720;
         }
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://localhost:" + this.getPort();
+            return "http://10.132.111.148:" + this.getPort();
         }
     }, {
         key: "getPort",
