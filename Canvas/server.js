@@ -82,7 +82,9 @@ io.on('connection', socket => {
         SESSION_LIST[sessionID].drivers = {};
         SESSION_LIST[sessionID].showController = false;
         SESSION_LIST[sessionID].numberOfDeaths = 0;
-
+        /*
+        Monster kills player
+        */
         socket.on("kill", (player) => {
             SESSION_LIST[sessionID].playerList[player.id].alive = false;
         });
