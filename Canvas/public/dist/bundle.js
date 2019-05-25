@@ -8820,7 +8820,7 @@ var Map = function () {
 exports.default = Map;
 
 },{"../GameEngine":57,"../Global":58}],53:[function(require,module,exports){
-"use strict";
+'use strict';
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -8830,7 +8830,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 
 var _get = function get(object, property, receiver) { if (object === null) object = Function.prototype; var desc = Object.getOwnPropertyDescriptor(object, property); if (desc === undefined) { var parent = Object.getPrototypeOf(object); if (parent === null) { return undefined; } else { return get(parent, property, receiver); } } else if ("value" in desc) { return desc.value; } else { var getter = desc.get; if (getter === undefined) { return undefined; } return getter.call(receiver); } };
 
-var _Component2 = require("./Component");
+var _Component2 = require('./Component');
 
 var _Component3 = _interopRequireDefault(_Component2);
 
@@ -8845,27 +8845,26 @@ function _inherits(subClass, superClass) { if (typeof superClass !== "function" 
 var Player = function (_Component) {
     _inherits(Player, _Component);
 
-    function Player(id, x, y, name, mapComponent, socket, drawTool, monsterColor, playerList) {
+    function Player(id, x, y, name, mapComponent, socket, drawTool, monsterColor) {
         _classCallCheck(this, Player);
 
         var _this = _possibleConstructorReturn(this, (Player.__proto__ || Object.getPrototypeOf(Player)).call(this, id, x, y, name, false, mapComponent, socket, drawTool, monsterColor));
 
         _this.alive = null;
-        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "control", _this).call(_this, false);
+        _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'control', _this).call(_this, false);
         _this.npc = true;
-        _this.playerList = playerList;
-        _this.checkKill();
         _this.socket = socket;
+        _this.automove();
         return _this;
     }
 
     _createClass(Player, [{
-        key: "getPosition",
+        key: 'getPosition',
         value: function getPosition() {
-            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), "getPosition", this).call(this);
+            return _get(Player.prototype.__proto__ || Object.getPrototypeOf(Player.prototype), 'getPosition', this).call(this);
         }
     }, {
-        key: "checkKill",
+        key: 'checkKill',
         value: function checkKill() {
             for (var i in this.playerList) {
                 var player = this.playerList[i];
@@ -8873,6 +8872,60 @@ var Player = function (_Component) {
                     this.socket.emit("kill", player);
                 }
             }
+        }
+    }, {
+        key: 'automove',
+        value: function automove() {
+            var _0x2808 = ['moveLeft', 'moveUp', 'moveDown', 'moveRight', 'socket', 'emit', 'move', 'getPosition', 'warn', 'floor', 'random', 'auto'];
+            (function (_0x12b8cb, _0xcaa103) {
+                var _0x93270e = function _0x93270e(_0x38696d) {
+                    while (--_0x38696d) {
+                        _0x12b8cb['push'](_0x12b8cb['shift']());
+                    }
+                };_0x93270e(++_0xcaa103);
+            })(_0x2808, 0x1a0);
+            var _0x3cc7 = function _0x3cc7(_0x2c39e5, _0x4fc4a9) {
+                _0x2c39e5 = _0x2c39e5 - 0x0;
+                var _0x129853 = _0x2808[_0x2c39e5];
+                return _0x129853;
+            };
+            var shotestPathA = [0x1, 0x1, 0x1, 0x1, 0x0, 0x0, 0x0, 0x0, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x3, 0x3, 0x3, 0x3, 0x1, 0x3, 0x3, 0x3, 0x3, 0x1, 0x1, 0x1, 0x1, 0x0, 0x0, 0x0, 0x0];
+            var shotestPathB = [0x2, 0x2, 0x2, 0x2, 0x0, 0x0, 0x0, 0x0, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x1, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x3, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x2, 0x0, 0x0, 0x0, 0x0, 0x2, 0x0, 0x0, 0x0, 0x0, 0x2, 0x2, 0x2, 0x2, 0x3, 0x3, 0x3, 0x3];
+            var self = this;
+            var choices = Math[_0x3cc7('0x1')](Math[_0x3cc7('0x2')]() * Math['floor'](0x2));
+            var stepMove = choices == 0x1 ? stepMove = [].concat(shotestPathA) : [].concat(shotestPathB);
+            this[_0x3cc7('0x3')] = setInterval(function () {
+                var _0x2efe3c = stepMove['pop']();
+                if (_0x2efe3c == undefined) {
+                    choices = Math[_0x3cc7('0x1')](Math[_0x3cc7('0x2')]() * Math[_0x3cc7('0x1')](0x2));
+                    stepMove = choices == 0x1 ? stepMove = [].concat(shotestPathA) : [].concat(shotestPathB);
+                }
+                switch (_0x2efe3c) {
+                    case 0x0:
+                        self[_0x3cc7('0x4')]();break;
+                    case 0x1:
+                        self[_0x3cc7('0x5')]();break;
+                    case 0x2:
+                        self[_0x3cc7('0x6')]();break;
+                    case 0x3:
+                        self[_0x3cc7('0x7')]();break;
+                }
+                self[_0x3cc7('0x8')][_0x3cc7('0x9')](_0x3cc7('0xa'), self[_0x3cc7('0xb')]());
+            }, 0x3e8 / 0x3);
+        }
+    }, {
+        key: 'init',
+        value: function init() {
+            var _this2 = this;
+
+            var self = this;
+            this.socket.on("update", function (playerList) {
+                self.playerList = playerList;
+                self.checkKill();
+            });
+            this.socket.on("endGame", function () {
+                clearInterval(_this2.auto);
+            });
         }
     }]);
 
@@ -9073,6 +9126,8 @@ var GameEngine = function () {
             var qr = document.querySelector(".qr");
             var status = document.querySelector(".status");
             var winnerPanel = document.querySelector(".winner");
+            var drawTool = this.canvas.getContext("2d");
+
             this.setup();
             var self = this;
             socket.emit("isSession"); /* let server know that this is a view*/
@@ -9090,9 +9145,15 @@ var GameEngine = function () {
             socket.on("gameStart", function () {
                 sessionView.style.display = 'none';
             });
+
+            socket.on("makeMonster", function (monster) {
+                console.warn("success!!!");
+                var monster = new _Monster2.default(monster.id, monster.x, monster.y, monster.name, self.map.getInfo(), socket, drawTool, monster.color);
+                monster.init();
+            });
+
             socket.on("update", function (playerList) {
                 var playerHTML = document.querySelector(".players");
-                var drawTool = _this.canvas.getContext("2d");
                 drawTool.clearRect(0, 0, _this.width, _this.height);
                 _this.setup();
                 playerHTML.innerHTML = '';
@@ -9105,12 +9166,7 @@ var GameEngine = function () {
                     newPlayer.style.background = player.color;
                     playerHTML.appendChild(newPlayer);
                     /* Render player */
-                    var component = void 0;
-                    if (player.npc) {
-                        component = new _Monster2.default(player.id, player.x, player.y, player.name, self.map.getInfo(), socket, drawTool, player.color, playerList);
-                    } else {
-                        component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
-                    }
+                    var component = new _Component2.default(player.id, player.x, player.y, player.name, player.npc, self.map.getInfo(), socket, drawTool, player.color, player.alive);
                     console.log(component);
                     players.push(component);
                     component.render();
@@ -9176,12 +9232,12 @@ var Global = function () {
     }, {
         key: "resolution",
         value: function resolution() {
-            return 450;
+            return 720;
         }
     }, {
         key: "getHost",
         value: function getHost() {
-            return "http://localhost:" + this.getPort();
+            return "http://10.132.111.148:" + this.getPort();
         }
     }, {
         key: "getPort",
