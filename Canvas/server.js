@@ -1,11 +1,17 @@
+/* 
+Server:
+Manages to host the websites, listen for all actions from the clients. 
+And broadcast actions to all the devices.
+*/
 import express from 'express';
 import http from 'http';
 import SocketIO from 'socket.io';
 import cors from 'cors';
 import Global from './src/js/Global';
-/* TODO: When end game turn off controller */
 
-/* Global */
+/* 
+Global 
+*/
 const app = express();
 const serv = http.Server(app);
 const PORT = process.env.PORT || Global.getPort();
@@ -17,8 +23,9 @@ let numberOfPlayer = 0;
 
 var showController = false;
 
-/* Hosting */
-
+/* 
+Hosting 
+*/
 app.get('/',(req,res) => {
     res.sendFile(__dirname + '/public/index.html');
 });
@@ -29,8 +36,9 @@ app.get('/join',(req,res) => {
 
 app.use('/dist', express.static(__dirname + '/public/dist'));
 
-/* Cors setting */
-
+/* 
+Cors setting 
+*/
 app.use(cors())
 app.use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
@@ -38,12 +46,17 @@ app.use(function(req, res, next) {
     next();
 });
 
-/* SocketIO */
+/* 
+SocketIO 
+*/
 var io = new SocketIO(serv, {
     log: false, origins: '*:*'
 })
 
 io.on('connection', socket => {
+    /* 
+    For each connection including both host and controller devices 
+    */
     let positionTaken = {
         "top-left": false, 
         "top-right": false, 
@@ -51,7 +64,9 @@ io.on('connection', socket => {
         "bottom-right": false,
     };
     console.log(`${socket.client.id} joined`);
+
     socket.on("isSession", () => {
+        // Generate genereic sessionID
         var sessionID = Math.floor(Math.random() * 800000) + 100000;
         SESSION_LIST[sessionID] = {};
         socket.emit("getSession", sessionID);
@@ -59,7 +74,6 @@ io.on('connection', socket => {
           SESSION_LIST[sessionID].mapInfo = data
         });
         SESSION_LIST[sessionID].socketio = socket;
-        // SESSION_LIST[sessionID].socket = socket;
         SESSION_LIST[sessionID].maxPlayer = maxPlayer;
         SESSION_LIST[sessionID].playerIndex = playerIndex;
         SESSION_LIST[sessionID].positionTaken = positionTaken;
@@ -72,15 +86,19 @@ io.on('connection', socket => {
         socket.on("kill", (player) => {
             SESSION_LIST[sessionID].playerList[player.id].alive = false;
         });
-        /* For monster */
+        /* 
+        For monster movement
+        */
         socket.on("move", usr => {
             socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
-            /* socketID must match, just send back socketID for dataID*/
             SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
             SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
             SESSION_LIST[sessionID].playerList[usr.id].alive = usr.alive;
         });
-
+        /* 
+        If session disconnect, delete session from the session list and tell all the devices
+        connect to the session to reload
+        */
         socket.on("disconnect", () => {
             for(var i in SESSION_LIST[sessionID].drivers) {
                 var socketioDriver = SESSION_LIST[sessionID].drivers[i];
@@ -91,7 +109,9 @@ io.on('connection', socket => {
     }); /* is SESSION */
 
     socket.on("checkSession", sessionID => {
-        console.log("checking session")
+        /*
+        Check if the session ID is valid
+        */
         var found = false;
         for(var i in SESSION_LIST) {
             if(i == sessionID && SESSION_LIST[sessionID].showController == false) {
@@ -102,21 +122,27 @@ io.on('connection', socket => {
             }
         }
         if(found) {
-            console.log(sessionID);
-            console.log(SESSION_LIST[sessionID])
+        /*
+        Player successfully joined the game
+        */
             socket.emit("loadMap", SESSION_LIST[sessionID].mapInfo);
-            /* Init player to activate driver.js*/
+            /* Init player to activate driver.js */
             SESSION_LIST[sessionID].drivers[socket.client.id] = socket;
 
             socket.on("isPlayer", (playerName) => {
+                /* If the connection is a player (to seperate from gameEngine (monsterAI) */
                 SESSION_LIST[sessionID].playerIndex += 1;
+                /* Send back the match info, So if a player join the game and it's full, it will show an error */
                 socket.emit("matchInfo", {maxPlayer: SESSION_LIST[sessionID].maxPlayer, 
                     playerIndex: SESSION_LIST[sessionID].playerIndex});
+                /* Send to the player available possition to choose */
                 socket.emit("getPosition", SESSION_LIST[sessionID].positionTaken);
+                /* Set max player based on the first player preference */
                 socket.on("setMaxPlayer", maxP => {
                     SESSION_LIST[sessionID].maxPlayer = maxP;
                     console.log(`[+] Changed default maxPlayer for session ${sessionID} to ${maxPlayer}`);
                 })
+
                 var thisPlayer = {
                     id: socket.client.id,
                     x: 0,
@@ -127,6 +153,7 @@ io.on('connection', socket => {
                     alive: true
                 }
                 var pos = null; 
+
                 socket.on("setPosition", position => {
                     SESSION_LIST[sessionID].numberOfPlayer += 1;
                     pos = position;
@@ -153,21 +180,25 @@ io.on('connection', socket => {
                             thisPlayer.color = Global.getColor().playerColor[3];
                             break;
                     }
+
                     SESSION_LIST[sessionID].playerList[thisPlayer.id] = thisPlayer;
                     let pack = [thisPlayer, SESSION_LIST[sessionID].playerList];
                     socket.emit('initPlayer', pack);
                     console.log(`Player: ${thisPlayer.id} from ${sessionID} joined the game as ${playerName}`);
                 })
-                /* checkCrash get playerList */
-                /* Player moves */
+                /* 
+                Player Movement
+                */
                 socket.on("move", usr => {
                     console.log(`Player ${usr.id} is moving`);
                     socket.emit("getPlayerList", SESSION_LIST[sessionID].playerList);
-                    /* socketID must match, just send back socketID for dataID*/
                     SESSION_LIST[sessionID].playerList[usr.id].x = usr.x;
                     SESSION_LIST[sessionID].playerList[usr.id].y = usr.y;
                     SESSION_LIST[sessionID].playerList[usr.id].alive = usr.alive;
                 });
+                /* 
+                Player pressed start
+                */
                 socket.on("start", () => {
                     SESSION_LIST[sessionID].showController = true;
                     var monster = {
@@ -182,7 +213,9 @@ io.on('connection', socket => {
                     SESSION_LIST[sessionID].socketio.emit("makeMonster", monster);
                     SESSION_LIST[sessionID].playerList[monster.id] = monster;
                 }) 
-                /* Player leaves the game*/
+                /* 
+                Player left the game
+                */
                 socket.on("disconnect", () => {
                     if(SESSION_LIST[sessionID] != null) {
                         SESSION_LIST[sessionID].playerIndex -= 1;
@@ -202,12 +235,16 @@ io.on('connection', socket => {
     }); /* end checkSession*/
 
 });
-/* Run server*/
+/* 
+Run server
+*/
 serv.listen(PORT, () => {
     console.log(`Server is running on: ` + Global.getHost());
 });
 
-/* Update game per 0.25 second */
+/* 
+Update game per 0.25 second 
+*/
 setInterval(function(){
     for(var i in SESSION_LIST){
         var showController = SESSION_LIST[i].showController;
@@ -262,8 +299,5 @@ setInterval(function(){
             }
             socketSession.emit("endGame", winner);
         }
-
-
-        // socket.emit("loadMap", SESSION_LIST[i].mapInfo);
     }
 },1000/25);

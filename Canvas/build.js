@@ -1,3 +1,6 @@
+/* 
+Compile the ES6 class to old Javascript
+*/
 var fs = require("fs");
 var browserify = require("browserify");
 browserify(["./src/js/main.js"])

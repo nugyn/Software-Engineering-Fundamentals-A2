@@ -1,6 +1,10 @@
 import Component from './Component';
-// import GameEngine from '../GameEngine'; // cause socket duplication
 export default class Player extends Component{
+    /* 
+    Player:
+    Has all of the basic functions of a component, but can die and be controllable
+    by driver.
+    */
     constructor(id, x, y, name, mapComponent, socket) {
         super(id,x,y,name, false, mapComponent, socket);
         this.alive = true;
@@ -9,7 +13,6 @@ export default class Player extends Component{
 
     die() {
         this.alive = false;
-        console.log(this);
     }
 
     getPosition() {

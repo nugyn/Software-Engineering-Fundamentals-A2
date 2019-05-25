@@ -1,6 +1,12 @@
-/* Store all the constant */
 export default class Global {
+    /* 
+    Global:
+    Store all of the static variable, grid, resolution, host, port.
+    */
     static getColor() {
+        /* 
+        Default the color path
+        */
         return {
             path: "#77B6EA",
             block: "#37393A",
@@ -13,6 +19,9 @@ export default class Global {
     }
 
     static getGrid() {
+        /* 
+        Store the grid data
+        */
         return ([
             [1, 1, 1, 1, 2, 1, 1, 1, 1], 
             [1, 0, 0, 0, 1, 0, 0, 0, 1], 
@@ -26,17 +35,29 @@ export default class Global {
         ]);
     }
     static getBSize() {
+        /* 
+        Calculate the block size of a player based on resolution and grid
+        */
         return this.resolution()/this.getGrid()[0].length;
     }
     static resolution() {
+        /* 
+        Set resolution of the canvas
+        */
         return 720;
     }
 
     static getHost() {
+        /* 
+        Set host domain
+        */
         return "http://10.132.111.148:" + this.getPort();
     }
 
     static getPort() {
+        /* 
+        Set port
+        */
         return 8080;
     }
 }

@@ -1,6 +1,9 @@
 export class Driver{
+    /* 
+    Driver:
+    Acts as an input listener for every device including touch screen and keyboards.
+    */
     constructor(thisPlayer, socket, touchInput) {
-        // this.renderObject = renderObject;
         this.player = thisPlayer;
         this.socket = socket;
         this.touchInput = touchInput;
@@ -8,6 +11,9 @@ export class Driver{
     }
 
     keyListener(component) {
+        /*
+        Listen to user's keyboard input.
+        */
         var self = this;
         window.onkeyup = function(e) {
             console.log(self.socket);
@@ -40,9 +46,11 @@ export class Driver{
     }
 
     controller(component) {
+        /* 
+        Listen to touch input from mobile.
+        */
         let keyList = this.touchInput;
         let self = this;
-        /* Same order as key Listener */
         keyList[0].onclick = function() {
             component.moveLeft();
             self.socket.emit("move", component.getPosition());
@@ -63,6 +71,9 @@ export class Driver{
 
 
     init() {
+        /* 
+        Init the object, and start listening to both inputs.
+        */
         this.keyListener(this.player);
         this.controller(this.player);
         console.log(this.player.getPosition());
