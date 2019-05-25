@@ -2,6 +2,11 @@ import Global from '../Global';
 import { InvalidMoveException } from '../Exceptions/InvalidMoveException';
 
 export default class Component {
+    /* 
+    Component:
+    Is a generalise of Player and Monster, This class acts as the main class
+    for rendering and checking movement validation.
+    */
     constructor(id, x, y, name, npc, mapComponent, socket, drawTool, color, alive) {
         this.id = id;
         this.x = x;
@@ -18,10 +23,20 @@ export default class Component {
     }
 
     mod(n,m) {
+        /*
+        Over-write the default mod calculation, which is a bug in javascript.
+        */
         return ((n%m) + m)%m;
     }
 
     checkCrash(futurePosition) {
+        /* 
+        If the player is an npc, this function will not be performed, because NPC
+        can move through the players.
+        
+        Else, it will calculate the future movement of the player and check if it crashes 
+        with another player position.
+        */
         if(this.npc) return false;
         var self = this;
         var crash = false;
@@ -42,6 +57,9 @@ export default class Component {
     }
 
     getPosition() {
+        /* 
+        Return the position, player id, x and y and its status.
+        */
         return {
             id: this.id,
             x: this.x,
@@ -51,10 +69,21 @@ export default class Component {
     }
 
     control(value) {
+        /* 
+        This will allows the component to be controllable.
+        */
         this.controllable = value;
     }
 
     getPotentialMove(direction) {
+        /* 
+        This function perform a future prediction for player movement. If the 
+        future position of a player is invalid (comparing to the Map Matrix)
+
+        It will be fale.
+
+        This function also check if 2 players crashing by calling checkCrash();
+        */
         let futurePosition = {
             x: null,
             y: null
@@ -102,15 +131,20 @@ export default class Component {
     }
 
     logError(e) {
+        /* 
+        Log the error message for debug
+        */
         if(e instanceof TypeError) {
-            console.warn(e);
             console.warn("Can't move beyond the grid");
         } else {
-            console.log(e);
             console.warn(e.getMessage());
         }
     }
     moveRight() {
+        /*
+        Make the component move right, this will call check getPotentialMove().
+        If It's an invalid move, it will throw an exception.
+        */
         try{
             if(this.getPotentialMove('right') == 1) {
                 this.x += this.size;
@@ -129,6 +163,10 @@ export default class Component {
     }
 
     moveLeft() {
+         /*
+        Make the component move left, this will call check getPotentialMove().
+        If It's an invalid move, it will throw an exception.
+        */
         try{
             if(this.getPotentialMove('left') == 1) {
                 this.x -= this.size;
@@ -145,6 +183,10 @@ export default class Component {
     }
 
     moveUp() {
+         /*
+        Make the component move up, this will call check getPotentialMove().
+        If It's an invalid move, it will throw an exception.
+        */
         try{
             if(this.getPotentialMove('up') == 1) {
                 this.y -= this.size;
@@ -161,6 +203,10 @@ export default class Component {
     }
 
     moveDown() {
+        /*
+        Make the component move down, this will call check getPotentialMove().
+        If It's an invalid move, it will throw an exception.
+        */
         try{
             if(this.getPotentialMove('down') == 1) {
                 this.y += this.size;
@@ -177,7 +223,9 @@ export default class Component {
     }
 
     render(){
-        // document.querySelector(".debug").innerHTML = "Player: x{" + this.x + "} y{" + this.y + "}";
+        /* 
+        Render player and align it to the matrix map.
+        */
         if(this.alive || this.npc) {
             this.drawTool.fillStyle = this.color;
             this.drawTool.fillRect(this.x,this.y,this.size,this.size);
