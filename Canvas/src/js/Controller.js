@@ -113,7 +113,7 @@ let joinBtn = document.querySelector("button[name='join']");
 let setupMatch = document.querySelector(".isFirst");
 let playerSetting = document.querySelector(".playable");
 let limit = document.querySelector(".limit");
-
+let notplayable = false;
 
 playerName.addEventListener("keyup", e => inputCheck(e), false);
 playerName.addEventListener("keydown", e => inputCheck(e), false)
@@ -138,6 +138,7 @@ joinBtn.addEventListener("click", function (){
                 show(playerSetting);
             } else {
                 hide(playerSetting);
+                notplayable = true;
                 show(limit);
             }
         })
@@ -217,7 +218,10 @@ btnStart.addEventListener("click", function() {
 /* Listen for server to show controller buttons */
 socket.on("showController", () => {
     hide(waiting);
-    controller.style.display = 'grid';
+    console.warn(limit.style.display);
+    if(!notplayable) {
+        controller.style.display = 'grid';
+    }
 })
 /* When game ends*/
 let gameOver = document.querySelector(".gameOver");

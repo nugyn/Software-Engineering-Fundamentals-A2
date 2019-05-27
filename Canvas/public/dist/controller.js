@@ -9474,6 +9474,7 @@ var joinBtn = document.querySelector("button[name='join']");
 var setupMatch = document.querySelector(".isFirst");
 var playerSetting = document.querySelector(".playable");
 var limit = document.querySelector(".limit");
+var notplayable = false;
 
 playerName.addEventListener("keyup", function (e) {
     return inputCheck(e);
@@ -9504,6 +9505,7 @@ joinBtn.addEventListener("click", function () {
                 show(playerSetting);
             } else {
                 hide(playerSetting);
+                notplayable = true;
                 show(limit);
             }
         });
@@ -9585,7 +9587,10 @@ btnStart.addEventListener("click", function () {
 /* Listen for server to show controller buttons */
 socket.on("showController", function () {
     hide(waiting);
-    controller.style.display = 'grid';
+    console.warn(limit.style.display);
+    if (!notplayable) {
+        controller.style.display = 'grid';
+    }
 });
 /* When game ends*/
 var gameOver = document.querySelector(".gameOver");
