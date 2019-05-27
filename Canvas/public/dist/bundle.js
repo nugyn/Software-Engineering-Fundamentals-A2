@@ -9451,7 +9451,7 @@ var Player = function (_Component) {
                         break;
                 }
                 self.socket.emit("move", self.getPosition());
-            }, 1000 / 6);
+            }, 1000 / 4);
         }
     }, {
         key: "init",
@@ -9838,7 +9838,8 @@ var Global = function () {
             /* 
             Set host domain
             */
-            return "http://" + ip.address() + ":" + this.getPort();
+            // return "http://" + ip.address() + ":" + this.getPort();
+            return "http://10.132.99.61:" + this.getPort();
         }
     }, {
         key: "getPort",

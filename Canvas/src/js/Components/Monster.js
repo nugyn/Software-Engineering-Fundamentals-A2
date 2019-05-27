@@ -63,7 +63,7 @@ export default class Player extends Component {
                     break;
             }
             self.socket.emit("move", self.getPosition());
-        }, 1000/6);
+        }, 1000/4);
     }
     init() {
         /* 
