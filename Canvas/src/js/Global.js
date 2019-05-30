@@ -53,7 +53,7 @@ export default class Global {
         Set host domain
         */
         // return "http://" + ip.address() + ":" + this.getPort();
-        return  "http://10.132.99.61:" + this.getPort();
+        return  "http://10.130.52.228:" + this.getPort();
     }
 
     static getPort() {
