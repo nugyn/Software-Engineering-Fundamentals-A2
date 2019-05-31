@@ -1,5 +1,5 @@
 import Component from './Component';
-export default class Player extends Component {
+export default class Monster extends Component {
     /* 
     Monster:
     Is a special type of component, which has basic performance of a component but
